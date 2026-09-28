@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ post.meta_title|default:post.title }} | TM Solutech Insights{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+    <div class="container">
+        <ul class="breadcrumb-list">
+            <li><a href="{% url 'core:home' %}"><i class="fas fa-home"></i> Home</a></li>
+            <li><span class="separator"><i class="fas fa-chevron-right"></i></span> <a href="{% url 'insights:post_list' %}">Insights</a></li>
+            <li><span class="separator"><i class="fas fa-chevron-right"></i></span> {{ post.title|truncatewords:5 }}</li>
+        </ul>
+        <h1 class="page-title">{{ post.title }}</h1>
+        <div class="flex gap-4" style="margin-top:var(--space-4);color:rgba(255,255,255,0.7);font-size:var(--text-sm);">
+            {% if post.published_at %}<span><i class="fas fa-calendar"></i> {{ post.published_at|date:"F d, Y" }}</span>{% endif %}
+            <span><i class="fas fa-clock"></i> {{ post.reading_time }} min read</span>
+            {% if post.author %}<span><i class="fas fa-user"></i> {{ post.author.get_full_name|default:post.author.username }}</span>{% endif %}
+        </div>
+    </div>
+</div>
+
+<section class="section">
+    <div class="container-narrow">
+        {% if post.featured_image %}
+        <div style="border-radius:var(--radius-xl);overflow:hidden;margin-bottom:var(--space-8);box-shadow:var(--shadow-lg);">
+            <img src="{{ post.featured_image.url }}" alt="{{ post.title }}" style="width:100%;">
+        </div>
+        {% endif %}
+
+        <article style="color:var(--gray-700);font-size:var(--text-lg);line-height:1.8;">
+            {{ post.content|safe }}
+        </article>
+
+        {# Share buttons #}
+        <div style="margin-top:var(--space-8);padding-top:var(--space-6);border-top:1px solid var(--gray-200);">
+            <p style="font-weight:var(--font-semibold);margin-bottom:var(--space-3);">Share this article:</p>
+            <div class="flex gap-4">
+                <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ request.build_absolute_uri }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-secondary"><i class="fab fa-linkedin-in"></i> LinkedIn</a>
+                <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}&text={{ post.title }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-secondary"><i class="fab fa-twitter"></i> Twitter</a>
+                <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-secondary"><i class="fab fa-facebook-f"></i> Facebook</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+{# Related Posts #}
+{% if related_posts %}
+<section class="section section-gray">
+    <div class="container">
+        <div class="section-header"><h2>Related Insights</h2></div>
+        <div class="blog-grid">
+            {% for rp in related_posts %}
+            <a href="{{ rp.get_absolute_url }}" class="blog-card" style="text-decoration:none;color:inherit;">
+                <div class="blog-card-image">
+                    {% if rp.featured_image %}<img src="{{ rp.featured_image.url }}" alt="{{ rp.title }}" loading="lazy">
+                    {% else %}<img src="{% static 'images/blog/default-blog.jpg' %}" alt="{{ rp.title }}" loading="lazy">{% endif %}
+                </div>
+                <div class="blog-card-content">
+                    <h3>{{ rp.title }}</h3>
+                    <p>{{ rp.excerpt|truncatewords:15 }}</p>
+                    <span class="blog-read-more">Read More <i class="fas fa-arrow-right"></i></span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endblock %}

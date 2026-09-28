@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="page-hero">
+    <div class="container">
+        <ul class="breadcrumb-list">
+            <li><a href="{% url 'core:home' %}"><i class="fas fa-home"></i> Home</a></li>
+            <li><span class="separator"><i class="fas fa-chevron-right"></i></span> Search</li>
+        </ul>
+        <h1 class="page-title">{{ page_title }}</h1>
+    </div>
+</div>
+
+<section class="section">
+    <div class="container">
+        <form class="search-form" action="{% url 'core:search' %}" method="get">
+            <input type="text" name="q" value="{{ query }}" placeholder="Search services, insights, industries..." required>
+            <button type="submit"><i class="fas fa-search"></i></button>
+        </form>
+
+        {% if query %}
+        <p class="text-center text-muted mb-8">Found <strong>{{ total_results }}</strong> result{{ total_results|pluralize }} for "<strong>{{ query }}</strong>"</p>
+
+        {% if results.services %}
+        <h3 class="mb-6"><i class="fas fa-cogs text-primary"></i> Services ({{ results.services|length }})</h3>
+        <div class="grid grid-3 mb-12">
+            {% for service in results.services %}
+            <div class="service-card">
+                <div class="service-card-icon"><i class="{{ service.icon }}"></i></div>
+                <h3>{{ service.title }}</h3>
+                <p>{{ service.short_description|truncatewords:20 }}</p>
+                <a href="{{ service.get_absolute_url }}" class="service-card-link">View Details <i class="fas fa-arrow-right"></i></a>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if results.posts %}
+        <h3 class="mb-6"><i class="fas fa-newspaper text-primary"></i> Insights ({{ results.posts|length }})</h3>
+        <div class="grid grid-3 mb-12">
+            {% for post in results.posts %}
+            <a href="{{ post.get_absolute_url }}" class="blog-card" style="text-decoration:none;color:inherit;">
+                <div class="blog-card-content">
+                    <h3>{{ post.title }}</h3>
+                    <p>{{ post.excerpt|truncatewords:20 }}</p>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if results.industries %}
+        <h3 class="mb-6"><i class="fas fa-industry text-primary"></i> Industries ({{ results.industries|length }})</h3>
+        <div class="grid grid-3 mb-12">
+            {% for industry in results.industries %}
+            <a href="{{ industry.get_absolute_url }}" class="industry-card" style="text-decoration:none;color:inherit;">
+                <div class="industry-icon"><i class="{{ industry.icon }}"></i></div>
+                <h4>{{ industry.name }}</h4>
+                <p>{{ industry.short_description|truncatewords:15 }}</p>
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if total_results == 0 %}
+        <div class="text-center" style="padding: var(--space-16) 0;">
+            <i class="fas fa-search" style="font-size: 3rem; color: var(--gray-300); margin-bottom: var(--space-4);"></i>
+            <h3>No results found</h3>
+            <p>Try different keywords or browse our <a href="{% url 'services:service_list' %}">services</a>.</p>
+        </div>
+        {% endif %}
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

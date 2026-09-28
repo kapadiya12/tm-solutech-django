@@ -1,0 +1,38 @@
+{% extends 'dashboard/base.html' %}
+{% block dashboard_content %}
+<div class="flex-between mb-8">
+    <h2>{{ page_title }}</h2>
+    <a href="{% url 'dashboard:service_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add Service</a>
+</div>
+<div class="dashboard-card">
+    <div class="dashboard-table-wrap">
+        <table class="dashboard-table">
+            <thead>
+                <tr><th>Title</th><th>Category</th><th>Featured</th><th>Active</th><th>Order</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                {% for service in services %}
+                <tr>
+                    <td><strong>{{ service.title }}</strong></td>
+                    <td>{{ service.category.name }}</td>
+                    <td>{% if service.is_featured %}<i class="fas fa-star text-accent"></i>{% else %}<i class="fas fa-star" style="color: var(--gray-300);"></i>{% endif %}</td>
+                    <td><span class="status-badge {% if service.is_active %}status-active{% else %}status-draft{% endif %}">{% if service.is_active %}Active{% else %}Inactive{% endif %}</span></td>
+                    <td>{{ service.display_order }}</td>
+                    <td>
+                        <div class="flex gap-2">
+                            <a href="{% url 'dashboard:service_edit' service.pk %}" class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></a>
+                            <form method="post" action="{% url 'dashboard:service_delete' service.pk %}" onsubmit="return confirm('Delete this service?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm" style="color: var(--danger);"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="text-center">No services yet. <a href="{% url 'dashboard:service_create' %}">Create one</a></td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

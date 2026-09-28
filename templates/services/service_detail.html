@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="page-hero">
+    <div class="container">
+        <ul class="breadcrumb-list">
+            <li><a href="{% url 'core:home' %}"><i class="fas fa-home"></i> Home</a></li>
+            <li><span class="separator"><i class="fas fa-chevron-right"></i></span> <a href="{% url 'services:service_list' %}">Services</a></li>
+            <li><span class="separator"><i class="fas fa-chevron-right"></i></span> <a href="{{ category.get_absolute_url }}">{{ category.name }}</a></li>
+            <li><span class="separator"><i class="fas fa-chevron-right"></i></span> {{ service.title }}</li>
+        </ul>
+        <h1 class="page-title">{{ page_title }}</h1>
+        <p class="page-subtitle">{{ page_subtitle }}</p>
+    </div>
+</div>
+
+{# Service Introduction #}
+<section class="section">
+    <div class="container">
+        <div class="service-detail-intro animate-on-scroll">
+            <div>
+                <h2>{{ service.title }}</h2>
+                {% if service.description %}
+                <div style="color: var(--gray-600); line-height: 1.8;">{{ service.description|safe }}</div>
+                {% endif %}
+            </div>
+            {% if service.image %}
+            <div class="service-detail-image">
+                <img src="{{ service.image.url }}" alt="{{ service.title }}" loading="lazy">
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+{# Features #}
+{% if service.features %}
+<section class="section section-gray">
+    <div class="container">
+        <div class="section-header animate-on-scroll">
+            <h2>Key <span class="highlight">Features</span></h2>
+        </div>
+        <div class="animate-on-scroll">{{ service.features|safe }}</div>
+    </div>
+</section>
+{% endif %}
+
+{# Benefits #}
+{% if service.benefits %}
+<section class="section">
+    <div class="container">
+        <div class="section-header animate-on-scroll">
+            <h2>Benefits</h2>
+        </div>
+        <div class="animate-on-scroll">{{ service.benefits|safe }}</div>
+    </div>
+</section>
+{% endif %}
+
+{# Process #}
+{% if service.process %}
+<section class="section section-gray">
+    <div class="container">
+        <div class="section-header animate-on-scroll">
+            <h2>Our Process</h2>
+        </div>
+        <div class="animate-on-scroll">{{ service.process|safe }}</div>
+    </div>
+</section>
+{% endif %}
+
+{# FAQ #}
+{% if faqs %}
+<section class="section">
+    <div class="container-narrow">
+        <div class="section-header animate-on-scroll">
+            <h2>Frequently Asked Questions</h2>
+        </div>
+        <div class="accordion">
+            {% for faq in faqs %}
+            <div class="accordion-item animate-on-scroll">
+                <div class="accordion-header">
+                    <h4>{{ faq.question }}</h4>
+                    <span class="accordion-icon"><i class="fas fa-chevron-down"></i></span>
+                </div>
+                <div class="accordion-body">
+                    <div class="accordion-body-inner">{{ faq.answer }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{# Related Services #}
+{% if related_services %}
+<section class="section section-gray">
+    <div class="container">
+        <div class="section-header animate-on-scroll">
+            <h2>Related Services</h2>
+        </div>
+        <div class="related-services">
+            {% for rs in related_services %}
+            <div class="service-card animate-on-scroll animate-delay-{{ forloop.counter }}">
+                <div class="service-card-icon"><i class="{{ rs.icon }}"></i></div>
+                <h3>{{ rs.title }}</h3>
+                <p>{{ rs.short_description|truncatewords:15 }}</p>
+                <a href="{{ rs.get_absolute_url }}" class="service-card-link">Learn More <i class="fas fa-arrow-right"></i></a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{% include 'includes/cta_section.html' %}
+{% endblock %}

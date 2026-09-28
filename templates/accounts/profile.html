@@ -1,0 +1,30 @@
+{% extends 'dashboard/base.html' %}
+
+{% block dashboard_content %}
+<div class="section-header" style="text-align: left; margin-bottom: var(--space-8);">
+    <h2>My Profile</h2>
+</div>
+<div style="max-width: 600px; background: var(--white); border-radius: var(--radius-xl); padding: var(--space-8); border: 1px solid var(--gray-200);">
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-grid">
+            <div class="form-group">
+                <label class="form-label">First Name</label>
+                {{ form.first_name }}
+            </div>
+            <div class="form-group">
+                <label class="form-label">Last Name</label>
+                {{ form.last_name }}
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Email</label>
+            {{ form.email }}
+        </div>
+        <div class="flex gap-4">
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <a href="{% url 'accounts:change_password' %}" class="btn btn-secondary">Change Password</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

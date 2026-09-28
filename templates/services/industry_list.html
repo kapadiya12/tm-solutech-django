@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="page-hero">
+    <div class="container">
+        <ul class="breadcrumb-list">
+            <li><a href="{% url 'core:home' %}"><i class="fas fa-home"></i> Home</a></li>
+            <li><span class="separator"><i class="fas fa-chevron-right"></i></span> Industries</li>
+        </ul>
+        <h1 class="page-title">{{ page_title }}</h1>
+        <p class="page-subtitle">{{ page_subtitle }}</p>
+    </div>
+</div>
+
+<section class="section">
+    <div class="container">
+        <div class="grid grid-3">
+            {% for industry in industries %}
+            <a href="{{ industry.get_absolute_url }}" class="service-card animate-on-scroll animate-delay-{{ forloop.counter }}" style="text-decoration:none;color:inherit;text-align:center;">
+                <div class="service-card-icon" style="margin: 0 auto var(--space-6);"><i class="{{ industry.icon }}"></i></div>
+                <h3>{{ industry.name }}</h3>
+                <p>{{ industry.short_description|truncatewords:20 }}</p>
+                <span class="service-card-link">Learn More <i class="fas fa-arrow-right"></i></span>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% include 'includes/cta_section.html' %}
+{% endblock %}

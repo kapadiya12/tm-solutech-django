@@ -1,0 +1,24 @@
+{% extends 'dashboard/base.html' %}
+{% block dashboard_content %}
+<div class="flex-between mb-8">
+    <h2>{{ page_title }}</h2>
+    <a href="{% url 'dashboard:category_list' %}" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Back</a>
+</div>
+<div class="dashboard-card">
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="form-group">
+            <label class="form-label">{{ field.label }} {% if field.field.required %}<span class="required">*</span>{% endif %}</label>
+            {{ field }}
+            {% if field.errors %}<div class="form-error">{{ field.errors.0 }}</div>{% endif %}
+            {% if field.help_text %}<p style="font-size: var(--text-xs); color: var(--gray-500); margin-top: var(--space-1);">{{ field.help_text }}</p>{% endif %}
+        </div>
+        {% endfor %}
+        <div class="flex gap-4">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save</button>
+            <a href="{% url 'dashboard:category_list' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

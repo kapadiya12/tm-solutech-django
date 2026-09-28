@@ -1,0 +1,46 @@
+{% extends 'dashboard/base.html' %}
+{% block dashboard_content %}
+<div class="flex-between mb-8">
+    <h2>{{ page_title }}</h2>
+    <form class="flex gap-4" method="get">
+        <input type="text" name="q" value="{{ search }}" placeholder="Search..." class="form-control" style="max-width: 200px;">
+        <select name="status" class="form-control" onchange="this.form.submit()" style="max-width: 150px;">
+            <option value="">All Status</option>
+            <option value="new" {% if status_filter == 'new' %}selected{% endif %}>New</option>
+            <option value="contacted" {% if status_filter == 'contacted' %}selected{% endif %}>Contacted</option>
+            <option value="in_progress" {% if status_filter == 'in_progress' %}selected{% endif %}>In Progress</option>
+            <option value="closed" {% if status_filter == 'closed' %}selected{% endif %}>Closed</option>
+        </select>
+    </form>
+</div>
+<div class="dashboard-card">
+    <div class="dashboard-table-wrap">
+        <table class="dashboard-table">
+            <thead><tr><th>Name</th><th>Company</th><th>Email</th><th>Service</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+                {% for inq in inquiries %}
+                <tr {% if not inq.is_read %}style="font-weight: 600;"{% endif %}>
+                    <td>{{ inq.name }}</td>
+                    <td>{{ inq.company }}</td>
+                    <td>{{ inq.email }}</td>
+                    <td>{{ inq.service|default:'-' }}</td>
+                    <td>{{ inq.created_at|date:"M d, Y" }}</td>
+                    <td><span class="status-badge status-{{ inq.status }}">{{ inq.get_status_display }}</span></td>
+                    <td>
+                        <div class="flex gap-2">
+                            <a href="{% url 'dashboard:inquiry_detail' inq.pk %}" class="btn btn-sm btn-secondary"><i class="fas fa-eye"></i></a>
+                            <form method="post" action="{% url 'dashboard:inquiry_delete' inq.pk %}" onsubmit="return confirm('Delete?');">
+                                {% csrf_token %}
+                                <button class="btn btn-sm" style="color:var(--danger);"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="text-center">No inquiries</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

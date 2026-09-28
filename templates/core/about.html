@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+{# Page Hero #}
+<div class="page-hero">
+    <div class="container">
+        <ul class="breadcrumb-list">
+            <li><a href="{% url 'core:home' %}"><i class="fas fa-home"></i> Home</a></li>
+            <li><span class="separator"><i class="fas fa-chevron-right"></i></span> About Us</li>
+        </ul>
+        <h1 class="page-title">{{ page_title }}</h1>
+        <p class="page-subtitle">{{ page_subtitle }}</p>
+    </div>
+</div>
+
+{# Company Overview #}
+<section class="section">
+    <div class="container">
+        <div class="about-grid">
+            <div class="about-image animate-on-scroll slide-left">
+                <img src="{% static 'images/general/about-company.jpg' %}" alt="About TM Solutech" loading="lazy">
+                <div class="about-image-badge">
+                    <div class="badge-number">35+</div>
+                    <div class="badge-label">Years Heritage</div>
+                </div>
+            </div>
+            <div class="about-content animate-on-scroll slide-right">
+                <span class="section-badge"><i class="fas fa-building"></i> Who We Are</span>
+                <h2>TM Solutech <span class="highlight">Private Limited</span></h2>
+                <p>TM Solutech Private Limited (TMSPL), incorporated in 2020, carries forward a rich heritage originating in 1985 through TM Systems. We are a leading IT solutions company focused on delivering customized products and services that meet the unique needs of every client.</p>
+                <p>Our motto prioritizes customer needs, making each of our projects unique. Our working systems are tailored to deliver according to our principles — time efficiency and cost-effectiveness — both of which help our clients reach their full potential without any compromise on quality.</p>
+                <div class="about-features">
+                    <div class="about-feature"><i class="fas fa-check-circle"></i><span>Customer-Centric Approach</span></div>
+                    <div class="about-feature"><i class="fas fa-check-circle"></i><span>Cost-Effective Solutions</span></div>
+                    <div class="about-feature"><i class="fas fa-check-circle"></i><span>Time-Efficient Delivery</span></div>
+                    <div class="about-feature"><i class="fas fa-check-circle"></i><span>Quality Without Compromise</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{# Vision & Mission #}
+<section class="section section-gray">
+    <div class="container">
+        <div class="grid grid-2" style="gap: var(--space-8);">
+            <div class="service-card animate-on-scroll">
+                <div class="service-card-icon"><i class="fas fa-eye"></i></div>
+                <h3>Our Vision</h3>
+                <p>Our vision encompasses an ideology of 'growing together' and all our products, services, and our internal systems are built on that foundation. We believe in creating lasting partnerships that drive mutual success.</p>
+            </div>
+            <div class="service-card animate-on-scroll animate-delay-1">
+                <div class="service-card-icon"><i class="fas fa-bullseye"></i></div>
+                <h3>Our Mission</h3>
+                <p>To deliver innovative, customized IT solutions that empower businesses to thrive in the digital age. We combine deep technical expertise with a commitment to quality, efficiency, and client satisfaction.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+{# Culture #}
+<section class="section">
+    <div class="container">
+        <div class="section-header animate-on-scroll">
+            <span class="section-badge"><i class="fas fa-heart"></i> Our Culture</span>
+            <h2>An <span class="highlight">Open-Minded</span> Workplace</h2>
+            <p>We foster an inclusive culture that values diverse talents and experiences, arriving at optimal decisions through cross-functional discussion.</p>
+        </div>
+        <div class="why-us-grid">
+            <div class="why-us-card animate-on-scroll">
+                <div class="why-us-number">01</div>
+                <div class="why-us-icon"><i class="fas fa-users"></i></div>
+                <h3>Collaborative Teams</h3>
+                <p>Cross-functional teams that bring diverse perspectives to every project, ensuring innovative solutions.</p>
+            </div>
+            <div class="why-us-card animate-on-scroll animate-delay-1">
+                <div class="why-us-number">02</div>
+                <div class="why-us-icon"><i class="fas fa-lightbulb"></i></div>
+                <h3>Innovation First</h3>
+                <p>We continuously explore emerging technologies and methodologies to deliver cutting-edge solutions.</p>
+            </div>
+            <div class="why-us-card animate-on-scroll animate-delay-2">
+                <div class="why-us-number">03</div>
+                <div class="why-us-icon"><i class="fas fa-chart-line"></i></div>
+                <h3>Growing Together</h3>
+                <p>Our philosophy of mutual growth ensures that as our clients succeed, we grow alongside them.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+{# Statistics #}
+{% if statistics %}
+<section class="section section-dark">
+    <div class="container">
+        <div class="trust-grid">
+            {% for stat in statistics %}
+            <div class="trust-item animate-on-scroll">
+                <div class="trust-number"><span data-counter="{{ stat.value }}" style="color: var(--secondary);">0</span><span style="color: var(--secondary);">{{ stat.suffix }}</span></div>
+                <div class="trust-label">{{ stat.label }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{# Leadership #}
+<section class="section">
+    <div class="container">
+        <div class="section-header animate-on-scroll">
+            <span class="section-badge"><i class="fas fa-user-tie"></i> Leadership</span>
+            <h2>Our <span class="highlight">Leadership</span> Team</h2>
+            <p>Meet the experienced professionals driving TM Solutech's vision and growth.</p>
+        </div>
+        <div class="leadership-grid">
+            {% for leader in leadership %}
+            <div class="leadership-card animate-on-scroll animate-delay-{{ forloop.counter }}">
+                <div class="leadership-photo">
+                    {% if leader.photo %}
+                    <img src="{{ leader.photo.url }}" alt="{{ leader.name }}" loading="lazy">
+                    {% else %}
+                    <img src="{% static 'images/general/placeholder-person.jpg' %}" alt="{{ leader.name }}" loading="lazy">
+                    {% endif %}
+                    <div class="leadership-social">
+                        {% if leader.linkedin_url %}<a href="{{ leader.linkedin_url }}" target="_blank" rel="noopener noreferrer"><i class="fab fa-linkedin-in"></i></a>{% endif %}
+                    </div>
+                </div>
+                <div class="leadership-info">
+                    <h4>{{ leader.name }}</h4>
+                    <p class="designation">{{ leader.designation }}</p>
+                    {% if leader.short_bio %}<p class="bio">{{ leader.short_bio|truncatewords:25 }}</p>{% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+{% include 'includes/cta_section.html' %}
+{% endblock %}

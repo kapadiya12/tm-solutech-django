@@ -1,0 +1,37 @@
+{% extends 'dashboard/base.html' %}
+{% block dashboard_content %}
+<div class="flex-between mb-8">
+    <h2>{{ page_title }}</h2>
+    <a href="{% url 'dashboard:blog_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add Post</a>
+</div>
+<div class="dashboard-card">
+    <div class="dashboard-table-wrap">
+        <table class="dashboard-table">
+            <thead>
+                <tr><th>Title</th><th>Category</th><th>Status</th><th>Published</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                {% for post in posts %}
+                <tr>
+                    <td><strong>{{ post.title }}</strong></td>
+                    <td>{{ post.category.name }}</td>
+                    <td><span class="status-badge {% if post.is_published %}status-active{% else %}status-draft{% endif %}">{% if post.is_published %}Published{% else %}Draft{% endif %}</span></td>
+                    <td>{{ post.published_at|date:"M d, Y"|default:"-" }}</td>
+                    <td>
+                        <div class="flex gap-2">
+                            <a href="{% url 'dashboard:blog_edit' post.pk %}" class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></a>
+                            <form method="post" action="{% url 'dashboard:blog_delete' post.pk %}" onsubmit="return confirm('Delete this post?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm" style="color: var(--danger);"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="text-center">No posts yet. <a href="{% url 'dashboard:blog_create' %}">Create one</a></td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

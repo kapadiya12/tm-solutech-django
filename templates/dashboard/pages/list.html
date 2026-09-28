@@ -1,0 +1,36 @@
+{% extends 'dashboard/base.html' %}
+{% block dashboard_content %}
+<div class="flex-between mb-8">
+    <h2>{{ page_title }}</h2>
+    <a href="{% url 'dashboard:page_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add Page</a>
+</div>
+<div class="dashboard-card">
+    <div class="dashboard-table-wrap">
+        <table class="dashboard-table">
+            <thead>
+                <tr><th>Title</th><th>Slug</th><th>Active</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                {% for page in pages %}
+                <tr>
+                    <td><strong>{{ page.title }}</strong></td>
+                    <td>{{ page.slug }}</td>
+                    <td><span class="status-badge {% if page.is_active %}status-active{% else %}status-draft{% endif %}">{% if page.is_active %}Active{% else %}Inactive{% endif %}</span></td>
+                    <td>
+                        <div class="flex gap-2">
+                            <a href="{% url 'dashboard:page_edit' page.pk %}" class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></a>
+                            <form method="post" action="{% url 'dashboard:page_delete' page.pk %}" onsubmit="return confirm('Delete this page?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm" style="color: var(--danger);"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4" class="text-center">No pages yet. <a href="{% url 'dashboard:page_create' %}">Create one</a></td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

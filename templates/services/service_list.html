@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="page-hero">
+    <div class="container">
+        <ul class="breadcrumb-list">
+            <li><a href="{% url 'core:home' %}"><i class="fas fa-home"></i> Home</a></li>
+            <li><span class="separator"><i class="fas fa-chevron-right"></i></span> Services</li>
+        </ul>
+        <h1 class="page-title">{{ page_title }}</h1>
+        <p class="page-subtitle">{{ page_subtitle }}</p>
+    </div>
+</div>
+
+{% for category in categories %}
+<section class="section {% if forloop.counter|divisibleby:2 %}section-gray{% endif %}">
+    <div class="container">
+        <div class="section-header animate-on-scroll">
+            <span class="section-badge"><i class="{{ category.icon }}"></i> {{ category.name }}</span>
+            <h2>{{ category.name }}</h2>
+            <p>{{ category.short_description|default:category.description|truncatewords:30 }}</p>
+        </div>
+        <div class="grid grid-3">
+            {% for service in category.active_services %}
+            <div class="service-card animate-on-scroll animate-delay-{{ forloop.counter }}">
+                <div class="service-card-icon"><i class="{{ service.icon }}"></i></div>
+                <h3>{{ service.title }}</h3>
+                <p>{{ service.short_description|truncatewords:20 }}</p>
+                <a href="{{ service.get_absolute_url }}" class="service-card-link">Learn More <i class="fas fa-arrow-right"></i></a>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="text-center" style="margin-top: var(--space-8);">
+            <a href="{{ category.get_absolute_url }}" class="btn btn-secondary">View All {{ category.name }}</a>
+        </div>
+    </div>
+</section>
+{% endfor %}
+
+{% include 'includes/cta_section.html' %}
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="page-hero">
+    <div class="container">
+        <ul class="breadcrumb-list">
+            <li><a href="{% url 'core:home' %}"><i class="fas fa-home"></i> Home</a></li>
+            <li><span class="separator"><i class="fas fa-chevron-right"></i></span> Leadership</li>
+        </ul>
+        <h1 class="page-title">{{ page_title }}</h1>
+        <p class="page-subtitle">{{ page_subtitle }}</p>
+    </div>
+</div>
+
+<section class="section">
+    <div class="container">
+        <div class="leadership-grid">
+            {% for leader in leadership %}
+            <div class="leadership-card animate-on-scroll animate-delay-{{ forloop.counter }}">
+                <div class="leadership-photo">
+                    {% if leader.photo %}<img src="{{ leader.photo.url }}" alt="{{ leader.name }}" loading="lazy">
+                    {% else %}<img src="{% static 'images/general/placeholder-person.jpg' %}" alt="{{ leader.name }}" loading="lazy">{% endif %}
+                    <div class="leadership-social">
+                        {% if leader.linkedin_url %}<a href="{{ leader.linkedin_url }}" target="_blank" rel="noopener noreferrer"><i class="fab fa-linkedin-in"></i></a>{% endif %}
+                        {% if leader.email %}<a href="mailto:{{ leader.email }}"><i class="fas fa-envelope"></i></a>{% endif %}
+                    </div>
+                </div>
+                <div class="leadership-info">
+                    <h4>{{ leader.name }}</h4>
+                    <p class="designation">{{ leader.designation }}</p>
+                    {% if leader.short_bio %}<p class="bio">{{ leader.short_bio }}</p>{% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% include 'includes/cta_section.html' %}
+{% endblock %}

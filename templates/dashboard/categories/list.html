@@ -1,0 +1,36 @@
+{% extends 'dashboard/base.html' %}
+{% block dashboard_content %}
+<div class="flex-between mb-8">
+    <h2>{{ page_title }}</h2>
+    <a href="{% url 'dashboard:category_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add Category</a>
+</div>
+<div class="dashboard-card">
+    <div class="dashboard-table-wrap">
+        <table class="dashboard-table">
+            <thead>
+                <tr><th>Name</th><th>Active</th><th>Order</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                {% for category in categories %}
+                <tr>
+                    <td><strong>{{ category.name }}</strong></td>
+                    <td><span class="status-badge {% if category.is_active %}status-active{% else %}status-draft{% endif %}">{% if category.is_active %}Active{% else %}Inactive{% endif %}</span></td>
+                    <td>{{ category.display_order }}</td>
+                    <td>
+                        <div class="flex gap-2">
+                            <a href="{% url 'dashboard:category_edit' category.pk %}" class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></a>
+                            <form method="post" action="{% url 'dashboard:category_delete' category.pk %}" onsubmit="return confirm('Delete this category?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm" style="color: var(--danger);"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4" class="text-center">No categories yet. <a href="{% url 'dashboard:category_create' %}">Create one</a></td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

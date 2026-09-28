@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="page-hero">
+    <div class="container">
+        <ul class="breadcrumb-list">
+            <li><a href="{% url 'core:home' %}"><i class="fas fa-home"></i> Home</a></li>
+            <li><span class="separator"><i class="fas fa-chevron-right"></i></span> Insights</li>
+        </ul>
+        <h1 class="page-title">{{ page_title }}</h1>
+        <p class="page-subtitle">{{ page_subtitle }}</p>
+    </div>
+</div>
+
+<section class="section">
+    <div class="container">
+        {# Category Filter #}
+        {% if categories %}
+        <div class="flex-center gap-4 mb-12" style="flex-wrap: wrap;">
+            <a href="{% url 'insights:post_list' %}" class="btn {% if not current_category %}btn-primary{% else %}btn-secondary{% endif %} btn-sm">All</a>
+            {% for cat in categories %}
+            <a href="?category={{ cat.slug }}" class="btn {% if current_category == cat.slug %}btn-primary{% else %}btn-secondary{% endif %} btn-sm">{{ cat.name }}</a>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="blog-grid">
+            {% for post in posts %}
+            <a href="{{ post.get_absolute_url }}" class="blog-card animate-on-scroll" style="text-decoration:none;color:inherit;">
+                <div class="blog-card-image">
+                    {% if post.featured_image %}<img src="{{ post.featured_image.url }}" alt="{{ post.title }}" loading="lazy">
+                    {% else %}<img src="{% static 'images/blog/default-blog.jpg' %}" alt="{{ post.title }}" loading="lazy">{% endif %}
+                    {% if post.category %}<span class="blog-card-category">{{ post.category.name }}</span>{% endif %}
+                </div>
+                <div class="blog-card-content">
+                    <div class="blog-card-meta">
+                        {% if post.published_at %}<span><i class="fas fa-calendar"></i> {{ post.published_at|date:"M d, Y" }}</span>{% endif %}
+                        <span><i class="fas fa-clock"></i> {{ post.reading_time }} min</span>
+                    </div>
+                    <h3>{{ post.title }}</h3>
+                    <p>{{ post.excerpt|truncatewords:25 }}</p>
+                    <div class="blog-card-footer"><span class="blog-read-more">Read More <i class="fas fa-arrow-right"></i></span></div>
+                </div>
+            </a>
+            {% empty %}
+            <div class="text-center" style="grid-column: 1/-1; padding: var(--space-16) 0;">
+                <i class="fas fa-newspaper" style="font-size:3rem;color:var(--gray-300);margin-bottom:var(--space-4);"></i>
+                <h3>No insights published yet</h3>
+                <p>Check back soon for the latest from TM Solutech.</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% include 'includes/pagination.html' %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends 'dashboard/base.html' %}
+{% block dashboard_content %}
+<div class="flex-between mb-8">
+    <h2>{{ page_title }}</h2>
+    <a href="{% url 'dashboard:leadership_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add Leader</a>
+</div>
+<div class="dashboard-card">
+    <div class="dashboard-table-wrap">
+        <table class="dashboard-table">
+            <thead>
+                <tr><th>Name</th><th>Position</th><th>Active</th><th>Order</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                {% for leader in leaderships %}
+                <tr>
+                    <td><strong>{{ leader.name }}</strong></td>
+                    <td>{{ leader.position }}</td>
+                    <td><span class="status-badge {% if leader.is_active %}status-active{% else %}status-draft{% endif %}">{% if leader.is_active %}Active{% else %}Inactive{% endif %}</span></td>
+                    <td>{{ leader.display_order }}</td>
+                    <td>
+                        <div class="flex gap-2">
+                            <a href="{% url 'dashboard:leadership_edit' leader.pk %}" class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></a>
+                            <form method="post" action="{% url 'dashboard:leadership_delete' leader.pk %}" onsubmit="return confirm('Delete this leader?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm" style="color: var(--danger);"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="text-center">No leadership members yet. <a href="{% url 'dashboard:leadership_create' %}">Create one</a></td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

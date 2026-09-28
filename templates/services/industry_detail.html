@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="page-hero">
+    <div class="container">
+        <ul class="breadcrumb-list">
+            <li><a href="{% url 'core:home' %}"><i class="fas fa-home"></i> Home</a></li>
+            <li><span class="separator"><i class="fas fa-chevron-right"></i></span> <a href="{% url 'services:industry_list' %}">Industries</a></li>
+            <li><span class="separator"><i class="fas fa-chevron-right"></i></span> {{ industry.name }}</li>
+        </ul>
+        <h1 class="page-title">{{ page_title }}</h1>
+        <p class="page-subtitle">{{ page_subtitle }}</p>
+    </div>
+</div>
+
+<section class="section">
+    <div class="container">
+        <div class="container-narrow">
+            {% if industry.description %}
+            <div class="animate-on-scroll">{{ industry.description|safe }}</div>
+            {% endif %}
+            {% if industry.benefits %}
+            <div class="animate-on-scroll" style="margin-top: var(--space-8);"><h2>Benefits</h2>{{ industry.benefits|safe }}</div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% include 'includes/cta_section.html' %}
+{% endblock %}

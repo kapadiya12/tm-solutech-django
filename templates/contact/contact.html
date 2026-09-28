@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="page-hero">
+    <div class="container">
+        <ul class="breadcrumb-list">
+            <li><a href="{% url 'core:home' %}"><i class="fas fa-home"></i> Home</a></li>
+            <li><span class="separator"><i class="fas fa-chevron-right"></i></span> Contact</li>
+        </ul>
+        <h1 class="page-title">{{ page_title }}</h1>
+        <p class="page-subtitle">{{ page_subtitle }}</p>
+    </div>
+</div>
+
+<section class="section">
+    <div class="container">
+        {# Contact Cards #}
+        <div class="contact-grid">
+            <div class="contact-card animate-on-scroll">
+                <div class="contact-card-icon"><i class="fas fa-map-marker-alt"></i></div>
+                <h4>Visit Us</h4>
+                <p>{% if site_settings %}{{ site_settings.address }}{% else %}805/806 Aditya Building, Near Mithakhali Six Roads, Ellisbridge, Ahmedabad, Gujarat 380006{% endif %}</p>
+            </div>
+            <div class="contact-card animate-on-scroll animate-delay-1">
+                <div class="contact-card-icon"><i class="fas fa-phone"></i></div>
+                <h4>Call Us</h4>
+                <p><a href="tel:{% if site_settings %}{{ site_settings.phone }}{% else %}+917947717070{% endif %}">{% if site_settings %}{{ site_settings.phone }}{% else %}+91 79 4771 7070{% endif %}</a></p>
+            </div>
+            <div class="contact-card animate-on-scroll animate-delay-2">
+                <div class="contact-card-icon"><i class="fas fa-envelope"></i></div>
+                <h4>Email Us</h4>
+                <p><a href="mailto:{% if site_settings %}{{ site_settings.email }}{% else %}info@tmsolutech.com{% endif %}">{% if site_settings %}{{ site_settings.email }}{% else %}info@tmsolutech.com{% endif %}</a></p>
+            </div>
+        </div>
+
+        {# Contact Form & Map #}
+        <div class="grid grid-2" style="gap: var(--space-12); align-items: start;">
+            <div class="animate-on-scroll">
+                <h2 style="margin-bottom: var(--space-6);">Send Us a <span class="highlight">Message</span></h2>
+                <form method="post" action="{% url 'contact:contact' %}" data-validate>
+                    {% csrf_token %}
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Name <span class="required">*</span></label>
+                            {{ form.name }}
+                            {% if form.name.errors %}<div class="form-error">{{ form.name.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Company <span class="required">*</span></label>
+                            {{ form.company }}
+                            {% if form.company.errors %}<div class="form-error">{{ form.company.errors.0 }}</div>{% endif %}
+                        </div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Email <span class="required">*</span></label>
+                            {{ form.email }}
+                            {% if form.email.errors %}<div class="form-error">{{ form.email.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Phone</label>
+                            {{ form.phone }}
+                            {% if form.phone.errors %}<div class="form-error">{{ form.phone.errors.0 }}</div>{% endif %}
+                        </div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Subject</label>
+                            {{ form.subject }}
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Service Interest</label>
+                            {{ form.service }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Message <span class="required">*</span></label>
+                        {{ form.message }}
+                        {% if form.message.errors %}<div class="form-error">{{ form.message.errors.0 }}</div>{% endif %}
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">Send Message <i class="fas fa-paper-plane"></i></button>
+                </form>
+            </div>
+            <div class="animate-on-scroll slide-right">
+                <div class="map-container">
+                    {% if site_settings and site_settings.google_maps_embed %}
+                    {{ site_settings.google_maps_embed|safe }}
+                    {% else %}
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3671.9026!2d72.5601!3d23.0317!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjPCsDAyJzA2LjEiTiA3MsKwMzMnMzYuNCJF!5e0!3m2!1sen!2sin!4v1&q=Mithakhali+Ahmedabad" allowfullscreen loading="lazy"></iframe>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

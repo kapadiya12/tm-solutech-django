@@ -1,0 +1,1114 @@
+[
+{
+  "model": "auth.user",
+  "pk": 1,
+  "fields": {
+    "password": "pbkdf2_sha256$870000$TUTx8IVlQYtVnTUKFzMHx6$pPPSDQ0UlpRwl6NzAHzTdD0eC61ix2WN5p2A77mnpJ8=",
+    "last_login": "2026-09-27T15:39:39.216Z",
+    "is_superuser": true,
+    "username": "admin",
+    "first_name": "",
+    "last_name": "",
+    "email": "admin@tmsolutech.com",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-09-27T15:14:38.314Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "uxb6hyif7uu4rqkvzi923bv8h7m0pzrf",
+  "fields": {
+    "session_data": ".eJxVjMsOwiAQRf-FtSEMb1y69xvIwIBUDU1KuzL-uzbpQrf3nHNfLOK2triNssSJ2JkBO_1uCfOj9B3QHftt5nnu6zIlviv8oINfZyrPy-H-HTQc7Vujq-ScCcqpqkT2Hoyl5EF5iSkYmYMVyTtLKEygahXJrMFoKDoLBM3eH8kKNxg:1xAqyZ:lB6z53LJMnJIqIHYXcedOwS5Rg2kTYKAo_8a_Ru_cYo",
+    "expire_date": "2026-10-11T15:39:39.222Z"
+  }
+},
+{
+  "model": "core.sitesettings",
+  "pk": 1,
+  "fields": {
+    "company_name": "TM Solutech Private Limited",
+    "tagline": "Smart IT Solutions for Modern Businesses",
+    "logo": "settings/tm-solutech-logo.png",
+    "favicon": "settings/favicon.png",
+    "phone": "+91 79 4771 7070",
+    "email": "info@tmsolutech.com",
+    "address": "805/806 Aditya Building, Near Mithakhali Six Roads, Ellisbridge, Ahmedabad, Gujarat 380006",
+    "google_maps_url": "",
+    "google_maps_embed": "<iframe src=\"https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3671.9!2d72.56!3d23.03!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjPCsDAyJzA2LjEiTiA3MsKwMzMnMzYuNCJF!5e0!3m2!1sen!2sin!4v1\" width=\"100%\" height=\"400\" style=\"border:0;\" allowfullscreen=\"\" loading=\"lazy\"></iframe>",
+    "linkedin_url": "https://www.linkedin.com/company/tmsolutech",
+    "instagram_url": "",
+    "facebook_url": "https://www.facebook.com/tmsolutech",
+    "youtube_url": "",
+    "whatsapp_number": "",
+    "footer_description": "TM Solutech Private Limited is a leading IT solutions company specializing in Cloud Solutions, Network & Security, and Remote Infrastructure Management. With heritage dating back to 1985, we deliver customized, cost-effective technology solutions that help businesses grow and thrive.",
+    "copyright_text": "© 2026 TM Solutech Private Limited. All Rights Reserved.",
+    "meta_title": "TM Solutech | Smart IT Solutions for Modern Businesses",
+    "meta_description": "TM Solutech provides enterprise Cloud Solutions, Network & Security, and Remote Infrastructure Management services. Trusted IT partner since 1985.",
+    "meta_keywords": "",
+    "og_image": "",
+    "header_scripts": "",
+    "footer_scripts": ""
+  }
+},
+{
+  "model": "core.statistic",
+  "pk": 1,
+  "fields": {
+    "label": "Organizations Served",
+    "value": "150",
+    "suffix": "+",
+    "icon": "fas fa-building",
+    "display_order": 1,
+    "is_active": true
+  }
+},
+{
+  "model": "core.statistic",
+  "pk": 2,
+  "fields": {
+    "label": "Team Members",
+    "value": "250",
+    "suffix": "+",
+    "icon": "fas fa-users",
+    "display_order": 2,
+    "is_active": true
+  }
+},
+{
+  "model": "core.statistic",
+  "pk": 3,
+  "fields": {
+    "label": "Years of Heritage",
+    "value": "35",
+    "suffix": "+",
+    "icon": "fas fa-calendar",
+    "display_order": 3,
+    "is_active": true
+  }
+},
+{
+  "model": "core.statistic",
+  "pk": 4,
+  "fields": {
+    "label": "Expert Support",
+    "value": "24",
+    "suffix": "/7",
+    "icon": "fas fa-headset",
+    "display_order": 4,
+    "is_active": true
+  }
+},
+{
+  "model": "core.whyusreason",
+  "pk": 1,
+  "fields": {
+    "title": "Cross-Industry Expertise",
+    "description": "Deep experience across Banking, Hi-Tech, Medical, Industrial, and SME sectors. We bring specialized knowledge to deliver solutions tailored to your industry's unique challenges, having served 150+ banking institutions and enterprises across multiple verticals.",
+    "icon": "fas fa-globe",
+    "image": "",
+    "display_order": 1,
+    "is_active": true
+  }
+},
+{
+  "model": "core.whyusreason",
+  "pk": 2,
+  "fields": {
+    "title": "Deep Expertise & Leadership",
+    "description": "Backed by experienced leaders with 30+ years in IT, including software development, hardware architecture, networking, and cybersecurity. Our leadership team brings decades of hands-on experience to every project.",
+    "icon": "fas fa-users-cog",
+    "image": "",
+    "display_order": 2,
+    "is_active": true
+  }
+},
+{
+  "model": "core.whyusreason",
+  "pk": 3,
+  "fields": {
+    "title": "Dedicated IT Solutions",
+    "description": "Every project is unique because we prioritize your specific needs. Our philosophy of 'growing together' drives us to deliver custom-tailored solutions with time efficiency and cost-effectiveness, without compromising on quality.",
+    "icon": "fas fa-handshake",
+    "image": "",
+    "display_order": 3,
+    "is_active": true
+  }
+},
+{
+  "model": "core.whyusreason",
+  "pk": 4,
+  "fields": {
+    "title": "Quality Without Compromise",
+    "description": "Our working systems are tailored to reduce timescales and costs while maintaining the highest quality standards. We help clients reach their full potential through efficient, reliable technology solutions.",
+    "icon": "fas fa-award",
+    "image": "",
+    "display_order": 4,
+    "is_active": true
+  }
+},
+{
+  "model": "core.whyusreason",
+  "pk": 5,
+  "fields": {
+    "title": "End-to-End Solutions",
+    "description": "From cloud strategy and migration to cybersecurity and infrastructure management, we provide comprehensive IT solutions under one roof, ensuring seamless integration and consistent quality.",
+    "icon": "fas fa-layer-group",
+    "image": "",
+    "display_order": 5,
+    "is_active": true
+  }
+},
+{
+  "model": "core.whyusreason",
+  "pk": 6,
+  "fields": {
+    "title": "24/7 Support & Monitoring",
+    "description": "Our managed services include continuous infrastructure monitoring, automated incident response, and SLA-backed support to ensure your IT systems run smoothly around the clock.",
+    "icon": "fas fa-headset",
+    "image": "",
+    "display_order": 6,
+    "is_active": true
+  }
+},
+{
+  "model": "core.testimonial",
+  "pk": 1,
+  "fields": {
+    "name": "Rajesh Patel",
+    "designation": "CTO",
+    "company": "Leading Co-Operative Bank",
+    "content": "TM Solutech modernized our entire core banking network and managed SOC infrastructure to ensure 100% SEBI CSCRF compliance. Their 24/7 monitoring gives us absolute peace of mind.",
+    "photo": "",
+    "rating": 5,
+    "is_active": true,
+    "display_order": 1
+  }
+},
+{
+  "model": "core.testimonial",
+  "pk": 2,
+  "fields": {
+    "name": "Dr. Alok Verma",
+    "designation": "VP of Technology",
+    "company": "Global Pharma Group",
+    "content": "The on-premise Custom Copilot developed by TM Solutech empowered our 300+ medical representatives with instant clinical data without risking any proprietary IP.",
+    "photo": "",
+    "rating": 5,
+    "is_active": true,
+    "display_order": 2
+  }
+},
+{
+  "model": "core.testimonial",
+  "pk": 3,
+  "fields": {
+    "name": "Pooja Mehta",
+    "designation": "Head of IT Infrastructure",
+    "company": "High-Tech Engineering Ltd",
+    "content": "Zero downtime cloud migration and flawless Microsoft 365 SharePoint rollout. TM Solutech is by far the most reliable technology partner we have worked with.",
+    "photo": "",
+    "rating": 5,
+    "is_active": true,
+    "display_order": 3
+  }
+},
+{
+  "model": "core.leadership",
+  "pk": 1,
+  "fields": {
+    "name": "Saumil Shah",
+    "designation": "CEO, TM Systems",
+    "short_bio": "Fresh out of MBA school, Saumil wanted to design high performing software. Beginning with a team of only 2 members in 1985, the company under him has grown to over 250 team members serving 150+ banks across Gujarat, Madhya Pradesh, and Rajasthan.",
+    "biography": "",
+    "photo": "uploads/leadership/saumil-shah.jpg",
+    "linkedin_url": "https://www.linkedin.com/in/saumil-shah-898598a/",
+    "email": "saumil@tmsystems.co.in",
+    "display_order": 1,
+    "is_active": true
+  }
+},
+{
+  "model": "core.leadership",
+  "pk": 2,
+  "fields": {
+    "name": "Binit Shah",
+    "designation": "Director",
+    "short_bio": "With 30+ years of experience in licensed software distribution and management, Binit is focused on providing actionable insights to business teams. He has been instrumental in promoting a large portfolio of licensed software products from both Indian and international vendors.",
+    "biography": "",
+    "photo": "uploads/leadership/binit-shah.png",
+    "linkedin_url": "https://www.linkedin.com/in/binit-shah-9a63113/",
+    "email": "binit@tmsystems.co.in",
+    "display_order": 2,
+    "is_active": true
+  }
+},
+{
+  "model": "core.leadership",
+  "pk": 3,
+  "fields": {
+    "name": "Saurin Shah",
+    "designation": "Director",
+    "short_bio": "With 24+ years in IT, Saurin specializes in hardware architecture and networking planning and implementation. He possesses extensive experience implementing turnkey Data Center projects and complex networking infrastructure for enterprises.",
+    "biography": "",
+    "photo": "uploads/leadership/saurin-shah.jpg",
+    "linkedin_url": "https://www.linkedin.com/company/tm-systems-pvt-ltd/",
+    "email": "saurin@tmsystems.co.in",
+    "display_order": 3,
+    "is_active": true
+  }
+},
+{
+  "model": "core.leadership",
+  "pk": 4,
+  "fields": {
+    "name": "Maunish Shah",
+    "designation": "Director, Software Department",
+    "short_bio": "Joined in 1991, Maunish possesses vast experience across the complete SDLC. Under his leadership, the organization expanded across educational institutions, club management, banking, and industrial enterprises.",
+    "biography": "",
+    "photo": "uploads/leadership/maunish-shah.png",
+    "linkedin_url": "https://www.linkedin.com/in/maunish-shah-87a9465/",
+    "email": "maunish@tmsystems.co.in",
+    "display_order": 4,
+    "is_active": true
+  }
+},
+{
+  "model": "core.leadership",
+  "pk": 5,
+  "fields": {
+    "name": "Divyesh Doshi",
+    "designation": "Security Specialist & Product Development",
+    "short_bio": "Specialist in web application security, network security assessments, VAPT, and security training. Experienced in enterprise firewalls, mail servers, and campus management solutions for leading educational institutions.",
+    "biography": "",
+    "photo": "uploads/leadership/team1.jpg",
+    "linkedin_url": "https://www.linkedin.com/company/tm-systems-pvt-ltd/",
+    "email": "divyesh@tmsystems.co.in",
+    "display_order": 5,
+    "is_active": true
+  }
+},
+{
+  "model": "core.faq",
+  "pk": 1,
+  "fields": {
+    "question": "What IT services does TM Solutech provide?",
+    "answer": "TM Solutech provides comprehensive IT solutions including Cloud Solutions (managed services, security, disaster recovery, SharePoint, Office 365), Network & Security (firewalls, VPN, NGFW, routing, wireless), and Remote Infrastructure Management (monitoring, system administration, asset management, IT consulting).",
+    "category": "general",
+    "is_active": true,
+    "display_order": 1
+  }
+},
+{
+  "model": "core.faq",
+  "pk": 2,
+  "fields": {
+    "question": "How long has TM Solutech been in business?",
+    "answer": "TM Solutech Private Limited was incorporated in 2020, but carries forward a rich heritage originating in 1985 through TM Systems. Our leadership team brings over 30 years of combined IT experience.",
+    "category": "general",
+    "is_active": true,
+    "display_order": 2
+  }
+},
+{
+  "model": "core.faq",
+  "pk": 3,
+  "fields": {
+    "question": "What industries does TM Solutech serve?",
+    "answer": "We serve diverse verticals including Hi-Tech, Banking & Financial Services (150+ banks), Medical & Pharmaceuticals, Industrial & Manufacturing, Small & Medium Enterprises, and Educational institutions.",
+    "category": "general",
+    "is_active": true,
+    "display_order": 3
+  }
+},
+{
+  "model": "core.faq",
+  "pk": 4,
+  "fields": {
+    "question": "Do you provide 24/7 support?",
+    "answer": "Yes, our managed services include 24/7 continuous infrastructure monitoring, automated incident response, and SLA-backed helpdesk support to ensure your IT systems run smoothly around the clock.",
+    "category": "support",
+    "is_active": true,
+    "display_order": 4
+  }
+},
+{
+  "model": "core.faq",
+  "pk": 5,
+  "fields": {
+    "question": "What cloud platforms do you support?",
+    "answer": "We support major cloud platforms including Microsoft Azure, AWS, and Google Cloud. Our services cover cloud strategy, migration, architecture design, security, compliance, and ongoing managed support.",
+    "category": "cloud",
+    "is_active": true,
+    "display_order": 5
+  }
+},
+{
+  "model": "core.faq",
+  "pk": 6,
+  "fields": {
+    "question": "How do you ensure data security?",
+    "answer": "We implement multi-layered security including Identity & Access Management, data encryption, continuous threat detection, penetration testing, compliance advisory (GDPR, HIPAA, ISO, SOC2), and managed SOC services.",
+    "category": "services",
+    "is_active": true,
+    "display_order": 6
+  }
+},
+{
+  "model": "core.faq",
+  "pk": 7,
+  "fields": {
+    "question": "What is your approach to project delivery?",
+    "answer": "We follow a structured 5-step delivery framework: Define Scope, Plan, Build, Stabilize, and Execute. This methodology ensures risk mitigation, quality assurance, and timely delivery for every project.",
+    "category": "general",
+    "is_active": true,
+    "display_order": 7
+  }
+},
+{
+  "model": "core.faq",
+  "pk": 8,
+  "fields": {
+    "question": "Where is TM Solutech located?",
+    "answer": "805/806 Aditya Building, Near Mithakhali Six Roads, Ellisbridge, Ahmedabad, Gujarat 380006, India. You can reach us at +91 79 4771 7070 or info@tmsolutech.com.",
+    "category": "general",
+    "is_active": true,
+    "display_order": 8
+  }
+},
+{
+  "model": "services.servicecategory",
+  "pk": 1,
+  "fields": {
+    "name": "Cloud Solutions",
+    "slug": "cloud-solutions",
+    "description": "TM Solutech delivers customized and cost-effective cloud computing services. Our cloud solutions cover cloud strategy, maintenance, migration, architecture design, cloud security, and disaster recovery. We follow a three-step engagement methodology: Pre-sales assessment & architecture design, Seamless Cloud Migration with No Downtime guarantee, and Post-migration Managed Support.",
+    "short_description": "Customized and cost-effective cloud computing services covering strategy, maintenance, migration, architecture design, security, and disaster recovery.",
+    "image": "",
+    "icon": "fas fa-cloud",
+    "is_active": true,
+    "display_order": 1,
+    "meta_title": "",
+    "meta_description": ""
+  }
+},
+{
+  "model": "services.servicecategory",
+  "pk": 2,
+  "fields": {
+    "name": "Network & Security",
+    "slug": "network-security",
+    "description": "Our Network & Security solutions provide enterprise-grade protection for your digital infrastructure. From firewalls and VPN to next-generation security and QoS, we design, implement, and manage robust network architectures.",
+    "short_description": "Enterprise-grade network infrastructure and cybersecurity solutions to protect your digital assets and ensure business continuity.",
+    "image": "",
+    "icon": "fas fa-shield-alt",
+    "is_active": true,
+    "display_order": 2,
+    "meta_title": "",
+    "meta_description": ""
+  }
+},
+{
+  "model": "services.servicecategory",
+  "pk": 3,
+  "fields": {
+    "name": "Remote Infrastructure Management",
+    "slug": "remote-infrastructure-management",
+    "description": "Our Remote Infrastructure Management services provide cost-effective, continuous remote operations management for global enterprise and SME IT environments, without requiring dedicated on-premise administrators.",
+    "short_description": "Cost-effective, continuous remote operations management for enterprise IT environments without requiring dedicated on-premise administrators.",
+    "image": "",
+    "icon": "fas fa-server",
+    "is_active": true,
+    "display_order": 3,
+    "meta_title": "",
+    "meta_description": ""
+  }
+},
+{
+  "model": "services.service",
+  "pk": 1,
+  "fields": {
+    "category": 1,
+    "title": "Cloud Support & Managed Services",
+    "slug": "cloud-support-managed-services",
+    "short_description": "Enterprise-grade Cloud Support & Managed Services services designed for maximum operational efficiency, reliability, and security.",
+    "description": "<p class=\"lead-text\">TM Solutech provides specialized <strong>Cloud Support & Managed Services</strong> services engineered to meet the rigorous demands of modern digital enterprises. Operating within our Cloud Solutions practice, our certified engineers deliver customized architectures that prioritize time efficiency, cost-effectiveness, and uncompromised quality.</p>\n<p>Originating from TM Systems in 1985, our engineering teams possess over three decades of hands-on expertise implementing enterprise-grade technologies across Gujarat and pan-India. Every Cloud Support & Managed Services engagement includes end-to-end architecture planning, hardened security configurations, and 24/7 proactive monitoring.</p>",
+    "image": "services/microsoft-365.jpg",
+    "icon": "fas fa-cogs",
+    "features": "<div class=\"features-custom-grid\">\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-check-double\"></i></div><h4>Enterprise Architecture</h4><p>Bespoke technical blueprints designed for high-availability and compliance.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-shield-alt\"></i></div><h4>Hardened Security</h4><p>Zero Trust posture with multi-layer defense-in-depth security principles.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-headset\"></i></div><h4>24/7 NOC Monitoring</h4><p>Real-time telemetry and sub-15 minute response SLAs for mission-critical alerts.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-chart-line\"></i></div><h4>Proven ROI & Efficiency</h4><p>Time-tested operational frameworks that eliminate waste and optimize infrastructure TCO.</p></div>\n</div>",
+    "benefits": "<div class=\"benefits-custom-list\">\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Guaranteed 99.9% Uptime:</strong> High-availability architecture and automated disaster recovery failover.</div></div>\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Regulatory Compliance:</strong> Aligned with ISO 27001, SEBI, and RBI CSCRF standards.</div></div>\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Dedicated Technical Escalation:</strong> Senior systems architects assigned directly to your account.</div></div>\n</div>",
+    "process": "<div class=\"process-timeline\">\n    <div class=\"proc-step\"><span class=\"step-num\">01</span><h4>Technical Assessment</h4><p>Comprehensive audit of existing infrastructure, workload dependencies, and security boundaries.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">02</span><h4>Custom Engineering Blueprint</h4><p>Architectural specification outlining topology, components, and integration milestones.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">03</span><h4>Deployment & Cutover</h4><p>Phased, non-intrusive implementation executed during scheduled maintenance windows.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">04</span><h4>24/7 Managed Governance</h4><p>Continuous monitoring, automated security patching, and quarterly health reviews.</p></div>\n</div>",
+    "faq": "[{\"question\": \"What is the typical deployment timeline for this service?\", \"answer\": \"Timelines depend on workload scope, typically ranging from 3 to 14 business days with zero interruption to ongoing operations.\"}, {\"question\": \"How does TM Solutech support this service post-deployment?\", \"answer\": \"Every deployment is backed by our 24/7 Network Operations Center (NOC) in Ahmedabad with guaranteed SLA response times and assigned senior architects.\"}]",
+    "meta_title": "",
+    "meta_description": "",
+    "is_featured": true,
+    "is_active": true,
+    "display_order": 1,
+    "created_at": "2026-09-27T15:16:44.385Z",
+    "updated_at": "2026-09-27T17:05:59.924Z"
+  }
+},
+{
+  "model": "services.service",
+  "pk": 2,
+  "fields": {
+    "category": 1,
+    "title": "Cloud Security & Compliance",
+    "slug": "cloud-security-compliance",
+    "short_description": "Enterprise-grade Cloud Security & Compliance services designed for maximum operational efficiency, reliability, and security.",
+    "description": "<p class=\"lead-text\">TM Solutech provides specialized <strong>Cloud Security & Compliance</strong> services engineered to meet the rigorous demands of modern digital enterprises. Operating within our Cloud Solutions practice, our certified engineers deliver customized architectures that prioritize time efficiency, cost-effectiveness, and uncompromised quality.</p>\n<p>Originating from TM Systems in 1985, our engineering teams possess over three decades of hands-on expertise implementing enterprise-grade technologies across Gujarat and pan-India. Every Cloud Security & Compliance engagement includes end-to-end architecture planning, hardened security configurations, and 24/7 proactive monitoring.</p>",
+    "image": "services/tech-team.jpg",
+    "icon": "fas fa-lock",
+    "features": "<div class=\"features-custom-grid\">\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-check-double\"></i></div><h4>Enterprise Architecture</h4><p>Bespoke technical blueprints designed for high-availability and compliance.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-shield-alt\"></i></div><h4>Hardened Security</h4><p>Zero Trust posture with multi-layer defense-in-depth security principles.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-headset\"></i></div><h4>24/7 NOC Monitoring</h4><p>Real-time telemetry and sub-15 minute response SLAs for mission-critical alerts.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-chart-line\"></i></div><h4>Proven ROI & Efficiency</h4><p>Time-tested operational frameworks that eliminate waste and optimize infrastructure TCO.</p></div>\n</div>",
+    "benefits": "<div class=\"benefits-custom-list\">\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Guaranteed 99.9% Uptime:</strong> High-availability architecture and automated disaster recovery failover.</div></div>\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Regulatory Compliance:</strong> Aligned with ISO 27001, SEBI, and RBI CSCRF standards.</div></div>\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Dedicated Technical Escalation:</strong> Senior systems architects assigned directly to your account.</div></div>\n</div>",
+    "process": "<div class=\"process-timeline\">\n    <div class=\"proc-step\"><span class=\"step-num\">01</span><h4>Technical Assessment</h4><p>Comprehensive audit of existing infrastructure, workload dependencies, and security boundaries.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">02</span><h4>Custom Engineering Blueprint</h4><p>Architectural specification outlining topology, components, and integration milestones.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">03</span><h4>Deployment & Cutover</h4><p>Phased, non-intrusive implementation executed during scheduled maintenance windows.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">04</span><h4>24/7 Managed Governance</h4><p>Continuous monitoring, automated security patching, and quarterly health reviews.</p></div>\n</div>",
+    "faq": "[{\"question\": \"What is the typical deployment timeline for this service?\", \"answer\": \"Timelines depend on workload scope, typically ranging from 3 to 14 business days with zero interruption to ongoing operations.\"}, {\"question\": \"How does TM Solutech support this service post-deployment?\", \"answer\": \"Every deployment is backed by our 24/7 Network Operations Center (NOC) in Ahmedabad with guaranteed SLA response times and assigned senior architects.\"}]",
+    "meta_title": "",
+    "meta_description": "",
+    "is_featured": true,
+    "is_active": true,
+    "display_order": 2,
+    "created_at": "2026-09-27T15:16:44.390Z",
+    "updated_at": "2026-09-27T17:05:59.941Z"
+  }
+},
+{
+  "model": "services.service",
+  "pk": 3,
+  "fields": {
+    "category": 1,
+    "title": "Business Continuity & Disaster Recovery",
+    "slug": "business-continuity-disaster-recovery",
+    "short_description": "Enterprise-grade Business Continuity & Disaster Recovery services designed for maximum operational efficiency, reliability, and security.",
+    "description": "<p class=\"lead-text\">TM Solutech provides specialized <strong>Business Continuity & Disaster Recovery</strong> services engineered to meet the rigorous demands of modern digital enterprises. Operating within our Cloud Solutions practice, our certified engineers deliver customized architectures that prioritize time efficiency, cost-effectiveness, and uncompromised quality.</p>\n<p>Originating from TM Systems in 1985, our engineering teams possess over three decades of hands-on expertise implementing enterprise-grade technologies across Gujarat and pan-India. Every Business Continuity & Disaster Recovery engagement includes end-to-end architecture planning, hardened security configurations, and 24/7 proactive monitoring.</p>",
+    "image": "services/microsoft-365.jpg",
+    "icon": "fas fa-sync-alt",
+    "features": "<div class=\"features-custom-grid\">\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-check-double\"></i></div><h4>Enterprise Architecture</h4><p>Bespoke technical blueprints designed for high-availability and compliance.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-shield-alt\"></i></div><h4>Hardened Security</h4><p>Zero Trust posture with multi-layer defense-in-depth security principles.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-headset\"></i></div><h4>24/7 NOC Monitoring</h4><p>Real-time telemetry and sub-15 minute response SLAs for mission-critical alerts.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-chart-line\"></i></div><h4>Proven ROI & Efficiency</h4><p>Time-tested operational frameworks that eliminate waste and optimize infrastructure TCO.</p></div>\n</div>",
+    "benefits": "<div class=\"benefits-custom-list\">\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Guaranteed 99.9% Uptime:</strong> High-availability architecture and automated disaster recovery failover.</div></div>\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Regulatory Compliance:</strong> Aligned with ISO 27001, SEBI, and RBI CSCRF standards.</div></div>\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Dedicated Technical Escalation:</strong> Senior systems architects assigned directly to your account.</div></div>\n</div>",
+    "process": "<div class=\"process-timeline\">\n    <div class=\"proc-step\"><span class=\"step-num\">01</span><h4>Technical Assessment</h4><p>Comprehensive audit of existing infrastructure, workload dependencies, and security boundaries.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">02</span><h4>Custom Engineering Blueprint</h4><p>Architectural specification outlining topology, components, and integration milestones.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">03</span><h4>Deployment & Cutover</h4><p>Phased, non-intrusive implementation executed during scheduled maintenance windows.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">04</span><h4>24/7 Managed Governance</h4><p>Continuous monitoring, automated security patching, and quarterly health reviews.</p></div>\n</div>",
+    "faq": "[{\"question\": \"What is the typical deployment timeline for this service?\", \"answer\": \"Timelines depend on workload scope, typically ranging from 3 to 14 business days with zero interruption to ongoing operations.\"}, {\"question\": \"How does TM Solutech support this service post-deployment?\", \"answer\": \"Every deployment is backed by our 24/7 Network Operations Center (NOC) in Ahmedabad with guaranteed SLA response times and assigned senior architects.\"}]",
+    "meta_title": "",
+    "meta_description": "",
+    "is_featured": false,
+    "is_active": true,
+    "display_order": 3,
+    "created_at": "2026-09-27T15:16:44.397Z",
+    "updated_at": "2026-09-27T17:05:59.956Z"
+  }
+},
+{
+  "model": "services.service",
+  "pk": 4,
+  "fields": {
+    "category": 1,
+    "title": "SharePoint Development & Intranet Solutions",
+    "slug": "sharepoint-development-intranet-solutions",
+    "short_description": "Enterprise-grade SharePoint Development & Intranet Solutions services designed for maximum operational efficiency, reliability, and security.",
+    "description": "<p class=\"lead-text\">TM Solutech provides specialized <strong>SharePoint Development & Intranet Solutions</strong> services engineered to meet the rigorous demands of modern digital enterprises. Operating within our Cloud Solutions practice, our certified engineers deliver customized architectures that prioritize time efficiency, cost-effectiveness, and uncompromised quality.</p>\n<p>Originating from TM Systems in 1985, our engineering teams possess over three decades of hands-on expertise implementing enterprise-grade technologies across Gujarat and pan-India. Every SharePoint Development & Intranet Solutions engagement includes end-to-end architecture planning, hardened security configurations, and 24/7 proactive monitoring.</p>",
+    "image": "services/tech-team.jpg",
+    "icon": "fas fa-sitemap",
+    "features": "<div class=\"features-custom-grid\">\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-check-double\"></i></div><h4>Enterprise Architecture</h4><p>Bespoke technical blueprints designed for high-availability and compliance.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-shield-alt\"></i></div><h4>Hardened Security</h4><p>Zero Trust posture with multi-layer defense-in-depth security principles.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-headset\"></i></div><h4>24/7 NOC Monitoring</h4><p>Real-time telemetry and sub-15 minute response SLAs for mission-critical alerts.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-chart-line\"></i></div><h4>Proven ROI & Efficiency</h4><p>Time-tested operational frameworks that eliminate waste and optimize infrastructure TCO.</p></div>\n</div>",
+    "benefits": "<div class=\"benefits-custom-list\">\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Guaranteed 99.9% Uptime:</strong> High-availability architecture and automated disaster recovery failover.</div></div>\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Regulatory Compliance:</strong> Aligned with ISO 27001, SEBI, and RBI CSCRF standards.</div></div>\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Dedicated Technical Escalation:</strong> Senior systems architects assigned directly to your account.</div></div>\n</div>",
+    "process": "<div class=\"process-timeline\">\n    <div class=\"proc-step\"><span class=\"step-num\">01</span><h4>Technical Assessment</h4><p>Comprehensive audit of existing infrastructure, workload dependencies, and security boundaries.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">02</span><h4>Custom Engineering Blueprint</h4><p>Architectural specification outlining topology, components, and integration milestones.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">03</span><h4>Deployment & Cutover</h4><p>Phased, non-intrusive implementation executed during scheduled maintenance windows.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">04</span><h4>24/7 Managed Governance</h4><p>Continuous monitoring, automated security patching, and quarterly health reviews.</p></div>\n</div>",
+    "faq": "[{\"question\": \"What is the typical deployment timeline for this service?\", \"answer\": \"Timelines depend on workload scope, typically ranging from 3 to 14 business days with zero interruption to ongoing operations.\"}, {\"question\": \"How does TM Solutech support this service post-deployment?\", \"answer\": \"Every deployment is backed by our 24/7 Network Operations Center (NOC) in Ahmedabad with guaranteed SLA response times and assigned senior architects.\"}]",
+    "meta_title": "",
+    "meta_description": "",
+    "is_featured": false,
+    "is_active": true,
+    "display_order": 4,
+    "created_at": "2026-09-27T15:16:44.401Z",
+    "updated_at": "2026-09-27T17:05:59.971Z"
+  }
+},
+{
+  "model": "services.service",
+  "pk": 5,
+  "fields": {
+    "category": 1,
+    "title": "Office 365 Solutions",
+    "slug": "office-365-solutions",
+    "short_description": "Enterprise-grade Office 365 Solutions services designed for maximum operational efficiency, reliability, and security.",
+    "description": "<p class=\"lead-text\">TM Solutech provides specialized <strong>Office 365 Solutions</strong> services engineered to meet the rigorous demands of modern digital enterprises. Operating within our Cloud Solutions practice, our certified engineers deliver customized architectures that prioritize time efficiency, cost-effectiveness, and uncompromised quality.</p>\n<p>Originating from TM Systems in 1985, our engineering teams possess over three decades of hands-on expertise implementing enterprise-grade technologies across Gujarat and pan-India. Every Office 365 Solutions engagement includes end-to-end architecture planning, hardened security configurations, and 24/7 proactive monitoring.</p>",
+    "image": "services/microsoft-365.jpg",
+    "icon": "fab fa-microsoft",
+    "features": "<div class=\"features-custom-grid\">\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-check-double\"></i></div><h4>Enterprise Architecture</h4><p>Bespoke technical blueprints designed for high-availability and compliance.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-shield-alt\"></i></div><h4>Hardened Security</h4><p>Zero Trust posture with multi-layer defense-in-depth security principles.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-headset\"></i></div><h4>24/7 NOC Monitoring</h4><p>Real-time telemetry and sub-15 minute response SLAs for mission-critical alerts.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-chart-line\"></i></div><h4>Proven ROI & Efficiency</h4><p>Time-tested operational frameworks that eliminate waste and optimize infrastructure TCO.</p></div>\n</div>",
+    "benefits": "<div class=\"benefits-custom-list\">\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Guaranteed 99.9% Uptime:</strong> High-availability architecture and automated disaster recovery failover.</div></div>\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Regulatory Compliance:</strong> Aligned with ISO 27001, SEBI, and RBI CSCRF standards.</div></div>\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Dedicated Technical Escalation:</strong> Senior systems architects assigned directly to your account.</div></div>\n</div>",
+    "process": "<div class=\"process-timeline\">\n    <div class=\"proc-step\"><span class=\"step-num\">01</span><h4>Technical Assessment</h4><p>Comprehensive audit of existing infrastructure, workload dependencies, and security boundaries.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">02</span><h4>Custom Engineering Blueprint</h4><p>Architectural specification outlining topology, components, and integration milestones.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">03</span><h4>Deployment & Cutover</h4><p>Phased, non-intrusive implementation executed during scheduled maintenance windows.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">04</span><h4>24/7 Managed Governance</h4><p>Continuous monitoring, automated security patching, and quarterly health reviews.</p></div>\n</div>",
+    "faq": "[{\"question\": \"What is the typical deployment timeline for this service?\", \"answer\": \"Timelines depend on workload scope, typically ranging from 3 to 14 business days with zero interruption to ongoing operations.\"}, {\"question\": \"How does TM Solutech support this service post-deployment?\", \"answer\": \"Every deployment is backed by our 24/7 Network Operations Center (NOC) in Ahmedabad with guaranteed SLA response times and assigned senior architects.\"}]",
+    "meta_title": "",
+    "meta_description": "",
+    "is_featured": false,
+    "is_active": true,
+    "display_order": 5,
+    "created_at": "2026-09-27T15:16:44.406Z",
+    "updated_at": "2026-09-27T17:05:59.990Z"
+  }
+},
+{
+  "model": "services.service",
+  "pk": 6,
+  "fields": {
+    "category": 2,
+    "title": "Firewalls",
+    "slug": "firewalls",
+    "short_description": "Next-Generation Firewall (NGFW) deployment, deep packet inspection, intrusion prevention (IPS), and perimeter security governance.",
+    "description": "<p class=\"lead-text\">Safeguard your corporate network perimeter against sophisticated modern cyber attacks with TM Solutech's Next-Generation Firewall (NGFW) solutions. Partnering with global security leaders including Fortinet, Sophos, SonicWall, and Cisco, we deploy hardened firewall architectures engineered for uncompromising throughput and threat interception.</p>\n<p>Our solutions transcend conventional port filtering by incorporating deep packet inspection (DPI), real-time SSL/TLS decryption, AI-powered intrusion prevention systems (IPS), and application-aware traffic control to eradicate malware, ransomware, and unauthorized intrusions at line-speed.</p>",
+    "image": "services/cyber-security-concept.jpg",
+    "icon": "fas fa-fire",
+    "features": "<div class=\"features-custom-grid\">\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-shield-virus\"></i></div><h4>AI Intrusion Prevention</h4><p>Real-time heuristic analysis blocking zero-day vulnerabilities, botnets, and exploits.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-search\"></i></div><h4>SSL/TLS Deep Inspection</h4><p>Decryption and scrutiny of encrypted traffic streams to expose hidden threat vectors.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-sitemap\"></i></div><h4>Application Control</h4><p>Granular bandwidth policies restricting risky shadow IT applications and peer-to-peer protocols.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-network-wired\"></i></div><h4>High-Availability Clustering</h4><p>Active-Passive or Active-Active dual-firewall pairing ensuring zero second failover.</p></div>\n</div>",
+    "benefits": "<div class=\"benefits-custom-list\">\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Perimeter Defense:</strong> Real-time neutralization of brute-force, DDoS, and malware attacks.</div></div>\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Complete Network Visibility:</strong> Granular dashboards identifying user activity, threats, and traffic trends.</div></div>\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Continuous Rule Auditing:</strong> Regular optimization of firewall policies to prevent rule bloat and latency.</div></div>\n</div>",
+    "process": "<div class=\"process-timeline\">\n    <div class=\"proc-step\"><span class=\"step-num\">01</span><h4>Traffic & Threat Profiling</h4><p>Conduct perimeter vulnerability scans and calculate throughput requirements.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">02</span><h4>Hardened Appliance Setup</h4><p>Deploy enterprise NGFW hardware or virtual appliances with customized policy matrices.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">03</span><h4>Security Baseline Testing</h4><p>Execute penetration simulations to confirm IPS, anti-bot, and web filtering enforcement.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">04</span><h4>24/7 SOC Telemetry</h4><p>Connect syslog streams to our central SOC for round-the-clock incident response.</p></div>\n</div>",
+    "faq": "[{\"question\": \"Which firewall hardware brands do you recommend and support?\", \"answer\": \"We maintain certified engineering partnerships with Fortinet (FortiGate), Sophos (XGS), Cisco, and SonicWall.\"}, {\"question\": \"Will enabling deep packet inspection slow down our internet speed?\", \"answer\": \"Our sizing methodology calculates real-world DPI throughput overheads and specifies purpose-built hardware acceleration processors (such as Fortinet SPU/NPU) to guarantee zero latency degradation.\"}]",
+    "meta_title": "",
+    "meta_description": "",
+    "is_featured": true,
+    "is_active": true,
+    "display_order": 1,
+    "created_at": "2026-09-27T15:16:44.411Z",
+    "updated_at": "2026-09-27T17:05:59.929Z"
+  }
+},
+{
+  "model": "services.service",
+  "pk": 7,
+  "fields": {
+    "category": 2,
+    "title": "IPsec & SSL VPN",
+    "slug": "ipsec-ssl-vpn",
+    "short_description": "Enterprise Site-to-Site IPsec tunnels, Zero-Trust SSL VPN, and secure remote worker connectivity with granular access control.",
+    "description": "<p class=\"lead-text\">Enable secure, high-speed connectivity across geographically distributed corporate branches and hybrid remote workforces with TM Solutech's IPsec & SSL VPN solutions. We establish encrypted communication channels that safeguard corporate data across untrusted public networks.</p>\n<p>Our solutions incorporate hardware-accelerated IPsec IKEv2 site-to-site tunnels connecting headquarters to branches, alongside clientless and client-based SSL VPN portals featuring Multi-Factor Authentication (MFA) and device posture compliance checks.</p>",
+    "image": "services/quality-control.jpg",
+    "icon": "fas fa-key",
+    "features": "<div class=\"features-custom-grid\">\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-lock\"></i></div><h4>AES-256 IKEv2 IPsec</h4><p>Ultra-secure site-to-site tunneling interconnecting branches, datacenters, and cloud VPCs.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-laptop-house\"></i></div><h4>Remote Worker SSL VPN</h4><p>User-friendly remote connectivity with automated split-tunneling and bandwidth controls.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-fingerprint\"></i></div><h4>Mandatory MFA Enforcement</h4><p>Integrated TOTP / Push notification two-factor authentication before network admission.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-stethoscope\"></i></div><h4>Device Posture Check</h4><p>Verify antivirus status, OS patch level, and disk encryption before permitting network entry.</p></div>\n</div>",
+    "benefits": "<div class=\"benefits-custom-list\">\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Protected Remote Access:</strong> Endpoints securely access ERP, CRM, and file shares without exposure to the internet.</div></div>\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Bandwidth Optimization:</strong> Split-tunneling routes video streaming directly to ISP while keeping enterprise data encrypted.</div></div>\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Audit Trail Compliance:</strong> Detailed connection logs and session recording for regulatory accountability.</div></div>\n</div>",
+    "process": "<div class=\"process-timeline\">\n    <div class=\"proc-step\"><span class=\"step-num\">01</span><h4>Network Topology Review</h4><p>Examine branch IP addressing schemes, subnet overlaps, and throughput requirements.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">02</span><h4>Gateway Configuration</h4><p>Set up cryptographic proposals, Phase 1/Phase 2 parameters, and authentication servers.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">03</span><h4>Client Rollout & MFA Link</h4><p>Automate VPN client deployment with single-click onboarding and authenticator binding.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">04</span><h4>Throughput & Failover Stress Test</h4><p>Simulate primary link cuts to test redundant secondary tunnel failovers.</p></div>\n</div>",
+    "faq": "[{\"question\": \"What is the difference between IPsec and SSL VPN?\", \"answer\": \"IPsec operates at the network layer and is ideal for persistent site-to-site connectivity between branch offices, while SSL VPN operates at the transport layer and provides flexible, individual secure access for remote laptop and mobile users.\"}, {\"question\": \"Can we restrict remote employees to only access specific internal servers?\", \"answer\": \"Yes, our Zero-Trust policies enforce least-privilege network access, ensuring remote workers can only communicate with authorized server IPs and specific ports.\"}]",
+    "meta_title": "",
+    "meta_description": "",
+    "is_featured": false,
+    "is_active": true,
+    "display_order": 2,
+    "created_at": "2026-09-27T15:16:44.415Z",
+    "updated_at": "2026-09-27T17:05:59.945Z"
+  }
+},
+{
+  "model": "services.service",
+  "pk": 8,
+  "fields": {
+    "category": 2,
+    "title": "Next-Generation Firewalls",
+    "slug": "next-generation-firewalls",
+    "short_description": "Enterprise-grade Next-Generation Firewalls services designed for maximum operational efficiency, reliability, and security.",
+    "description": "<p class=\"lead-text\">TM Solutech provides specialized <strong>Next-Generation Firewalls</strong> services engineered to meet the rigorous demands of modern digital enterprises. Operating within our Network & Security practice, our certified engineers deliver customized architectures that prioritize time efficiency, cost-effectiveness, and uncompromised quality.</p>\n<p>Originating from TM Systems in 1985, our engineering teams possess over three decades of hands-on expertise implementing enterprise-grade technologies across Gujarat and pan-India. Every Next-Generation Firewalls engagement includes end-to-end architecture planning, hardened security configurations, and 24/7 proactive monitoring.</p>",
+    "image": "services/cyber-security-concept.jpg",
+    "icon": "fas fa-shield-virus",
+    "features": "<div class=\"features-custom-grid\">\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-check-double\"></i></div><h4>Enterprise Architecture</h4><p>Bespoke technical blueprints designed for high-availability and compliance.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-shield-alt\"></i></div><h4>Hardened Security</h4><p>Zero Trust posture with multi-layer defense-in-depth security principles.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-headset\"></i></div><h4>24/7 NOC Monitoring</h4><p>Real-time telemetry and sub-15 minute response SLAs for mission-critical alerts.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-chart-line\"></i></div><h4>Proven ROI & Efficiency</h4><p>Time-tested operational frameworks that eliminate waste and optimize infrastructure TCO.</p></div>\n</div>",
+    "benefits": "<div class=\"benefits-custom-list\">\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Guaranteed 99.9% Uptime:</strong> High-availability architecture and automated disaster recovery failover.</div></div>\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Regulatory Compliance:</strong> Aligned with ISO 27001, SEBI, and RBI CSCRF standards.</div></div>\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Dedicated Technical Escalation:</strong> Senior systems architects assigned directly to your account.</div></div>\n</div>",
+    "process": "<div class=\"process-timeline\">\n    <div class=\"proc-step\"><span class=\"step-num\">01</span><h4>Technical Assessment</h4><p>Comprehensive audit of existing infrastructure, workload dependencies, and security boundaries.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">02</span><h4>Custom Engineering Blueprint</h4><p>Architectural specification outlining topology, components, and integration milestones.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">03</span><h4>Deployment & Cutover</h4><p>Phased, non-intrusive implementation executed during scheduled maintenance windows.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">04</span><h4>24/7 Managed Governance</h4><p>Continuous monitoring, automated security patching, and quarterly health reviews.</p></div>\n</div>",
+    "faq": "[{\"question\": \"What is the typical deployment timeline for this service?\", \"answer\": \"Timelines depend on workload scope, typically ranging from 3 to 14 business days with zero interruption to ongoing operations.\"}, {\"question\": \"How does TM Solutech support this service post-deployment?\", \"answer\": \"Every deployment is backed by our 24/7 Network Operations Center (NOC) in Ahmedabad with guaranteed SLA response times and assigned senior architects.\"}]",
+    "meta_title": "",
+    "meta_description": "",
+    "is_featured": false,
+    "is_active": true,
+    "display_order": 3,
+    "created_at": "2026-09-27T15:16:44.422Z",
+    "updated_at": "2026-09-27T17:05:59.961Z"
+  }
+},
+{
+  "model": "services.service",
+  "pk": 9,
+  "fields": {
+    "category": 2,
+    "title": "Quality of Service",
+    "slug": "quality-of-service",
+    "short_description": "Enterprise-grade Quality of Service services designed for maximum operational efficiency, reliability, and security.",
+    "description": "<p class=\"lead-text\">TM Solutech provides specialized <strong>Quality of Service</strong> services engineered to meet the rigorous demands of modern digital enterprises. Operating within our Network & Security practice, our certified engineers deliver customized architectures that prioritize time efficiency, cost-effectiveness, and uncompromised quality.</p>\n<p>Originating from TM Systems in 1985, our engineering teams possess over three decades of hands-on expertise implementing enterprise-grade technologies across Gujarat and pan-India. Every Quality of Service engagement includes end-to-end architecture planning, hardened security configurations, and 24/7 proactive monitoring.</p>",
+    "image": "services/quality-control.jpg",
+    "icon": "fas fa-tachometer-alt",
+    "features": "<div class=\"features-custom-grid\">\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-check-double\"></i></div><h4>Enterprise Architecture</h4><p>Bespoke technical blueprints designed for high-availability and compliance.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-shield-alt\"></i></div><h4>Hardened Security</h4><p>Zero Trust posture with multi-layer defense-in-depth security principles.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-headset\"></i></div><h4>24/7 NOC Monitoring</h4><p>Real-time telemetry and sub-15 minute response SLAs for mission-critical alerts.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-chart-line\"></i></div><h4>Proven ROI & Efficiency</h4><p>Time-tested operational frameworks that eliminate waste and optimize infrastructure TCO.</p></div>\n</div>",
+    "benefits": "<div class=\"benefits-custom-list\">\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Guaranteed 99.9% Uptime:</strong> High-availability architecture and automated disaster recovery failover.</div></div>\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Regulatory Compliance:</strong> Aligned with ISO 27001, SEBI, and RBI CSCRF standards.</div></div>\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Dedicated Technical Escalation:</strong> Senior systems architects assigned directly to your account.</div></div>\n</div>",
+    "process": "<div class=\"process-timeline\">\n    <div class=\"proc-step\"><span class=\"step-num\">01</span><h4>Technical Assessment</h4><p>Comprehensive audit of existing infrastructure, workload dependencies, and security boundaries.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">02</span><h4>Custom Engineering Blueprint</h4><p>Architectural specification outlining topology, components, and integration milestones.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">03</span><h4>Deployment & Cutover</h4><p>Phased, non-intrusive implementation executed during scheduled maintenance windows.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">04</span><h4>24/7 Managed Governance</h4><p>Continuous monitoring, automated security patching, and quarterly health reviews.</p></div>\n</div>",
+    "faq": "[{\"question\": \"What is the typical deployment timeline for this service?\", \"answer\": \"Timelines depend on workload scope, typically ranging from 3 to 14 business days with zero interruption to ongoing operations.\"}, {\"question\": \"How does TM Solutech support this service post-deployment?\", \"answer\": \"Every deployment is backed by our 24/7 Network Operations Center (NOC) in Ahmedabad with guaranteed SLA response times and assigned senior architects.\"}]",
+    "meta_title": "",
+    "meta_description": "",
+    "is_featured": false,
+    "is_active": true,
+    "display_order": 4,
+    "created_at": "2026-09-27T15:16:44.429Z",
+    "updated_at": "2026-09-27T17:05:59.978Z"
+  }
+},
+{
+  "model": "services.service",
+  "pk": 10,
+  "fields": {
+    "category": 2,
+    "title": "Routing & Switching",
+    "slug": "routing-switching",
+    "short_description": "Enterprise-grade Routing & Switching services designed for maximum operational efficiency, reliability, and security.",
+    "description": "<p class=\"lead-text\">TM Solutech provides specialized <strong>Routing & Switching</strong> services engineered to meet the rigorous demands of modern digital enterprises. Operating within our Network & Security practice, our certified engineers deliver customized architectures that prioritize time efficiency, cost-effectiveness, and uncompromised quality.</p>\n<p>Originating from TM Systems in 1985, our engineering teams possess over three decades of hands-on expertise implementing enterprise-grade technologies across Gujarat and pan-India. Every Routing & Switching engagement includes end-to-end architecture planning, hardened security configurations, and 24/7 proactive monitoring.</p>",
+    "image": "services/cyber-security-concept.jpg",
+    "icon": "fas fa-network-wired",
+    "features": "<div class=\"features-custom-grid\">\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-check-double\"></i></div><h4>Enterprise Architecture</h4><p>Bespoke technical blueprints designed for high-availability and compliance.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-shield-alt\"></i></div><h4>Hardened Security</h4><p>Zero Trust posture with multi-layer defense-in-depth security principles.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-headset\"></i></div><h4>24/7 NOC Monitoring</h4><p>Real-time telemetry and sub-15 minute response SLAs for mission-critical alerts.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-chart-line\"></i></div><h4>Proven ROI & Efficiency</h4><p>Time-tested operational frameworks that eliminate waste and optimize infrastructure TCO.</p></div>\n</div>",
+    "benefits": "<div class=\"benefits-custom-list\">\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Guaranteed 99.9% Uptime:</strong> High-availability architecture and automated disaster recovery failover.</div></div>\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Regulatory Compliance:</strong> Aligned with ISO 27001, SEBI, and RBI CSCRF standards.</div></div>\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Dedicated Technical Escalation:</strong> Senior systems architects assigned directly to your account.</div></div>\n</div>",
+    "process": "<div class=\"process-timeline\">\n    <div class=\"proc-step\"><span class=\"step-num\">01</span><h4>Technical Assessment</h4><p>Comprehensive audit of existing infrastructure, workload dependencies, and security boundaries.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">02</span><h4>Custom Engineering Blueprint</h4><p>Architectural specification outlining topology, components, and integration milestones.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">03</span><h4>Deployment & Cutover</h4><p>Phased, non-intrusive implementation executed during scheduled maintenance windows.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">04</span><h4>24/7 Managed Governance</h4><p>Continuous monitoring, automated security patching, and quarterly health reviews.</p></div>\n</div>",
+    "faq": "[{\"question\": \"What is the typical deployment timeline for this service?\", \"answer\": \"Timelines depend on workload scope, typically ranging from 3 to 14 business days with zero interruption to ongoing operations.\"}, {\"question\": \"How does TM Solutech support this service post-deployment?\", \"answer\": \"Every deployment is backed by our 24/7 Network Operations Center (NOC) in Ahmedabad with guaranteed SLA response times and assigned senior architects.\"}]",
+    "meta_title": "",
+    "meta_description": "",
+    "is_featured": false,
+    "is_active": true,
+    "display_order": 5,
+    "created_at": "2026-09-27T15:16:44.436Z",
+    "updated_at": "2026-09-27T17:05:59.996Z"
+  }
+},
+{
+  "model": "services.service",
+  "pk": 11,
+  "fields": {
+    "category": 2,
+    "title": "WAN Optimization",
+    "slug": "wan-optimization",
+    "short_description": "Enterprise-grade WAN Optimization services designed for maximum operational efficiency, reliability, and security.",
+    "description": "<p class=\"lead-text\">TM Solutech provides specialized <strong>WAN Optimization</strong> services engineered to meet the rigorous demands of modern digital enterprises. Operating within our Network & Security practice, our certified engineers deliver customized architectures that prioritize time efficiency, cost-effectiveness, and uncompromised quality.</p>\n<p>Originating from TM Systems in 1985, our engineering teams possess over three decades of hands-on expertise implementing enterprise-grade technologies across Gujarat and pan-India. Every WAN Optimization engagement includes end-to-end architecture planning, hardened security configurations, and 24/7 proactive monitoring.</p>",
+    "image": "services/tech-team.jpg",
+    "icon": "fas fa-bolt",
+    "features": "<div class=\"features-custom-grid\">\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-check-double\"></i></div><h4>Enterprise Architecture</h4><p>Bespoke technical blueprints designed for high-availability and compliance.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-shield-alt\"></i></div><h4>Hardened Security</h4><p>Zero Trust posture with multi-layer defense-in-depth security principles.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-headset\"></i></div><h4>24/7 NOC Monitoring</h4><p>Real-time telemetry and sub-15 minute response SLAs for mission-critical alerts.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-chart-line\"></i></div><h4>Proven ROI & Efficiency</h4><p>Time-tested operational frameworks that eliminate waste and optimize infrastructure TCO.</p></div>\n</div>",
+    "benefits": "<div class=\"benefits-custom-list\">\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Guaranteed 99.9% Uptime:</strong> High-availability architecture and automated disaster recovery failover.</div></div>\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Regulatory Compliance:</strong> Aligned with ISO 27001, SEBI, and RBI CSCRF standards.</div></div>\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Dedicated Technical Escalation:</strong> Senior systems architects assigned directly to your account.</div></div>\n</div>",
+    "process": "<div class=\"process-timeline\">\n    <div class=\"proc-step\"><span class=\"step-num\">01</span><h4>Technical Assessment</h4><p>Comprehensive audit of existing infrastructure, workload dependencies, and security boundaries.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">02</span><h4>Custom Engineering Blueprint</h4><p>Architectural specification outlining topology, components, and integration milestones.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">03</span><h4>Deployment & Cutover</h4><p>Phased, non-intrusive implementation executed during scheduled maintenance windows.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">04</span><h4>24/7 Managed Governance</h4><p>Continuous monitoring, automated security patching, and quarterly health reviews.</p></div>\n</div>",
+    "faq": "[{\"question\": \"What is the typical deployment timeline for this service?\", \"answer\": \"Timelines depend on workload scope, typically ranging from 3 to 14 business days with zero interruption to ongoing operations.\"}, {\"question\": \"How does TM Solutech support this service post-deployment?\", \"answer\": \"Every deployment is backed by our 24/7 Network Operations Center (NOC) in Ahmedabad with guaranteed SLA response times and assigned senior architects.\"}]",
+    "meta_title": "",
+    "meta_description": "",
+    "is_featured": false,
+    "is_active": true,
+    "display_order": 6,
+    "created_at": "2026-09-27T15:16:44.443Z",
+    "updated_at": "2026-09-27T17:06:00.010Z"
+  }
+},
+{
+  "model": "services.service",
+  "pk": 12,
+  "fields": {
+    "category": 2,
+    "title": "Wireless Networking",
+    "slug": "wireless-networking",
+    "short_description": "High-density enterprise Wi-Fi 6/6E architecture, seamless roaming, guest hotspot portals, and centralized cloud controller management.",
+    "description": "<p class=\"lead-text\">Modern enterprises demand pervasive, ultra-fast, and secure wireless connectivity capable of handling dense device environments without dead zones or dropped packets. TM Solutech delivers enterprise Wi-Fi solutions spanning predictive radio frequency (RF) heat-mapping, Wi-Fi 6/6E access point deployments, and centralized cloud orchestration.</p>\n<p>From corporate head offices and manufacturing floors to university campuses and logistics warehouses, our wireless designs guarantee seamless 802.11r/k/v fast roaming, strict network micro-segmentation, and captive portal guest isolation.</p>",
+    "image": "services/about_composite.png",
+    "icon": "fas fa-wifi",
+    "features": "<div class=\"features-custom-grid\">\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-wifi\"></i></div><h4>Predictive RF Heat-Mapping</h4><p>CAD-based predictive signal modeling accounting for wall attenuation and interference.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-broadcast-tower\"></i></div><h4>Wi-Fi 6 & 6E High-Density</h4><p>Multi-gigabit wireless capacity with OFDMA and MU-MIMO for hundreds of concurrent clients.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-key\"></i></div><h4>WPA3 Enterprise Security</h4><p>802.1X RADIUS authentication verifying user credentials against corporate Active Directory.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-user-friends\"></i></div><h4>Secure Guest Portals</h4><p>SMS OTP and social login guest workflows strictly separated from internal production VLANs.</p></div>\n</div>",
+    "benefits": "<div class=\"benefits-custom-list\">\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Zero Signal Drops:</strong> Intelligent fast roaming allowing employees to walk campuses without VoIP calls disconnecting.</div></div>\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>IoT & BYOD Isolation:</strong> Dedicated SSIDs with isolation rules preventing compromised mobile phones from reaching core servers.</div></div>\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Cloud Dashboard Management:</strong> Single-pane monitoring of all APs across nationwide branch offices.</div></div>\n</div>",
+    "process": "<div class=\"process-timeline\">\n    <div class=\"proc-step\"><span class=\"step-num\">01</span><h4>Physical RF Site Survey</h4><p>Physical spectrum analysis and structural attenuation assessments across the facility.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">02</span><h4>AP Layout & Cabling</h4><p>Strategic AP placement with certified Cat6A structured cabling and PoE+ switching.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">03</span><h4>Controller & VLAN Provisioning</h4><p>Configure channel widths, power levels, 802.1X security policies, and captive portals.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">04</span><h4>Post-Deployment Validation</h4><p>Active walkthrough heat-map verification confirming coverage and SNR thresholds.</p></div>\n</div>",
+    "faq": "[{\"question\": \"How do you prevent interference in industrial or warehouse environments?\", \"answer\": \"We utilize directional antennas and automated radio resource management (RRM) to dynamically avoid metallic interference and machinery harmonics.\"}, {\"question\": \"Can you provide Wi-Fi for multi-building university or hospital campuses?\", \"answer\": \"Yes, we deploy centralized cloud-managed mesh and fiber-interconnected wireless fabrics that unify authentication across multi-building campuses.\"}]",
+    "meta_title": "",
+    "meta_description": "",
+    "is_featured": false,
+    "is_active": true,
+    "display_order": 7,
+    "created_at": "2026-09-27T15:16:44.449Z",
+    "updated_at": "2026-09-27T17:06:00.019Z"
+  }
+},
+{
+  "model": "services.service",
+  "pk": 13,
+  "fields": {
+    "category": 3,
+    "title": "IT Asset Management & Lifecycle Support",
+    "slug": "it-asset-management-lifecycle-support",
+    "short_description": "Enterprise-grade IT Asset Management & Lifecycle Support services designed for maximum operational efficiency, reliability, and security.",
+    "description": "<p class=\"lead-text\">TM Solutech provides specialized <strong>IT Asset Management & Lifecycle Support</strong> services engineered to meet the rigorous demands of modern digital enterprises. Operating within our Remote Infrastructure Management practice, our certified engineers deliver customized architectures that prioritize time efficiency, cost-effectiveness, and uncompromised quality.</p>\n<p>Originating from TM Systems in 1985, our engineering teams possess over three decades of hands-on expertise implementing enterprise-grade technologies across Gujarat and pan-India. Every IT Asset Management & Lifecycle Support engagement includes end-to-end architecture planning, hardened security configurations, and 24/7 proactive monitoring.</p>",
+    "image": "services/connected-city.jpg",
+    "icon": "fas fa-boxes",
+    "features": "<div class=\"features-custom-grid\">\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-check-double\"></i></div><h4>Enterprise Architecture</h4><p>Bespoke technical blueprints designed for high-availability and compliance.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-shield-alt\"></i></div><h4>Hardened Security</h4><p>Zero Trust posture with multi-layer defense-in-depth security principles.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-headset\"></i></div><h4>24/7 NOC Monitoring</h4><p>Real-time telemetry and sub-15 minute response SLAs for mission-critical alerts.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-chart-line\"></i></div><h4>Proven ROI & Efficiency</h4><p>Time-tested operational frameworks that eliminate waste and optimize infrastructure TCO.</p></div>\n</div>",
+    "benefits": "<div class=\"benefits-custom-list\">\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Guaranteed 99.9% Uptime:</strong> High-availability architecture and automated disaster recovery failover.</div></div>\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Regulatory Compliance:</strong> Aligned with ISO 27001, SEBI, and RBI CSCRF standards.</div></div>\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Dedicated Technical Escalation:</strong> Senior systems architects assigned directly to your account.</div></div>\n</div>",
+    "process": "<div class=\"process-timeline\">\n    <div class=\"proc-step\"><span class=\"step-num\">01</span><h4>Technical Assessment</h4><p>Comprehensive audit of existing infrastructure, workload dependencies, and security boundaries.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">02</span><h4>Custom Engineering Blueprint</h4><p>Architectural specification outlining topology, components, and integration milestones.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">03</span><h4>Deployment & Cutover</h4><p>Phased, non-intrusive implementation executed during scheduled maintenance windows.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">04</span><h4>24/7 Managed Governance</h4><p>Continuous monitoring, automated security patching, and quarterly health reviews.</p></div>\n</div>",
+    "faq": "[{\"question\": \"What is the typical deployment timeline for this service?\", \"answer\": \"Timelines depend on workload scope, typically ranging from 3 to 14 business days with zero interruption to ongoing operations.\"}, {\"question\": \"How does TM Solutech support this service post-deployment?\", \"answer\": \"Every deployment is backed by our 24/7 Network Operations Center (NOC) in Ahmedabad with guaranteed SLA response times and assigned senior architects.\"}]",
+    "meta_title": "",
+    "meta_description": "",
+    "is_featured": false,
+    "is_active": true,
+    "display_order": 1,
+    "created_at": "2026-09-27T15:16:44.457Z",
+    "updated_at": "2026-09-27T17:05:59.934Z"
+  }
+},
+{
+  "model": "services.service",
+  "pk": 14,
+  "fields": {
+    "category": 3,
+    "title": "IT Strategy & Consulting",
+    "slug": "it-strategy-consulting",
+    "short_description": "Enterprise-grade IT Strategy & Consulting services designed for maximum operational efficiency, reliability, and security.",
+    "description": "<p class=\"lead-text\">TM Solutech provides specialized <strong>IT Strategy & Consulting</strong> services engineered to meet the rigorous demands of modern digital enterprises. Operating within our Remote Infrastructure Management practice, our certified engineers deliver customized architectures that prioritize time efficiency, cost-effectiveness, and uncompromised quality.</p>\n<p>Originating from TM Systems in 1985, our engineering teams possess over three decades of hands-on expertise implementing enterprise-grade technologies across Gujarat and pan-India. Every IT Strategy & Consulting engagement includes end-to-end architecture planning, hardened security configurations, and 24/7 proactive monitoring.</p>",
+    "image": "services/about_composite.png",
+    "icon": "fas fa-chess",
+    "features": "<div class=\"features-custom-grid\">\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-check-double\"></i></div><h4>Enterprise Architecture</h4><p>Bespoke technical blueprints designed for high-availability and compliance.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-shield-alt\"></i></div><h4>Hardened Security</h4><p>Zero Trust posture with multi-layer defense-in-depth security principles.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-headset\"></i></div><h4>24/7 NOC Monitoring</h4><p>Real-time telemetry and sub-15 minute response SLAs for mission-critical alerts.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-chart-line\"></i></div><h4>Proven ROI & Efficiency</h4><p>Time-tested operational frameworks that eliminate waste and optimize infrastructure TCO.</p></div>\n</div>",
+    "benefits": "<div class=\"benefits-custom-list\">\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Guaranteed 99.9% Uptime:</strong> High-availability architecture and automated disaster recovery failover.</div></div>\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Regulatory Compliance:</strong> Aligned with ISO 27001, SEBI, and RBI CSCRF standards.</div></div>\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Dedicated Technical Escalation:</strong> Senior systems architects assigned directly to your account.</div></div>\n</div>",
+    "process": "<div class=\"process-timeline\">\n    <div class=\"proc-step\"><span class=\"step-num\">01</span><h4>Technical Assessment</h4><p>Comprehensive audit of existing infrastructure, workload dependencies, and security boundaries.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">02</span><h4>Custom Engineering Blueprint</h4><p>Architectural specification outlining topology, components, and integration milestones.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">03</span><h4>Deployment & Cutover</h4><p>Phased, non-intrusive implementation executed during scheduled maintenance windows.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">04</span><h4>24/7 Managed Governance</h4><p>Continuous monitoring, automated security patching, and quarterly health reviews.</p></div>\n</div>",
+    "faq": "[{\"question\": \"What is the typical deployment timeline for this service?\", \"answer\": \"Timelines depend on workload scope, typically ranging from 3 to 14 business days with zero interruption to ongoing operations.\"}, {\"question\": \"How does TM Solutech support this service post-deployment?\", \"answer\": \"Every deployment is backed by our 24/7 Network Operations Center (NOC) in Ahmedabad with guaranteed SLA response times and assigned senior architects.\"}]",
+    "meta_title": "",
+    "meta_description": "",
+    "is_featured": true,
+    "is_active": true,
+    "display_order": 2,
+    "created_at": "2026-09-27T15:16:44.463Z",
+    "updated_at": "2026-09-27T17:05:59.950Z"
+  }
+},
+{
+  "model": "services.service",
+  "pk": 15,
+  "fields": {
+    "category": 3,
+    "title": "Performance Optimization & Capacity Planning",
+    "slug": "performance-optimization-capacity-planning",
+    "short_description": "Enterprise-grade Performance Optimization & Capacity Planning services designed for maximum operational efficiency, reliability, and security.",
+    "description": "<p class=\"lead-text\">TM Solutech provides specialized <strong>Performance Optimization & Capacity Planning</strong> services engineered to meet the rigorous demands of modern digital enterprises. Operating within our Remote Infrastructure Management practice, our certified engineers deliver customized architectures that prioritize time efficiency, cost-effectiveness, and uncompromised quality.</p>\n<p>Originating from TM Systems in 1985, our engineering teams possess over three decades of hands-on expertise implementing enterprise-grade technologies across Gujarat and pan-India. Every Performance Optimization & Capacity Planning engagement includes end-to-end architecture planning, hardened security configurations, and 24/7 proactive monitoring.</p>",
+    "image": "services/connected-city.jpg",
+    "icon": "fas fa-chart-bar",
+    "features": "<div class=\"features-custom-grid\">\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-check-double\"></i></div><h4>Enterprise Architecture</h4><p>Bespoke technical blueprints designed for high-availability and compliance.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-shield-alt\"></i></div><h4>Hardened Security</h4><p>Zero Trust posture with multi-layer defense-in-depth security principles.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-headset\"></i></div><h4>24/7 NOC Monitoring</h4><p>Real-time telemetry and sub-15 minute response SLAs for mission-critical alerts.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-chart-line\"></i></div><h4>Proven ROI & Efficiency</h4><p>Time-tested operational frameworks that eliminate waste and optimize infrastructure TCO.</p></div>\n</div>",
+    "benefits": "<div class=\"benefits-custom-list\">\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Guaranteed 99.9% Uptime:</strong> High-availability architecture and automated disaster recovery failover.</div></div>\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Regulatory Compliance:</strong> Aligned with ISO 27001, SEBI, and RBI CSCRF standards.</div></div>\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Dedicated Technical Escalation:</strong> Senior systems architects assigned directly to your account.</div></div>\n</div>",
+    "process": "<div class=\"process-timeline\">\n    <div class=\"proc-step\"><span class=\"step-num\">01</span><h4>Technical Assessment</h4><p>Comprehensive audit of existing infrastructure, workload dependencies, and security boundaries.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">02</span><h4>Custom Engineering Blueprint</h4><p>Architectural specification outlining topology, components, and integration milestones.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">03</span><h4>Deployment & Cutover</h4><p>Phased, non-intrusive implementation executed during scheduled maintenance windows.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">04</span><h4>24/7 Managed Governance</h4><p>Continuous monitoring, automated security patching, and quarterly health reviews.</p></div>\n</div>",
+    "faq": "[{\"question\": \"What is the typical deployment timeline for this service?\", \"answer\": \"Timelines depend on workload scope, typically ranging from 3 to 14 business days with zero interruption to ongoing operations.\"}, {\"question\": \"How does TM Solutech support this service post-deployment?\", \"answer\": \"Every deployment is backed by our 24/7 Network Operations Center (NOC) in Ahmedabad with guaranteed SLA response times and assigned senior architects.\"}]",
+    "meta_title": "",
+    "meta_description": "",
+    "is_featured": false,
+    "is_active": true,
+    "display_order": 3,
+    "created_at": "2026-09-27T15:16:44.471Z",
+    "updated_at": "2026-09-27T17:05:59.967Z"
+  }
+},
+{
+  "model": "services.service",
+  "pk": 16,
+  "fields": {
+    "category": 3,
+    "title": "Proactive Monitoring & Incident Management",
+    "slug": "proactive-monitoring-incident-management",
+    "short_description": "Enterprise-grade Proactive Monitoring & Incident Management services designed for maximum operational efficiency, reliability, and security.",
+    "description": "<p class=\"lead-text\">TM Solutech provides specialized <strong>Proactive Monitoring & Incident Management</strong> services engineered to meet the rigorous demands of modern digital enterprises. Operating within our Remote Infrastructure Management practice, our certified engineers deliver customized architectures that prioritize time efficiency, cost-effectiveness, and uncompromised quality.</p>\n<p>Originating from TM Systems in 1985, our engineering teams possess over three decades of hands-on expertise implementing enterprise-grade technologies across Gujarat and pan-India. Every Proactive Monitoring & Incident Management engagement includes end-to-end architecture planning, hardened security configurations, and 24/7 proactive monitoring.</p>",
+    "image": "services/about_composite.png",
+    "icon": "fas fa-desktop",
+    "features": "<div class=\"features-custom-grid\">\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-check-double\"></i></div><h4>Enterprise Architecture</h4><p>Bespoke technical blueprints designed for high-availability and compliance.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-shield-alt\"></i></div><h4>Hardened Security</h4><p>Zero Trust posture with multi-layer defense-in-depth security principles.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-headset\"></i></div><h4>24/7 NOC Monitoring</h4><p>Real-time telemetry and sub-15 minute response SLAs for mission-critical alerts.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-chart-line\"></i></div><h4>Proven ROI & Efficiency</h4><p>Time-tested operational frameworks that eliminate waste and optimize infrastructure TCO.</p></div>\n</div>",
+    "benefits": "<div class=\"benefits-custom-list\">\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Guaranteed 99.9% Uptime:</strong> High-availability architecture and automated disaster recovery failover.</div></div>\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Regulatory Compliance:</strong> Aligned with ISO 27001, SEBI, and RBI CSCRF standards.</div></div>\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Dedicated Technical Escalation:</strong> Senior systems architects assigned directly to your account.</div></div>\n</div>",
+    "process": "<div class=\"process-timeline\">\n    <div class=\"proc-step\"><span class=\"step-num\">01</span><h4>Technical Assessment</h4><p>Comprehensive audit of existing infrastructure, workload dependencies, and security boundaries.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">02</span><h4>Custom Engineering Blueprint</h4><p>Architectural specification outlining topology, components, and integration milestones.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">03</span><h4>Deployment & Cutover</h4><p>Phased, non-intrusive implementation executed during scheduled maintenance windows.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">04</span><h4>24/7 Managed Governance</h4><p>Continuous monitoring, automated security patching, and quarterly health reviews.</p></div>\n</div>",
+    "faq": "[{\"question\": \"What is the typical deployment timeline for this service?\", \"answer\": \"Timelines depend on workload scope, typically ranging from 3 to 14 business days with zero interruption to ongoing operations.\"}, {\"question\": \"How does TM Solutech support this service post-deployment?\", \"answer\": \"Every deployment is backed by our 24/7 Network Operations Center (NOC) in Ahmedabad with guaranteed SLA response times and assigned senior architects.\"}]",
+    "meta_title": "",
+    "meta_description": "",
+    "is_featured": true,
+    "is_active": true,
+    "display_order": 4,
+    "created_at": "2026-09-27T15:16:44.480Z",
+    "updated_at": "2026-09-27T17:05:59.983Z"
+  }
+},
+{
+  "model": "services.service",
+  "pk": 17,
+  "fields": {
+    "category": 3,
+    "title": "Remote System Administration",
+    "slug": "remote-system-administration",
+    "short_description": "Enterprise-grade Remote System Administration services designed for maximum operational efficiency, reliability, and security.",
+    "description": "<p class=\"lead-text\">TM Solutech provides specialized <strong>Remote System Administration</strong> services engineered to meet the rigorous demands of modern digital enterprises. Operating within our Remote Infrastructure Management practice, our certified engineers deliver customized architectures that prioritize time efficiency, cost-effectiveness, and uncompromised quality.</p>\n<p>Originating from TM Systems in 1985, our engineering teams possess over three decades of hands-on expertise implementing enterprise-grade technologies across Gujarat and pan-India. Every Remote System Administration engagement includes end-to-end architecture planning, hardened security configurations, and 24/7 proactive monitoring.</p>",
+    "image": "services/connected-city.jpg",
+    "icon": "fas fa-terminal",
+    "features": "<div class=\"features-custom-grid\">\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-check-double\"></i></div><h4>Enterprise Architecture</h4><p>Bespoke technical blueprints designed for high-availability and compliance.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-shield-alt\"></i></div><h4>Hardened Security</h4><p>Zero Trust posture with multi-layer defense-in-depth security principles.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-headset\"></i></div><h4>24/7 NOC Monitoring</h4><p>Real-time telemetry and sub-15 minute response SLAs for mission-critical alerts.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-chart-line\"></i></div><h4>Proven ROI & Efficiency</h4><p>Time-tested operational frameworks that eliminate waste and optimize infrastructure TCO.</p></div>\n</div>",
+    "benefits": "<div class=\"benefits-custom-list\">\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Guaranteed 99.9% Uptime:</strong> High-availability architecture and automated disaster recovery failover.</div></div>\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Regulatory Compliance:</strong> Aligned with ISO 27001, SEBI, and RBI CSCRF standards.</div></div>\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Dedicated Technical Escalation:</strong> Senior systems architects assigned directly to your account.</div></div>\n</div>",
+    "process": "<div class=\"process-timeline\">\n    <div class=\"proc-step\"><span class=\"step-num\">01</span><h4>Technical Assessment</h4><p>Comprehensive audit of existing infrastructure, workload dependencies, and security boundaries.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">02</span><h4>Custom Engineering Blueprint</h4><p>Architectural specification outlining topology, components, and integration milestones.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">03</span><h4>Deployment & Cutover</h4><p>Phased, non-intrusive implementation executed during scheduled maintenance windows.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">04</span><h4>24/7 Managed Governance</h4><p>Continuous monitoring, automated security patching, and quarterly health reviews.</p></div>\n</div>",
+    "faq": "[{\"question\": \"What is the typical deployment timeline for this service?\", \"answer\": \"Timelines depend on workload scope, typically ranging from 3 to 14 business days with zero interruption to ongoing operations.\"}, {\"question\": \"How does TM Solutech support this service post-deployment?\", \"answer\": \"Every deployment is backed by our 24/7 Network Operations Center (NOC) in Ahmedabad with guaranteed SLA response times and assigned senior architects.\"}]",
+    "meta_title": "",
+    "meta_description": "",
+    "is_featured": false,
+    "is_active": true,
+    "display_order": 5,
+    "created_at": "2026-09-27T15:16:44.485Z",
+    "updated_at": "2026-09-27T17:06:00.003Z"
+  }
+},
+{
+  "model": "services.service",
+  "pk": 18,
+  "fields": {
+    "category": 3,
+    "title": "Security Monitoring & Compliance",
+    "slug": "security-monitoring-compliance",
+    "short_description": "Enterprise-grade Security Monitoring & Compliance services designed for maximum operational efficiency, reliability, and security.",
+    "description": "<p class=\"lead-text\">TM Solutech provides specialized <strong>Security Monitoring & Compliance</strong> services engineered to meet the rigorous demands of modern digital enterprises. Operating within our Remote Infrastructure Management practice, our certified engineers deliver customized architectures that prioritize time efficiency, cost-effectiveness, and uncompromised quality.</p>\n<p>Originating from TM Systems in 1985, our engineering teams possess over three decades of hands-on expertise implementing enterprise-grade technologies across Gujarat and pan-India. Every Security Monitoring & Compliance engagement includes end-to-end architecture planning, hardened security configurations, and 24/7 proactive monitoring.</p>",
+    "image": "services/quality-control.jpg",
+    "icon": "fas fa-user-shield",
+    "features": "<div class=\"features-custom-grid\">\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-check-double\"></i></div><h4>Enterprise Architecture</h4><p>Bespoke technical blueprints designed for high-availability and compliance.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-shield-alt\"></i></div><h4>Hardened Security</h4><p>Zero Trust posture with multi-layer defense-in-depth security principles.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-headset\"></i></div><h4>24/7 NOC Monitoring</h4><p>Real-time telemetry and sub-15 minute response SLAs for mission-critical alerts.</p></div>\n    <div class=\"feat-box\"><div class=\"feat-icon\"><i class=\"fas fa-chart-line\"></i></div><h4>Proven ROI & Efficiency</h4><p>Time-tested operational frameworks that eliminate waste and optimize infrastructure TCO.</p></div>\n</div>",
+    "benefits": "<div class=\"benefits-custom-list\">\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Guaranteed 99.9% Uptime:</strong> High-availability architecture and automated disaster recovery failover.</div></div>\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Regulatory Compliance:</strong> Aligned with ISO 27001, SEBI, and RBI CSCRF standards.</div></div>\n    <div class=\"benefit-item\"><i class=\"fas fa-check-circle\"></i> <div><strong>Dedicated Technical Escalation:</strong> Senior systems architects assigned directly to your account.</div></div>\n</div>",
+    "process": "<div class=\"process-timeline\">\n    <div class=\"proc-step\"><span class=\"step-num\">01</span><h4>Technical Assessment</h4><p>Comprehensive audit of existing infrastructure, workload dependencies, and security boundaries.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">02</span><h4>Custom Engineering Blueprint</h4><p>Architectural specification outlining topology, components, and integration milestones.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">03</span><h4>Deployment & Cutover</h4><p>Phased, non-intrusive implementation executed during scheduled maintenance windows.</p></div>\n    <div class=\"proc-step\"><span class=\"step-num\">04</span><h4>24/7 Managed Governance</h4><p>Continuous monitoring, automated security patching, and quarterly health reviews.</p></div>\n</div>",
+    "faq": "[{\"question\": \"What is the typical deployment timeline for this service?\", \"answer\": \"Timelines depend on workload scope, typically ranging from 3 to 14 business days with zero interruption to ongoing operations.\"}, {\"question\": \"How does TM Solutech support this service post-deployment?\", \"answer\": \"Every deployment is backed by our 24/7 Network Operations Center (NOC) in Ahmedabad with guaranteed SLA response times and assigned senior architects.\"}]",
+    "meta_title": "",
+    "meta_description": "",
+    "is_featured": false,
+    "is_active": true,
+    "display_order": 6,
+    "created_at": "2026-09-27T15:16:44.493Z",
+    "updated_at": "2026-09-27T17:06:00.015Z"
+  }
+},
+{
+  "model": "services.industry",
+  "pk": 1,
+  "fields": {
+    "name": "Hi-Tech",
+    "slug": "hi-tech",
+    "short_description": "Cloud data migration, custom mobile application integration, and high-volume data processing infrastructure for technology companies.",
+    "description": "",
+    "image": "",
+    "icon": "fas fa-microchip",
+    "benefits": "",
+    "is_active": true,
+    "display_order": 1,
+    "meta_title": "",
+    "meta_description": ""
+  }
+},
+{
+  "model": "services.industry",
+  "pk": 2,
+  "fields": {
+    "name": "Banking & Financial Services",
+    "slug": "banking",
+    "short_description": "Deep domain expertise in cyber fraud prevention, core banking security, SEBI/CSCRF compliance, and specialized banking software serving 150+ banks.",
+    "description": "",
+    "image": "",
+    "icon": "fas fa-university",
+    "benefits": "",
+    "is_active": true,
+    "display_order": 2,
+    "meta_title": "",
+    "meta_description": ""
+  }
+},
+{
+  "model": "services.industry",
+  "pk": 3,
+  "fields": {
+    "name": "Medical & Pharmaceuticals",
+    "slug": "medical",
+    "short_description": "On-site engineering support, compute and data storage deployment, and specialized GenAI tools including Custom Copilot for Medical Representatives.",
+    "description": "",
+    "image": "",
+    "icon": "fas fa-heartbeat",
+    "benefits": "",
+    "is_active": true,
+    "display_order": 3,
+    "meta_title": "",
+    "meta_description": ""
+  }
+},
+{
+  "model": "services.industry",
+  "pk": 4,
+  "fields": {
+    "name": "Industrial & Manufacturing",
+    "slug": "industrial",
+    "short_description": "SAP sizing, ERP infrastructure planning, server/network deployments allowing manufacturing plants to focus on core operations.",
+    "description": "",
+    "image": "",
+    "icon": "fas fa-cog",
+    "benefits": "",
+    "is_active": true,
+    "display_order": 4,
+    "meta_title": "",
+    "meta_description": ""
+  }
+},
+{
+  "model": "services.industry",
+  "pk": 5,
+  "fields": {
+    "name": "Small & Medium Enterprises",
+    "slug": "sme",
+    "short_description": "End-to-end IT modernization, managed network security, and infrastructure outsourcing tailored for growing businesses.",
+    "description": "",
+    "image": "",
+    "icon": "fas fa-briefcase",
+    "benefits": "",
+    "is_active": true,
+    "display_order": 5,
+    "meta_title": "",
+    "meta_description": ""
+  }
+},
+{
+  "model": "insights.blogcategory",
+  "pk": 1,
+  "fields": {
+    "name": "Cybersecurity",
+    "slug": "cybersecurity",
+    "description": "",
+    "is_active": true
+  }
+},
+{
+  "model": "insights.blogcategory",
+  "pk": 2,
+  "fields": {
+    "name": "Cloud Computing",
+    "slug": "cloud-computing",
+    "description": "",
+    "is_active": true
+  }
+},
+{
+  "model": "insights.blogcategory",
+  "pk": 3,
+  "fields": {
+    "name": "AI & Innovation",
+    "slug": "ai-innovation",
+    "description": "",
+    "is_active": true
+  }
+},
+{
+  "model": "insights.blogcategory",
+  "pk": 4,
+  "fields": {
+    "name": "Compliance",
+    "slug": "compliance",
+    "description": "",
+    "is_active": true
+  }
+},
+{
+  "model": "insights.blogpost",
+  "pk": 1,
+  "fields": {
+    "title": "Custom Copilot: Transforming Medical Rep Conversations with AI and Privacy",
+    "slug": "custom-copilot-transforming-medical-rep-conversations",
+    "category": 3,
+    "author": 1,
+    "featured_image": "uploads/blog/custom-copilot.jpg",
+    "excerpt": "Medical representatives frequently face technical, research-heavy questions from doctors. Our proprietary GenAI Custom Copilot gives MRs instant, verified answers from indexed clinical research — deployed 100% on-premises to protect proprietary IP.",
+    "content": "<p>Medical representatives (MRs) frequently face technical, research-heavy questions from doctors and specialists regarding drug formulations and clinical patents. Waiting for back-office teams delays the sales cycle significantly.</p><p>TM Solutech developed a proprietary Generative AI (GenAI) Custom Copilot that indexes the pharmaceutical company's research papers, clinical trials, and patent documentation to give MRs instant, verified answers.</p><h3>Key Differentiator</h3><p>Implemented <strong>100% on-premises / in the client's own private environment</strong>, guaranteeing that proprietary patent and clinical IP never leaves the client's infrastructure.</p>",
+    "is_published": true,
+    "is_featured": true,
+    "published_at": "2026-09-27T15:16:44.560Z",
+    "meta_title": "",
+    "meta_description": "",
+    "created_at": "2026-09-27T15:16:44.560Z",
+    "updated_at": "2026-09-27T15:43:45.528Z"
+  }
+},
+{
+  "model": "insights.blogpost",
+  "pk": 2,
+  "fields": {
+    "title": "Ensuring Compliance with SEBI's Cybersecurity Framework: Managed SOC Solution for Stock Brokers",
+    "slug": "ensuring-compliance-sebi-cybersecurity-framework-managed-soc",
+    "category": 4,
+    "author": 1,
+    "featured_image": "uploads/blog/managed-soc.jpg",
+    "excerpt": "SEBI's Cybersecurity and Cyber Resilience Framework (CSCRF) mandates comprehensive security for market intermediaries. TM Solutech offers a 100% SEBI-compliant Managed Security Operations Center with 24/7 threat monitoring.",
+    "content": "<p>SEBI's Cybersecurity and Cyber Resilience Framework (CSCRF) introduces comprehensive security mandates for market intermediaries.</p><h3>Our Managed SOC Solution</h3><ul><li>100% SEBI-compliant Managed Security Operations Center</li><li>24/7 continuous threat monitoring and automated incident detection/response</li><li>Data localization strictly within Indian borders</li><li>Automated regulatory compliance reporting</li></ul>",
+    "is_published": true,
+    "is_featured": false,
+    "published_at": "2026-09-27T15:16:44.560Z",
+    "meta_title": "",
+    "meta_description": "",
+    "created_at": "2026-09-27T15:16:44.570Z",
+    "updated_at": "2026-09-27T15:43:45.548Z"
+  }
+},
+{
+  "model": "insights.blogpost",
+  "pk": 3,
+  "fields": {
+    "title": "Understanding CSCRF Compliance: How TM Solutech Empowers SEBI-Regulated Entities",
+    "slug": "understanding-cscrf-compliance-sebi-regulated-entities",
+    "category": 1,
+    "author": 1,
+    "featured_image": "uploads/blog/cscrf-compliance.png",
+    "excerpt": "SEBI-regulated entities including stock exchanges, brokers, depositories, and mutual funds must comply with the CSCRF framework. Learn how TM Solutech delivers comprehensive compliance solutions.",
+    "content": "<p>The CSCRF framework targets stock exchanges, brokers, depositories, mutual funds, asset management companies, and investment advisors.</p><h3>Framework Components Delivered by TM Solutech</h3><ul><li><strong>Governance & Access Control:</strong> Multi-Factor Authentication, Privileged Access Management, zero-trust policies</li><li><strong>Continuous Monitoring:</strong> Cyber SOC and SIEM real-time analytics</li><li><strong>Network Defense:</strong> NGFW, WAF, VLAN micro-segmentation</li><li><strong>Data Loss Prevention:</strong> Encrypted backups, email authentication, MDM</li><li><strong>Auditing & Resilience:</strong> Scheduled VAPT, automated patching, CCMP</li></ul>",
+    "is_published": true,
+    "is_featured": false,
+    "published_at": "2026-09-27T15:16:44.560Z",
+    "meta_title": "",
+    "meta_description": "",
+    "created_at": "2026-09-27T15:16:44.578Z",
+    "updated_at": "2026-09-27T15:43:45.568Z"
+  }
+},
+{
+  "model": "contact.contactinquiry",
+  "pk": 1,
+  "fields": {
+    "name": "Alexander Wright",
+    "company": "Apex Global Financial",
+    "email": "alexander.wright@apexglobal.com",
+    "phone": "+91 98765 43210",
+    "subject": "Enterprise SEBI CSCRF Architecture Audit",
+    "service": "Network & Security",
+    "message": "We require a comprehensive SEBI CSCRF compliance assessment and 24/7 Managed SOC rollout for our trading platform.",
+    "status": "new",
+    "is_read": false,
+    "admin_notes": "",
+    "created_at": "2026-09-27T16:20:44.660Z",
+    "updated_at": "2026-09-27T16:20:44.660Z"
+  }
+},
+{
+  "model": "contact.contactinquiry",
+  "pk": 2,
+  "fields": {
+    "name": "Krish Test Verification",
+    "company": "Enterprise Tech Corp",
+    "email": "krish@example.com",
+    "phone": "+91 9876543210",
+    "subject": "Architecture Review Consultation",
+    "service": "Cloud Solutions",
+    "message": "Testing enterprise contact form validation and layout responsiveness.",
+    "status": "new",
+    "is_read": false,
+    "admin_notes": "",
+    "created_at": "2026-09-27T16:31:41.684Z",
+    "updated_at": "2026-09-27T16:31:41.684Z"
+  }
+},
+{
+  "model": "cms.page",
+  "pk": 1,
+  "fields": {
+    "title": "Privacy Policy",
+    "slug": "privacy-policy",
+    "content": "<h2>Privacy Policy</h2><p>TM Solutech Private Limited (\"we\", \"our\", \"us\") is committed to protecting and respecting your privacy. This policy explains how we collect, use, and safeguard your personal information when you visit our website or use our services.</p><h3>Information We Collect</h3><p>We may collect personal data such as your name, email address, phone number, and company name when you fill out a contact form or subscribe to our services.</p><h3>How We Use Your Information</h3><ul><li>To respond to your inquiries and provide the services you request</li><li>To improve our website and services</li><li>To send relevant updates and communications (with your consent)</li><li>To comply with legal obligations</li></ul><h3>Data Security</h3><p>We implement appropriate technical and organizational measures to protect your personal data against unauthorized access, alteration, disclosure, or destruction.</p><h3>Contact</h3><p>For privacy-related inquiries, contact us at info@tmsolutech.com.</p>",
+    "featured_image": "",
+    "meta_title": "",
+    "meta_description": "",
+    "is_published": true,
+    "show_in_footer": true,
+    "created_at": "2026-09-27T15:16:44.633Z",
+    "updated_at": "2026-09-27T15:16:44.633Z"
+  }
+},
+{
+  "model": "cms.page",
+  "pk": 2,
+  "fields": {
+    "title": "Terms and Conditions",
+    "slug": "terms-and-conditions",
+    "content": "<h2>Terms and Conditions</h2><p>These terms and conditions govern your use of the TM Solutech Private Limited website and services.</p><h3>Use of Website</h3><p>By accessing this website, you agree to be bound by these terms. The content is for general information purposes only.</p><h3>Intellectual Property</h3><p>All content, logos, images, and materials on this website are the property of TM Solutech Private Limited and protected by applicable intellectual property laws.</p><h3>Limitation of Liability</h3><p>TM Solutech shall not be liable for any indirect, incidental, or consequential damages arising from the use of our website or services.</p><h3>Governing Law</h3><p>These terms shall be governed by the laws of India. Any disputes shall be subject to the exclusive jurisdiction of courts in Ahmedabad, Gujarat.</p>",
+    "featured_image": "",
+    "meta_title": "",
+    "meta_description": "",
+    "is_published": true,
+    "show_in_footer": true,
+    "created_at": "2026-09-27T15:16:44.639Z",
+    "updated_at": "2026-09-27T15:16:44.639Z"
+  }
+}
+]

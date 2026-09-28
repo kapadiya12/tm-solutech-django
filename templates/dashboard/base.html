@@ -1,0 +1,133 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ page_title|default:'Dashboard' }} | TM Solutech Admin{% endblock %}</title>
+    <link rel="icon" href="{% static 'images/logo/favicon.png' %}" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="dashboard-body">
+    {# Dashboard Layout #}
+    <div class="dashboard-wrapper">
+        {# Sidebar #}
+        <aside class="dashboard-sidebar" id="dashboardSidebar">
+            <div class="sidebar-header">
+                <a href="{% url 'dashboard:index' %}" class="sidebar-brand">
+                    <img src="{% static 'images/logo/tm-solutech-logo.png' %}" alt="TM Solutech" style="height: 36px;">
+                    <span>Admin</span>
+                </a>
+                <button class="sidebar-close" onclick="document.getElementById('dashboardSidebar').classList.remove('active')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Main</div>
+                    <a href="{% url 'dashboard:index' %}" class="sidebar-link {% if request.resolver_match.url_name == 'index' %}active{% endif %}">
+                        <i class="fas fa-th-large"></i> Dashboard
+                    </a>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Content</div>
+                    <a href="{% url 'dashboard:service_list' %}" class="sidebar-link {% if 'service' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-cogs"></i> Services
+                    </a>
+                    <a href="{% url 'dashboard:category_list' %}" class="sidebar-link {% if 'category' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-folder"></i> Categories
+                    </a>
+                    <a href="{% url 'dashboard:industry_list' %}" class="sidebar-link {% if 'industry' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-industry"></i> Industries
+                    </a>
+                    <a href="{% url 'dashboard:leadership_list' %}" class="sidebar-link {% if 'leadership' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-user-tie"></i> Leadership
+                    </a>
+                    <a href="{% url 'dashboard:blog_list' %}" class="sidebar-link {% if 'blog' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-newspaper"></i> Blog Posts
+                    </a>
+                    <a href="{% url 'dashboard:faq_list' %}" class="sidebar-link {% if 'faq' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-question-circle"></i> FAQs
+                    </a>
+                    <a href="{% url 'dashboard:page_list' %}" class="sidebar-link {% if 'page' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-file-alt"></i> Pages
+                    </a>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Communication</div>
+                    <a href="{% url 'dashboard:inquiry_list' %}" class="sidebar-link {% if 'inquiry' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-envelope"></i> Inquiries
+                        {% if new_inquiry_count %}<span class="sidebar-badge">{{ new_inquiry_count }}</span>{% endif %}
+                    </a>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Settings</div>
+                    <a href="{% url 'dashboard:site_settings' %}" class="sidebar-link {% if 'settings' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-sliders-h"></i> Site Settings
+                    </a>
+                    <a href="{% url 'admin:index' %}" class="sidebar-link" target="_blank">
+                        <i class="fas fa-tools"></i> Django Admin
+                    </a>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="sidebar-user">
+                    <div class="sidebar-user-avatar"><i class="fas fa-user"></i></div>
+                    <div>
+                        <div class="sidebar-user-name">{{ request.user.get_full_name|default:request.user.username }}</div>
+                        <div class="sidebar-user-role">{% if request.user.is_superuser %}Administrator{% else %}Staff{% endif %}</div>
+                    </div>
+                </div>
+                <div class="flex gap-2" style="margin-top: var(--space-3);">
+                    <a href="{% url 'accounts:profile' %}" class="btn btn-sm btn-secondary" style="flex: 1;"><i class="fas fa-user"></i></a>
+                    <a href="{% url 'core:home' %}" class="btn btn-sm btn-secondary" style="flex: 1;" target="_blank"><i class="fas fa-external-link-alt"></i></a>
+                    <a href="{% url 'accounts:logout' %}" class="btn btn-sm btn-secondary" style="flex: 1;"><i class="fas fa-sign-out-alt"></i></a>
+                </div>
+            </div>
+        </aside>
+
+        {# Main Content #}
+        <div class="dashboard-main">
+            <header class="dashboard-topbar">
+                <button class="sidebar-toggle" onclick="document.getElementById('dashboardSidebar').classList.toggle('active')">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 class="dashboard-page-title">{{ page_title|default:'Dashboard' }}</h1>
+                <div class="dashboard-topbar-actions">
+                    <a href="{% url 'core:home' %}" class="btn btn-sm btn-secondary" target="_blank"><i class="fas fa-external-link-alt"></i> View Site</a>
+                </div>
+            </header>
+
+            {# Messages #}
+            {% if messages %}
+            <div style="padding: 0 var(--space-6); margin-top: var(--space-4);">
+                {% for message in messages %}
+                <div style="background: {% if message.tags == 'success' %}rgba(16,185,129,0.1){% elif message.tags == 'error' %}rgba(239,68,68,0.1){% else %}rgba(59,130,246,0.1){% endif %}; border: 1px solid {% if message.tags == 'success' %}var(--success){% elif message.tags == 'error' %}var(--danger){% else %}var(--info){% endif %}; border-radius: var(--radius-lg); padding: var(--space-3) var(--space-4); margin-bottom: var(--space-3); font-size: var(--text-sm);">
+                    <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %}"></i>
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="dashboard-content">
+                {% block dashboard_content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

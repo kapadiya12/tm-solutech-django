@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page.meta_title|default:page.title }} | TM Solutech{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+    <div class="container">
+        <ul class="breadcrumb-list">
+            <li><a href="{% url 'core:home' %}"><i class="fas fa-home"></i> Home</a></li>
+            <li><span class="separator"><i class="fas fa-chevron-right"></i></span> {{ page.title }}</li>
+        </ul>
+        <h1 class="page-title">{{ page.title }}</h1>
+    </div>
+</div>
+
+<section class="section">
+    <div class="container-narrow">
+        <article style="color: var(--gray-700); line-height: 1.8;">{{ page.content|safe }}</article>
+    </div>
+</section>
+{% endblock %}

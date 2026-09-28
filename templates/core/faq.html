@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="page-hero">
+    <div class="container">
+        <ul class="breadcrumb-list">
+            <li><a href="{% url 'core:home' %}"><i class="fas fa-home"></i> Home</a></li>
+            <li><span class="separator"><i class="fas fa-chevron-right"></i></span> FAQs</li>
+        </ul>
+        <h1 class="page-title">{{ page_title }}</h1>
+        <p class="page-subtitle">{{ page_subtitle }}</p>
+    </div>
+</div>
+
+<section class="section">
+    <div class="container-narrow">
+        <div class="accordion">
+            {% for faq in faqs %}
+            <div class="accordion-item animate-on-scroll {% if forloop.first %}active{% endif %}">
+                <div class="accordion-header">
+                    <h4>{{ faq.question }}</h4>
+                    <span class="accordion-icon"><i class="fas fa-chevron-down"></i></span>
+                </div>
+                <div class="accordion-body" {% if forloop.first %}style="max-height: 500px;"{% endif %}>
+                    <div class="accordion-body-inner">{{ faq.answer|safe }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% include 'includes/cta_section.html' %}
+{% endblock %}

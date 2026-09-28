@@ -1,0 +1,36 @@
+{% extends 'dashboard/base.html' %}
+{% block dashboard_content %}
+<div class="flex-between mb-8">
+    <h2>{{ page_title }}</h2>
+    <a href="{% url 'dashboard:industry_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add Industry</a>
+</div>
+<div class="dashboard-card">
+    <div class="dashboard-table-wrap">
+        <table class="dashboard-table">
+            <thead>
+                <tr><th>Name</th><th>Active</th><th>Order</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                {% for industry in industries %}
+                <tr>
+                    <td><strong>{{ industry.name }}</strong></td>
+                    <td><span class="status-badge {% if industry.is_active %}status-active{% else %}status-draft{% endif %}">{% if industry.is_active %}Active{% else %}Inactive{% endif %}</span></td>
+                    <td>{{ industry.display_order }}</td>
+                    <td>
+                        <div class="flex gap-2">
+                            <a href="{% url 'dashboard:industry_edit' industry.pk %}" class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></a>
+                            <form method="post" action="{% url 'dashboard:industry_delete' industry.pk %}" onsubmit="return confirm('Delete this industry?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm" style="color: var(--danger);"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4" class="text-center">No industries yet. <a href="{% url 'dashboard:industry_create' %}">Create one</a></td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

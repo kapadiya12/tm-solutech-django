@@ -1,0 +1,78 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% if page_title %}{{ page_title }} | {% endif %}{% if site_settings %}{{ site_settings.company_name }}{% else %}TM Solutech{% endif %}{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}{% if site_settings %}{{ site_settings.meta_description }}{% else %}TM Solutech - Smart IT Solutions for Modern Businesses{% endif %}{% endblock %}">
+    <meta name="keywords" content="{% block meta_keywords %}IT Solutions, Cloud Solutions, Network Security, Remote Infrastructure Management, TM Solutech{% endblock %}">
+    <meta name="author" content="TM Solutech Private Limited">
+    <link rel="canonical" href="{{ request.build_absolute_uri }}">
+
+    {# Favicon #}
+    {% if site_settings and site_settings.favicon %}
+    <link rel="icon" href="{{ site_settings.favicon.url }}" type="image/png">
+    {% else %}
+    <link rel="icon" href="{% static 'images/logo/favicon.png' %}" type="image/png">
+    {% endif %}
+
+    {# Google Fonts & Font Awesome #}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    {# Main CSS with Instant Cache Busting #}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v={% now 'U' %}">
+    {% block extra_css %}{% endblock %}
+
+    {% if site_settings and site_settings.header_scripts %}
+    {{ site_settings.header_scripts|safe }}
+    {% endif %}
+</head>
+<body>
+    <div class="scroll-progress"></div>
+    <div class="mobile-overlay"></div>
+
+    {% include 'includes/navbar.html' %}
+
+    {% if messages %}
+    <div class="toast-container">
+        {% for message in messages %}
+        <div class="toast {{ message.tags }}">
+            <span class="toast-icon">
+                {% if message.tags == 'success' %}<i class="fas fa-check-circle"></i>
+                {% elif message.tags == 'error' %}<i class="fas fa-exclamation-circle"></i>
+                {% else %}<i class="fas fa-info-circle"></i>{% endif %}
+            </span>
+            <div class="toast-content"><p class="toast-message">{{ message }}</p></div>
+            <button class="toast-close"><i class="fas fa-times"></i></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    {% include 'includes/footer.html' %}
+
+    <a href="#" class="back-to-top" aria-label="Back to top"><i class="fas fa-chevron-up"></i></a>
+
+    <div class="cookie-notice">
+        <div class="container">
+            <p>We use cookies to enhance your experience. By continuing to visit this site, you agree to our use of cookies.</p>
+            <button class="btn btn-sm btn-primary cookie-accept">Accept</button>
+        </div>
+    </div>
+
+    <script src="{% static 'js/main.js' %}?v={% now 'U' %}"></script>
+    {% block extra_js %}{% endblock %}
+
+    {% if site_settings and site_settings.footer_scripts %}
+    {{ site_settings.footer_scripts|safe }}
+    {% endif %}
+</body>
+</html>

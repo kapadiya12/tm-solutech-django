@@ -1,0 +1,92 @@
+{% load static %}
+<footer class="footer">
+    <div class="footer-main">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    {% if site_settings and site_settings.logo %}
+                    <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.company_name }}">
+                    {% else %}
+                    <img src="{% static 'images/logo/tm-solutech-logo.png' %}" alt="TM Solutech">
+                    {% endif %}
+                    <p>{% if site_settings and site_settings.footer_description %}{{ site_settings.footer_description }}{% else %}TM Solutech Private Limited is a leading IT solutions company specializing in Cloud Solutions, Network & Security, and Remote Infrastructure Management. We deliver customized, cost-effective technology solutions that help businesses grow and thrive.{% endif %}</p>
+
+                    <div class="footer-contact-info">
+                        <div class="footer-contact-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>{% if site_settings %}{{ site_settings.address }}{% else %}805/806 Aditya Building, Near Mithakhali Six Roads, Ellisbridge, Ahmedabad, Gujarat 380006{% endif %}</span>
+                        </div>
+                        <div class="footer-contact-item">
+                            <i class="fas fa-phone"></i>
+                            <a href="tel:{% if site_settings %}{{ site_settings.phone }}{% else %}+917947717070{% endif %}">{% if site_settings %}{{ site_settings.phone }}{% else %}+91 79 4771 7070{% endif %}</a>
+                        </div>
+                        <div class="footer-contact-item">
+                            <i class="fas fa-envelope"></i>
+                            <a href="mailto:{% if site_settings %}{{ site_settings.email }}{% else %}info@tmsolutech.com{% endif %}">{% if site_settings %}{{ site_settings.email }}{% else %}info@tmsolutech.com{% endif %}</a>
+                        </div>
+                    </div>
+
+                    <div class="footer-social">
+                        {% if site_settings and site_settings.linkedin_url %}
+                        <a href="{{ site_settings.linkedin_url }}" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                        {% endif %}
+                        {% if site_settings and site_settings.facebook_url %}
+                        <a href="{{ site_settings.facebook_url }}" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        {% endif %}
+                        {% if site_settings and site_settings.instagram_url %}
+                        <a href="{{ site_settings.instagram_url }}" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        {% endif %}
+                        {% if site_settings and site_settings.youtube_url %}
+                        <a href="{{ site_settings.youtube_url }}" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                        {% endif %}
+                        {% if site_settings and site_settings.whatsapp_number %}
+                        <a href="https://wa.me/{{ site_settings.whatsapp_number }}" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="footer-column">
+                    <h4>Company</h4>
+                    <div class="footer-links">
+                        <a href="{% url 'core:about' %}">About Us</a>
+                        <a href="{% url 'core:why_us' %}">Why Us</a>
+                        <a href="{% url 'core:leadership' %}">Leadership</a>
+                        <a href="{% url 'contact:contact' %}">Contact</a>
+                        <a href="{% url 'core:faqs' %}">FAQs</a>
+                    </div>
+                </div>
+
+                <div class="footer-column">
+                    <h4>Services</h4>
+                    <div class="footer-links">
+                        {% for category in nav_service_categories %}
+                        <a href="{{ category.get_absolute_url }}">{{ category.name }}</a>
+                        {% empty %}
+                        <a href="{% url 'services:service_list' %}">Our Services</a>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="footer-column">
+                    <h4>Resources</h4>
+                    <div class="footer-links">
+                        <a href="{% url 'insights:post_list' %}">Insights</a>
+                        <a href="{% url 'core:faqs' %}">FAQs</a>
+                        <a href="{% url 'cms:page_detail' slug='privacy-policy' %}">Privacy Policy</a>
+                        <a href="{% url 'cms:page_detail' slug='terms-and-conditions' %}">Terms & Conditions</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="footer-bottom">
+            <p>{% if site_settings and site_settings.copyright_text %}{{ site_settings.copyright_text }}{% else %}&copy; {% now "Y" %} TM Solutech Private Limited. All Rights Reserved.{% endif %}</p>
+            <div class="footer-bottom-links">
+                <a href="{% url 'cms:page_detail' slug='privacy-policy' %}">Privacy Policy</a>
+                <a href="{% url 'cms:page_detail' slug='terms-and-conditions' %}">Terms & Conditions</a>
+            </div>
+        </div>
+    </div>
+</footer>

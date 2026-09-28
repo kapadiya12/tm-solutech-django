@@ -1,0 +1,27 @@
+{% if posts.has_other_pages %}
+<div class="pagination">
+    {% if posts.has_previous %}
+    <a href="?page={{ posts.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}">
+        <i class="fas fa-chevron-left"></i>
+    </a>
+    {% else %}
+    <span class="disabled"><i class="fas fa-chevron-left"></i></span>
+    {% endif %}
+
+    {% for num in posts.paginator.page_range %}
+        {% if posts.number == num %}
+        <span class="active">{{ num }}</span>
+        {% elif num > posts.number|add:'-3' and num < posts.number|add:'3' %}
+        <a href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}">{{ num }}</a>
+        {% endif %}
+    {% endfor %}
+
+    {% if posts.has_next %}
+    <a href="?page={{ posts.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}">
+        <i class="fas fa-chevron-right"></i>
+    </a>
+    {% else %}
+    <span class="disabled"><i class="fas fa-chevron-right"></i></span>
+    {% endif %}
+</div>
+{% endif %}
