@@ -38,22 +38,36 @@ def superuser_required(view_func):
 @superuser_required
 def run_migrations(request):
     """
-    One-click 'migrate' for hosts (like Render's free tier) with no shell
-    access. Runs in-process, in the exact same environment/filesystem that
-    serves the live site, so it's more reliable here than trying to get a
-    platform's Build Command configured correctly.
+    One-click 'migrate' / 'sync_seed_media' for hosts (like Render's free
+    tier) with no shell access. Runs in-process, in the exact same
+    environment/filesystem that serves the live site, so it's more reliable
+    here than trying to get a platform's Build Command configured correctly.
+
+    These are two separate actions because they solve different problems:
+    'migrate' applies schema changes (and is a no-op if already applied —
+    migration state lives in the shared database, not on this filesystem).
+    'sync_seed_media' copies seed images onto disk wherever they're missing,
+    regardless of migration state — needed because the database can already
+    say an image is set while the actual file was never written on *this*
+    environment's disk (e.g. it was only ever run locally before).
     """
     output = None
     error = None
+    action = None
     if request.method == 'POST':
+        action = request.POST.get('action', 'migrate')
+        command = 'migrate' if action == 'migrate' else 'sync_seed_media'
         buffer = io.StringIO()
         try:
-            call_command('migrate', interactive=False, stdout=buffer, stderr=buffer)
+            if command == 'migrate':
+                call_command(command, interactive=False, stdout=buffer, stderr=buffer)
+            else:
+                call_command(command, stdout=buffer, stderr=buffer)
             output = buffer.getvalue()
-            messages.success(request, 'Migrations ran successfully.')
+            messages.success(request, f'{command} ran successfully.')
         except Exception as e:
             error = f"{buffer.getvalue()}\n{e}"
-            messages.error(request, 'Migration failed — see details below.')
+            messages.error(request, f'{command} failed — see details below.')
     return render(request, 'dashboard/run_migrations.html', {
         'page_title': 'Run Migrations',
         'output': output,

@@ -4,14 +4,27 @@
     <h2>Run Migrations</h2>
 </div>
 <div class="dashboard-card" style="max-width: 700px;">
-    <p style="color: var(--gray-600); margin-bottom: 1.5rem;">
+    <p style="color: var(--gray-600); margin-bottom: 1rem;">
         Applies any pending database migrations directly on this server — useful on hosts
         (like Render's free tier) that don't have a shell available. Safe to click more than
         once; already-applied migrations are skipped automatically.
     </p>
-    <form method="post">
+    <form method="post" style="display: inline-block; margin-right: 0.75rem;">
         {% csrf_token %}
+        <input type="hidden" name="action" value="migrate">
         <button type="submit" class="btn btn-primary"><i class="fas fa-database"></i> Run Migrations Now</button>
+    </form>
+
+    <p style="color: var(--gray-600); margin: 1.5rem 0 1rem;">
+        If migrations say "no migrations to apply" but images still don't show up, that's
+        expected — the database is shared, but this server's disk isn't. Use this instead:
+        it copies the seed images onto <em>this</em> disk if they're missing, regardless of
+        migration state.
+    </p>
+    <form method="post" style="display: inline-block;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="sync_media">
+        <button type="submit" class="btn btn-secondary"><i class="fas fa-image"></i> Fix Missing Images</button>
     </form>
 
     {% if output %}
