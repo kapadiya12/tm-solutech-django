@@ -28,7 +28,7 @@ class Command(BaseCommand):
         settings.meta_description = 'TM Solutech provides enterprise Cloud Solutions, Network & Security, and Remote Infrastructure Management services. Trusted IT partner since 1985.'
         settings.google_maps_embed = '<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3671.9!2d72.56!3d23.03!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjPCsDAyJzA2LjEiTiA3MsKwMzMnMzYuNCJF!5e0!3m2!1sen!2sin!4v1" width="100%" height="400" style="border:0;" allowfullscreen="" loading="lazy"></iframe>'
         settings.save()
-        self.stdout.write(self.style.SUCCESS('  ✓ Site Settings'))
+        self.stdout.write(self.style.SUCCESS('  [OK] Site Settings'))
 
         # Statistics
         stats_data = [
@@ -39,7 +39,7 @@ class Command(BaseCommand):
         ]
         for s in stats_data:
             Statistic.objects.get_or_create(label=s['label'], defaults=s)
-        self.stdout.write(self.style.SUCCESS('  ✓ Statistics'))
+        self.stdout.write(self.style.SUCCESS('  [OK] Statistics'))
 
         # Why Us Reasons
         reasons = [
@@ -52,7 +52,7 @@ class Command(BaseCommand):
         ]
         for r in reasons:
             WhyUsReason.objects.get_or_create(title=r['title'], defaults=r)
-        self.stdout.write(self.style.SUCCESS('  ✓ Why Us Reasons'))
+        self.stdout.write(self.style.SUCCESS('  [OK] Why Us Reasons'))
 
         # Leadership
         leaders = [
@@ -94,7 +94,7 @@ class Command(BaseCommand):
         ]
         for l in leaders:
             Leadership.objects.get_or_create(name=l['name'], defaults=l)
-        self.stdout.write(self.style.SUCCESS('  ✓ Leadership'))
+        self.stdout.write(self.style.SUCCESS('  [OK] Leadership'))
 
         # Service Categories
         categories = [
@@ -127,7 +127,7 @@ class Command(BaseCommand):
         for c in categories:
             obj, _ = ServiceCategory.objects.get_or_create(slug=c['slug'], defaults=c)
             cat_objects[c['slug']] = obj
-        self.stdout.write(self.style.SUCCESS('  ✓ Service Categories'))
+        self.stdout.write(self.style.SUCCESS('  [OK] Service Categories'))
 
         # Services - Cloud Solutions
         cloud_services = [
@@ -182,7 +182,7 @@ class Command(BaseCommand):
         ]
         for s in rim_services:
             Service.objects.get_or_create(slug=s['slug'], defaults={**s, 'category': cat_objects['remote-infrastructure-management']})
-        self.stdout.write(self.style.SUCCESS('  ✓ Services (18 total)'))
+        self.stdout.write(self.style.SUCCESS('  [OK] Services (18 total)'))
 
         # Industries
         industries = [
@@ -199,7 +199,7 @@ class Command(BaseCommand):
         ]
         for i in industries:
             Industry.objects.get_or_create(slug=i['slug'], defaults=i)
-        self.stdout.write(self.style.SUCCESS('  ✓ Industries'))
+        self.stdout.write(self.style.SUCCESS('  [OK] Industries'))
 
         # Blog Categories
         blog_cats = [
@@ -212,7 +212,7 @@ class Command(BaseCommand):
         for bc in blog_cats:
             obj, _ = BlogCategory.objects.get_or_create(slug=bc['slug'], defaults=bc)
             blog_cat_objects[bc['slug']] = obj
-        self.stdout.write(self.style.SUCCESS('  ✓ Blog Categories'))
+        self.stdout.write(self.style.SUCCESS('  [OK] Blog Categories'))
 
         # Blog Posts
         admin_user = User.objects.filter(is_superuser=True).first()
@@ -251,7 +251,7 @@ class Command(BaseCommand):
         ]
         for p in posts:
             BlogPost.objects.get_or_create(slug=p['slug'], defaults=p)
-        self.stdout.write(self.style.SUCCESS('  ✓ Blog Posts'))
+        self.stdout.write(self.style.SUCCESS('  [OK] Blog Posts'))
 
         # FAQs
         faqs = [
@@ -266,7 +266,7 @@ class Command(BaseCommand):
         ]
         for f in faqs:
             FAQ.objects.get_or_create(question=f['question'], defaults=f)
-        self.stdout.write(self.style.SUCCESS('  ✓ FAQs'))
+        self.stdout.write(self.style.SUCCESS('  [OK] FAQs'))
 
         # CMS Pages
         pages = [
@@ -287,7 +287,7 @@ class Command(BaseCommand):
         ]
         for p in pages:
             Page.objects.get_or_create(slug=p['slug'], defaults=p)
-        self.stdout.write(self.style.SUCCESS('  ✓ CMS Pages'))
+        self.stdout.write(self.style.SUCCESS('  [OK] CMS Pages'))
 
         self.stdout.write(self.style.SUCCESS('\n✅ Database seeded successfully!'))
         self.stdout.write(f'  Services: {Service.objects.count()}')

@@ -13,22 +13,29 @@
     </div>
     <div class="hero-overlay"></div>
     <div class="hero-pattern"></div>
+    <div class="hero-orb hero-orb-1"></div>
+    <div class="hero-orb hero-orb-2"></div>
+    <div class="hero-orb hero-orb-3"></div>
 
     <div class="container">
         <div class="hero-content">
-            <div class="hero-badge">
+            <div class="hero-badge hero-enter hero-enter-1">
                 <span class="pulse-dot"></span>
                 Trusted IT Solutions Since 1985
             </div>
-            <h1>Smart IT Solutions<br>for <span class="gradient-text">Modern Businesses</span></h1>
-            <p class="hero-description">Enterprise Cloud, Cyber Security, Networking & Infrastructure solutions tailored to accelerate your digital transformation journey.</p>
-            <div class="hero-tags">
+            <h1 class="hero-enter hero-enter-2">Smart IT Solutions<br>for <span class="gradient-text">Modern Businesses</span></h1>
+            <p class="hero-description hero-enter hero-enter-3">Cloud, Security, Networking & Infrastructure — built around your business.</p>
+            <div class="hero-tags hero-enter hero-enter-4">
+                {% for tag in hero_tags %}
+                <span class="hero-tag"><i class="{{ tag.icon }}"></i> {{ tag.label }}</span>
+                {% empty %}
                 <span class="hero-tag"><i class="fas fa-cloud"></i> Cloud Solutions</span>
                 <span class="hero-tag"><i class="fas fa-shield-alt"></i> Cyber Security</span>
                 <span class="hero-tag"><i class="fas fa-network-wired"></i> Networking</span>
                 <span class="hero-tag"><i class="fas fa-server"></i> Enterprise IT</span>
+                {% endfor %}
             </div>
-            <div class="hero-actions">
+            <div class="hero-actions hero-enter hero-enter-5">
                 <a href="{% url 'services:service_list' %}" class="btn btn-primary btn-lg">Explore Our Services</a>
                 <a href="{% url 'contact:contact' %}" class="btn btn-outline-white btn-lg">Get Free Consultation</a>
             </div>
@@ -36,6 +43,13 @@
     </div>
 
     <div class="hero-floating">
+        {% for stat in hero_stats %}
+        <div class="hero-float-card">
+            <div class="float-icon"><i class="{{ stat.icon }}"></i></div>
+            <div class="float-label">{{ stat.label }}</div>
+            <div class="float-value">{{ stat.value }}</div>
+        </div>
+        {% empty %}
         <div class="hero-float-card">
             <div class="float-icon"><i class="fas fa-cloud-upload-alt"></i></div>
             <div class="float-label">Cloud Migrations</div>
@@ -51,6 +65,7 @@
             <div class="float-label">Support</div>
             <div class="float-value">24/7</div>
         </div>
+        {% endfor %}
     </div>
 
     <div class="hero-scroll">
@@ -62,36 +77,64 @@
 {# ===== TRUST / STATS BAR ===== #}
 <section class="trust-bar">
     <div class="container">
-        <div class="trust-grid">
-            {% for stat in statistics %}
-            <div class="trust-item animate-on-scroll">
-                <div class="trust-number"><span data-counter="{{ stat.value }}">0</span><span>{{ stat.suffix }}</span></div>
-                <div class="trust-label">{{ stat.label }}</div>
+        <div class="trust-card">
+            <div class="trust-grid">
+                {% for stat in statistics %}
+                <div class="trust-item animate-on-scroll">
+                    <div class="trust-number"><span data-counter="{{ stat.value }}">0</span><span>{{ stat.suffix }}</span></div>
+                    <div class="trust-label">{{ stat.label }}</div>
+                </div>
+                {% empty %}
+                <div class="trust-item animate-on-scroll">
+                    <div class="trust-number"><span data-counter="150">0</span><span>+</span></div>
+                    <div class="trust-label">Organizations Served</div>
+                </div>
+                <div class="trust-item animate-on-scroll animate-delay-1">
+                    <div class="trust-number"><span data-counter="250">0</span><span>+</span></div>
+                    <div class="trust-label">Team Members</div>
+                </div>
+                <div class="trust-item animate-on-scroll animate-delay-2">
+                    <div class="trust-number"><span data-counter="35">0</span><span>+</span></div>
+                    <div class="trust-label">Years of Heritage</div>
+                </div>
+                <div class="trust-item animate-on-scroll animate-delay-3">
+                    <div class="trust-number"><span data-counter="24">0</span><span>/7</span></div>
+                    <div class="trust-label">Expert Support</div>
+                </div>
+                {% endfor %}
             </div>
+        </div>
+    </div>
+</section>
+
+{# ===== CLIENT LOGOS ===== #}
+<section class="clients-strip">
+    <div class="container">
+        <p class="clients-strip-label">Trusted by leading organizations across industries</p>
+    </div>
+    <div class="clients-marquee">
+        <div class="clients-track">
+            {% for logo in client_logos %}
+            <div class="client-logo-box"><img src="{{ logo.logo.url }}" alt="{{ logo.name }}" loading="lazy"></div>
             {% empty %}
-            <div class="trust-item animate-on-scroll">
-                <div class="trust-number"><span data-counter="150">0</span><span>+</span></div>
-                <div class="trust-label">Organizations Served</div>
-            </div>
-            <div class="trust-item animate-on-scroll animate-delay-1">
-                <div class="trust-number"><span data-counter="250">0</span><span>+</span></div>
-                <div class="trust-label">Team Members</div>
-            </div>
-            <div class="trust-item animate-on-scroll animate-delay-2">
-                <div class="trust-number"><span data-counter="35">0</span><span>+</span></div>
-                <div class="trust-label">Years of Heritage</div>
-            </div>
-            <div class="trust-item animate-on-scroll animate-delay-3">
-                <div class="trust-number"><span data-counter="24">0</span><span>/7</span></div>
-                <div class="trust-label">Expert Support</div>
-            </div>
+            <div class="client-logo-box"><img src="{% static 'images/clients/icon1.png' %}" alt="Client logo" loading="lazy"></div>
+            <div class="client-logo-box"><img src="{% static 'images/clients/icon2.png' %}" alt="Client logo" loading="lazy"></div>
+            <div class="client-logo-box"><img src="{% static 'images/clients/icon3.png' %}" alt="Client logo" loading="lazy"></div>
+            <div class="client-logo-box"><img src="{% static 'images/clients/icon4.png' %}" alt="Client logo" loading="lazy"></div>
+            <div class="client-logo-box"><img src="{% static 'images/clients/icon5.png' %}" alt="Client logo" loading="lazy"></div>
+            <div class="client-logo-box"><img src="{% static 'images/clients/icon6.png' %}" alt="Client logo" loading="lazy"></div>
+            <div class="client-logo-box"><img src="{% static 'images/clients/icon7.png' %}" alt="Client logo" loading="lazy"></div>
+            {% endfor %}
+            {% for logo in client_logos %}
+            <div class="client-logo-box" aria-hidden="true"><img src="{{ logo.logo.url }}" alt="" loading="lazy"></div>
             {% endfor %}
         </div>
     </div>
 </section>
 
 {# ===== CORE SERVICES ===== #}
-<section class="section">
+<section class="section services-section">
+    <div class="section-glow services-glow"></div>
     <div class="container">
         <div class="section-header animate-on-scroll">
             <span class="section-badge"><i class="fas fa-cogs"></i> Our Services</span>
@@ -140,7 +183,7 @@
     <div class="container">
         <div class="about-grid">
             <div class="about-image animate-on-scroll slide-left">
-                <img src="{% static 'images/general/about-company.jpg' %}" alt="About TM Solutech" loading="lazy">
+                <img src="{% static 'images/general/about-team.jpg' %}" alt="TM Solutech Team" loading="lazy">
                 <div class="about-image-badge">
                     <div class="badge-number">35+</div>
                     <div class="badge-label">Years Heritage</div>
@@ -149,8 +192,7 @@
             <div class="about-content animate-on-scroll slide-right">
                 <span class="section-badge"><i class="fas fa-building"></i> About Us</span>
                 <h2>Growing Together with <span class="highlight">Innovation</span></h2>
-                <p>TM Solutech Private Limited, with heritage dating back to 1985 through TM Systems, is a leading IT solutions company focused on delivering customized products and services that meet the unique needs of every client.</p>
-                <p>Our philosophy prioritizes customer needs, making each project unique. We deliver with time efficiency and cost-effectiveness without any compromise on quality, helping our clients reach their full potential.</p>
+                <p>35+ years of heritage. One philosophy: your growth is our growth. We build technology around your business, not the other way around.</p>
                 <div class="about-features">
                     <div class="about-feature">
                         <i class="fas fa-check-circle"></i>
@@ -192,26 +234,73 @@
                     <i class="{{ reason.icon }}"></i>
                 </div>
                 <h3>{{ reason.title }}</h3>
-                <p>{{ reason.description|truncatewords:30 }}</p>
+                <p>{{ reason.description|truncatewords:12 }}</p>
             </div>
             {% empty %}
             <div class="why-us-card animate-on-scroll">
                 <div class="why-us-number">01</div>
                 <div class="why-us-icon"><i class="fas fa-globe"></i></div>
                 <h3>Cross-Industry Expertise</h3>
-                <p>Deep experience across Banking, Hi-Tech, Medical, Industrial, and SME sectors with specialized solutions for each vertical.</p>
+                <p>Banking, Hi-Tech, Medical, Industrial & SME — specialized for every vertical.</p>
             </div>
             <div class="why-us-card animate-on-scroll animate-delay-1">
                 <div class="why-us-number">02</div>
                 <div class="why-us-icon"><i class="fas fa-users-cog"></i></div>
                 <h3>Deep Expertise & Leadership</h3>
-                <p>Backed by experienced leaders with 30+ years in IT, software development, hardware architecture, and cybersecurity.</p>
+                <p>30+ years leading IT, software, hardware, and cybersecurity.</p>
             </div>
             <div class="why-us-card animate-on-scroll animate-delay-2">
                 <div class="why-us-number">03</div>
                 <div class="why-us-icon"><i class="fas fa-handshake"></i></div>
                 <h3>Dedicated IT Solutions</h3>
-                <p>Custom-tailored solutions designed around your specific business needs with a philosophy of growing together.</p>
+                <p>Custom-built around your business. We grow when you grow.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+{# ===== TECHNOLOGY & CAPABILITIES ===== #}
+<section class="section capabilities-section">
+    <div class="container">
+        <div class="section-header animate-on-scroll">
+            <span class="section-badge"><i class="fas fa-microchip"></i> Capabilities</span>
+            <h2>Full-Stack Technology <span class="highlight">Capabilities</span></h2>
+            <p>One partner across the entire technology stack — from the network layer to the cloud, secured end to end.</p>
+        </div>
+
+        <div class="capabilities-grid">
+            {% for cap in capabilities %}
+            <div class="capability-card animate-on-scroll animate-delay-{{ forloop.counter }}">
+                <div class="capability-icon"><i class="{{ cap.icon }}"></i></div>
+                <h3>{{ cap.title }}</h3>
+                <p>{{ cap.description }}</p>
+            </div>
+            {% empty %}
+            <div class="capability-card animate-on-scroll">
+                <div class="capability-icon"><i class="fas fa-cloud"></i></div>
+                <h3>Cloud</h3>
+                <p>Strategy, migration, and managed cloud operations across AWS, Azure, and hybrid environments.</p>
+            </div>
+            <div class="capability-card animate-on-scroll animate-delay-1">
+                <div class="capability-icon"><i class="fas fa-shield-alt"></i></div>
+                <h3>Cyber Security</h3>
+                <p>Threat detection, endpoint protection, and compliance-ready security architecture.</p>
+            </div>
+            <div class="capability-card animate-on-scroll animate-delay-2">
+                <div class="capability-icon"><i class="fas fa-network-wired"></i></div>
+                <h3>Networking</h3>
+                <p>Enterprise-grade network design, implementation, and 24/7 monitored connectivity.</p>
+            </div>
+            <div class="capability-card animate-on-scroll animate-delay-3">
+                <div class="capability-icon"><i class="fas fa-server"></i></div>
+                <h3>Infrastructure</h3>
+                <p>Data center, virtualization, and remote infrastructure management built for uptime.</p>
+            </div>
+            <div class="capability-card animate-on-scroll animate-delay-4">
+                <div class="capability-icon"><i class="fas fa-building"></i></div>
+                <h3>Enterprise IT</h3>
+                <p>End-to-end IT operations, support, and lifecycle management tailored to your business.</p>
             </div>
             {% endfor %}
         </div>
@@ -227,46 +316,53 @@
             <p>Delivering specialized IT solutions across diverse industry verticals.</p>
         </div>
 
-        <div class="industry-grid">
-            {% for industry in industries %}
-            <a href="{{ industry.get_absolute_url }}" class="industry-card animate-on-scroll animate-delay-{{ forloop.counter }}">
-                <div class="industry-icon"><i class="{{ industry.icon }}"></i></div>
-                <h4>{{ industry.name }}</h4>
-                <p>{{ industry.short_description|truncatewords:10 }}</p>
-            </a>
-            {% empty %}
-            <div class="industry-card animate-on-scroll">
-                <div class="industry-icon"><i class="fas fa-microchip"></i></div>
-                <h4>Hi-Tech</h4>
-                <p>Cloud & data solutions</p>
+        <div class="industries-marquee">
+            <div class="industry-grid">
+                {% for i in "12"|make_list %}
+                {% for industry in industries %}
+                <a href="{{ industry.get_absolute_url }}" class="industry-card">
+                    <div class="industry-icon"><i class="{{ industry.icon }}"></i></div>
+                    <h4>{{ industry.name }}</h4>
+                    <p>{{ industry.short_description|truncatewords:10 }}</p>
+                </a>
+                {% empty %}
+                <div class="industry-card">
+                    <div class="industry-icon"><i class="fas fa-microchip"></i></div>
+                    <h4>Hi-Tech</h4>
+                    <p>Cloud & data solutions</p>
+                </div>
+                <div class="industry-card">
+                    <div class="industry-icon"><i class="fas fa-university"></i></div>
+                    <h4>Banking</h4>
+                    <p>Secure banking IT</p>
+                </div>
+                <div class="industry-card">
+                    <div class="industry-icon"><i class="fas fa-heartbeat"></i></div>
+                    <h4>Medical</h4>
+                    <p>Healthcare technology</p>
+                </div>
+                <div class="industry-card">
+                    <div class="industry-icon"><i class="fas fa-cog"></i></div>
+                    <h4>Industrial</h4>
+                    <p>Manufacturing IT</p>
+                </div>
+                <div class="industry-card">
+                    <div class="industry-icon"><i class="fas fa-briefcase"></i></div>
+                    <h4>SME</h4>
+                    <p>Small business solutions</p>
+                </div>
+                {% endfor %}
+                {% endfor %}
             </div>
-            <div class="industry-card animate-on-scroll animate-delay-1">
-                <div class="industry-icon"><i class="fas fa-university"></i></div>
-                <h4>Banking</h4>
-                <p>Secure banking IT</p>
-            </div>
-            <div class="industry-card animate-on-scroll animate-delay-2">
-                <div class="industry-icon"><i class="fas fa-heartbeat"></i></div>
-                <h4>Medical</h4>
-                <p>Healthcare technology</p>
-            </div>
-            <div class="industry-card animate-on-scroll animate-delay-3">
-                <div class="industry-icon"><i class="fas fa-cog"></i></div>
-                <h4>Industrial</h4>
-                <p>Manufacturing IT</p>
-            </div>
-            <div class="industry-card animate-on-scroll animate-delay-4">
-                <div class="industry-icon"><i class="fas fa-briefcase"></i></div>
-                <h4>SME</h4>
-                <p>Small business solutions</p>
-            </div>
-            {% endfor %}
         </div>
     </div>
 </section>
 
-{# ===== LEADERSHIP ===== #}
-<section class="section">
+{# ===== LEADERSHIP CAROUSEL ===== #}
+{% if leadership %}
+<section class="section leadership-section">
+    <div class="leadership-glow leadership-glow-1"></div>
+    <div class="leadership-glow leadership-glow-2"></div>
     <div class="container">
         <div class="section-header animate-on-scroll">
             <span class="section-badge"><i class="fas fa-user-tie"></i> Leadership</span>
@@ -274,42 +370,60 @@
             <p>Experienced professionals driving innovation and excellence at TM Solutech.</p>
         </div>
 
-        <div class="leadership-grid">
+        <div class="leadership-grid-static">
             {% for leader in leadership %}
-            <div class="leadership-card animate-on-scroll animate-delay-{{ forloop.counter }}">
-                <div class="leadership-photo">
+            <div
+                class="leader-mini-card open-bio-modal animate-on-scroll animate-delay-{{ forloop.counter }}"
+                role="button" tabindex="0"
+                aria-label="View {{ leader.name }}'s bio"
+                style="--leader-photo: url('{% if leader.photo %}{{ leader.photo.url }}{% else %}{% static 'images/general/placeholder-person.jpg' %}{% endif %}');"
+                data-name="{{ leader.name }}"
+                data-designation="{{ leader.designation }}"
+                data-photo="{% if leader.photo %}{{ leader.photo.url }}{% else %}{% static 'images/general/placeholder-person.jpg' %}{% endif %}"
+                data-linkedin="{{ leader.linkedin_url }}"
+                data-email="{{ leader.email }}"
+                data-bio="{{ leader.short_bio|default:'' }}"
+            >
+                <div class="leader-mini-card-bg"></div>
+                <div class="leader-mini-photo">
                     {% if leader.photo %}
                     <img src="{{ leader.photo.url }}" alt="{{ leader.name }}" loading="lazy">
                     {% else %}
                     <img src="{% static 'images/general/placeholder-person.jpg' %}" alt="{{ leader.name }}" loading="lazy">
                     {% endif %}
-                    <div class="leadership-social">
-                        {% if leader.linkedin_url %}
-                        <a href="{{ leader.linkedin_url }}" target="_blank" rel="noopener noreferrer"><i class="fab fa-linkedin-in"></i></a>
-                        {% endif %}
-                        {% if leader.email %}
-                        <a href="mailto:{{ leader.email }}"><i class="fas fa-envelope"></i></a>
-                        {% endif %}
-                    </div>
                 </div>
-                <div class="leadership-info">
-                    <h4>{{ leader.name }}</h4>
-                    <p class="designation">{{ leader.designation }}</p>
-                    {% if leader.short_bio %}
-                    <p class="bio">{{ leader.short_bio|truncatewords:20 }}</p>
-                    {% endif %}
-                </div>
+                <h4>{{ leader.name }}</h4>
+                <p>{{ leader.designation }}</p>
+                <span class="view-bio-hint">View Bio <i class="fas fa-arrow-right"></i></span>
             </div>
             {% endfor %}
         </div>
 
-        {% if leadership %}
         <div class="text-center" style="margin-top: var(--space-8);">
             <a href="{% url 'core:leadership' %}" class="btn btn-secondary">View Full Leadership Team</a>
         </div>
-        {% endif %}
     </div>
 </section>
+
+{# Leader Bio Modal #}
+<div class="leader-bio-modal" id="leaderBioModal">
+    <div class="leader-bio-modal-backdrop" id="leaderBioModalBackdrop"></div>
+    <div class="leader-bio-modal-panel" role="dialog" aria-modal="true" aria-label="Leader biography">
+        <button class="leader-bio-modal-close" id="leaderBioModalClose" aria-label="Close">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="leader-bio-modal-photo">
+            <img id="modalLeaderImg" src="" alt="">
+        </div>
+        <div class="leader-bio-modal-content">
+            <p class="leader-bio-modal-role" id="modalLeaderRole"></p>
+            <h3 id="modalLeaderName"></h3>
+            <p class="leader-bio-modal-text" id="modalLeaderBio"></p>
+            <div class="leader-bio-modal-socials" id="modalLeaderSocials"></div>
+        </div>
+    </div>
+</div>
+{% endif %}
 
 {# ===== LATEST INSIGHTS ===== #}
 {% if latest_posts %}
@@ -341,8 +455,8 @@
                         {% endif %}
                         <span><i class="fas fa-clock"></i> {{ post.reading_time }} min read</span>
                     </div>
-                    <h3>{{ post.title }}</h3>
-                    <p>{{ post.excerpt|truncatewords:25 }}</p>
+                    <h3>{{ post.title|truncatechars:60 }}</h3>
+                    <p>{{ post.excerpt|truncatewords:12 }}</p>
                     <div class="blog-card-footer">
                         <span class="blog-read-more">Read More <i class="fas fa-arrow-right"></i></span>
                     </div>

@@ -8,7 +8,10 @@ from django.utils import timezone
 from datetime import timedelta
 import json
 
-from core.models import SiteSettings, Statistic, WhyUsReason, Testimonial, Leadership, FAQ, SEOSettings, Gallery
+from core.models import (
+    SiteSettings, Statistic, WhyUsReason, Testimonial, Leadership, FAQ, SEOSettings, Gallery,
+    Capability, ClientLogo, HeroTag, HeroStat,
+)
 from services.models import ServiceCategory, Service, Industry
 from insights.models import BlogPost, BlogCategory
 from contact.models import ContactInquiry
@@ -486,3 +489,346 @@ def page_delete(request, pk):
         page.delete()
         messages.success(request, 'Page deleted.')
     return redirect('dashboard:page_list')
+
+
+# ---- Statistic CRUD ----
+@login_required
+@staff_required
+def statistic_list(request):
+    stats = Statistic.objects.all()
+    return render(request, 'dashboard/statistics/list.html', {'stats': stats, 'page_title': 'Trust Bar Statistics'})
+
+
+@login_required
+@staff_required
+def statistic_create(request):
+    from dashboard.forms import StatisticForm
+    if request.method == 'POST':
+        form = StatisticForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Statistic added.')
+            return redirect('dashboard:statistic_list')
+    else:
+        form = StatisticForm()
+    return render(request, 'dashboard/statistics/form.html', {'form': form, 'page_title': 'Add Statistic'})
+
+
+@login_required
+@staff_required
+def statistic_edit(request, pk):
+    from dashboard.forms import StatisticForm
+    stat = get_object_or_404(Statistic, pk=pk)
+    if request.method == 'POST':
+        form = StatisticForm(request.POST, instance=stat)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Statistic updated.')
+            return redirect('dashboard:statistic_list')
+    else:
+        form = StatisticForm(instance=stat)
+    return render(request, 'dashboard/statistics/form.html', {'form': form, 'page_title': 'Edit Statistic'})
+
+
+@login_required
+@staff_required
+def statistic_delete(request, pk):
+    stat = get_object_or_404(Statistic, pk=pk)
+    if request.method == 'POST':
+        stat.delete()
+        messages.success(request, 'Statistic deleted.')
+    return redirect('dashboard:statistic_list')
+
+
+# ---- WhyUsReason CRUD ----
+@login_required
+@staff_required
+def whyus_list(request):
+    reasons = WhyUsReason.objects.all()
+    return render(request, 'dashboard/whyus/list.html', {'reasons': reasons, 'page_title': 'Why Choose Us'})
+
+
+@login_required
+@staff_required
+def whyus_create(request):
+    from dashboard.forms import WhyUsReasonForm
+    if request.method == 'POST':
+        form = WhyUsReasonForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Reason added.')
+            return redirect('dashboard:whyus_list')
+    else:
+        form = WhyUsReasonForm()
+    return render(request, 'dashboard/whyus/form.html', {'form': form, 'page_title': 'Add Reason'})
+
+
+@login_required
+@staff_required
+def whyus_edit(request, pk):
+    from dashboard.forms import WhyUsReasonForm
+    reason = get_object_or_404(WhyUsReason, pk=pk)
+    if request.method == 'POST':
+        form = WhyUsReasonForm(request.POST, request.FILES, instance=reason)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Reason updated.')
+            return redirect('dashboard:whyus_list')
+    else:
+        form = WhyUsReasonForm(instance=reason)
+    return render(request, 'dashboard/whyus/form.html', {'form': form, 'page_title': 'Edit Reason'})
+
+
+@login_required
+@staff_required
+def whyus_delete(request, pk):
+    reason = get_object_or_404(WhyUsReason, pk=pk)
+    if request.method == 'POST':
+        reason.delete()
+        messages.success(request, 'Reason deleted.')
+    return redirect('dashboard:whyus_list')
+
+
+# ---- BlogCategory CRUD ----
+@login_required
+@staff_required
+def blogcategory_list(request):
+    categories = BlogCategory.objects.all()
+    return render(request, 'dashboard/blogcategories/list.html', {'categories': categories, 'page_title': 'Blog Categories'})
+
+
+@login_required
+@staff_required
+def blogcategory_create(request):
+    from dashboard.forms import BlogCategoryForm
+    if request.method == 'POST':
+        form = BlogCategoryForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Category added.')
+            return redirect('dashboard:blogcategory_list')
+    else:
+        form = BlogCategoryForm()
+    return render(request, 'dashboard/blogcategories/form.html', {'form': form, 'page_title': 'Add Category'})
+
+
+@login_required
+@staff_required
+def blogcategory_edit(request, pk):
+    from dashboard.forms import BlogCategoryForm
+    category = get_object_or_404(BlogCategory, pk=pk)
+    if request.method == 'POST':
+        form = BlogCategoryForm(request.POST, instance=category)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Category updated.')
+            return redirect('dashboard:blogcategory_list')
+    else:
+        form = BlogCategoryForm(instance=category)
+    return render(request, 'dashboard/blogcategories/form.html', {'form': form, 'page_title': 'Edit Category'})
+
+
+@login_required
+@staff_required
+def blogcategory_delete(request, pk):
+    category = get_object_or_404(BlogCategory, pk=pk)
+    if request.method == 'POST':
+        category.delete()
+        messages.success(request, 'Category deleted.')
+    return redirect('dashboard:blogcategory_list')
+
+
+# ---- Capability CRUD ----
+@login_required
+@staff_required
+def capability_list(request):
+    capabilities = Capability.objects.all()
+    return render(request, 'dashboard/capabilities/list.html', {'capabilities': capabilities, 'page_title': 'Capabilities'})
+
+
+@login_required
+@staff_required
+def capability_create(request):
+    from dashboard.forms import CapabilityForm
+    if request.method == 'POST':
+        form = CapabilityForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Capability added.')
+            return redirect('dashboard:capability_list')
+    else:
+        form = CapabilityForm()
+    return render(request, 'dashboard/capabilities/form.html', {'form': form, 'page_title': 'Add Capability'})
+
+
+@login_required
+@staff_required
+def capability_edit(request, pk):
+    from dashboard.forms import CapabilityForm
+    capability = get_object_or_404(Capability, pk=pk)
+    if request.method == 'POST':
+        form = CapabilityForm(request.POST, instance=capability)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Capability updated.')
+            return redirect('dashboard:capability_list')
+    else:
+        form = CapabilityForm(instance=capability)
+    return render(request, 'dashboard/capabilities/form.html', {'form': form, 'page_title': 'Edit Capability'})
+
+
+@login_required
+@staff_required
+def capability_delete(request, pk):
+    capability = get_object_or_404(Capability, pk=pk)
+    if request.method == 'POST':
+        capability.delete()
+        messages.success(request, 'Capability deleted.')
+    return redirect('dashboard:capability_list')
+
+
+# ---- ClientLogo CRUD ----
+@login_required
+@staff_required
+def clientlogo_list(request):
+    logos = ClientLogo.objects.all()
+    return render(request, 'dashboard/clientlogos/list.html', {'logos': logos, 'page_title': 'Client Logos'})
+
+
+@login_required
+@staff_required
+def clientlogo_create(request):
+    from dashboard.forms import ClientLogoForm
+    if request.method == 'POST':
+        form = ClientLogoForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Logo added.')
+            return redirect('dashboard:clientlogo_list')
+    else:
+        form = ClientLogoForm()
+    return render(request, 'dashboard/clientlogos/form.html', {'form': form, 'page_title': 'Add Client Logo'})
+
+
+@login_required
+@staff_required
+def clientlogo_edit(request, pk):
+    from dashboard.forms import ClientLogoForm
+    logo = get_object_or_404(ClientLogo, pk=pk)
+    if request.method == 'POST':
+        form = ClientLogoForm(request.POST, request.FILES, instance=logo)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Logo updated.')
+            return redirect('dashboard:clientlogo_list')
+    else:
+        form = ClientLogoForm(instance=logo)
+    return render(request, 'dashboard/clientlogos/form.html', {'form': form, 'page_title': 'Edit Client Logo'})
+
+
+@login_required
+@staff_required
+def clientlogo_delete(request, pk):
+    logo = get_object_or_404(ClientLogo, pk=pk)
+    if request.method == 'POST':
+        logo.delete()
+        messages.success(request, 'Logo deleted.')
+    return redirect('dashboard:clientlogo_list')
+
+
+# ---- HeroTag CRUD ----
+@login_required
+@staff_required
+def herotag_list(request):
+    tags = HeroTag.objects.all()
+    return render(request, 'dashboard/herotags/list.html', {'tags': tags, 'page_title': 'Hero Tags'})
+
+
+@login_required
+@staff_required
+def herotag_create(request):
+    from dashboard.forms import HeroTagForm
+    if request.method == 'POST':
+        form = HeroTagForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Tag added.')
+            return redirect('dashboard:herotag_list')
+    else:
+        form = HeroTagForm()
+    return render(request, 'dashboard/herotags/form.html', {'form': form, 'page_title': 'Add Hero Tag'})
+
+
+@login_required
+@staff_required
+def herotag_edit(request, pk):
+    from dashboard.forms import HeroTagForm
+    tag = get_object_or_404(HeroTag, pk=pk)
+    if request.method == 'POST':
+        form = HeroTagForm(request.POST, instance=tag)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Tag updated.')
+            return redirect('dashboard:herotag_list')
+    else:
+        form = HeroTagForm(instance=tag)
+    return render(request, 'dashboard/herotags/form.html', {'form': form, 'page_title': 'Edit Hero Tag'})
+
+
+@login_required
+@staff_required
+def herotag_delete(request, pk):
+    tag = get_object_or_404(HeroTag, pk=pk)
+    if request.method == 'POST':
+        tag.delete()
+        messages.success(request, 'Tag deleted.')
+    return redirect('dashboard:herotag_list')
+
+
+# ---- HeroStat CRUD ----
+@login_required
+@staff_required
+def herostat_list(request):
+    stats = HeroStat.objects.all()
+    return render(request, 'dashboard/herostats/list.html', {'stats': stats, 'page_title': 'Hero Floating Stats'})
+
+
+@login_required
+@staff_required
+def herostat_create(request):
+    from dashboard.forms import HeroStatForm
+    if request.method == 'POST':
+        form = HeroStatForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Stat added.')
+            return redirect('dashboard:herostat_list')
+    else:
+        form = HeroStatForm()
+    return render(request, 'dashboard/herostats/form.html', {'form': form, 'page_title': 'Add Hero Stat'})
+
+
+@login_required
+@staff_required
+def herostat_edit(request, pk):
+    from dashboard.forms import HeroStatForm
+    stat = get_object_or_404(HeroStat, pk=pk)
+    if request.method == 'POST':
+        form = HeroStatForm(request.POST, instance=stat)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Stat updated.')
+            return redirect('dashboard:herostat_list')
+    else:
+        form = HeroStatForm(instance=stat)
+    return render(request, 'dashboard/herostats/form.html', {'form': form, 'page_title': 'Edit Hero Stat'})
+
+
+@login_required
+@staff_required
+def herostat_delete(request, pk):
+    stat = get_object_or_404(HeroStat, pk=pk)
+    if request.method == 'POST':
+        stat.delete()
+        messages.success(request, 'Stat deleted.')
+    return redirect('dashboard:herostat_list')

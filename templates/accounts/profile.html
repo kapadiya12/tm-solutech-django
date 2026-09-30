@@ -1,10 +1,10 @@
 {% extends 'dashboard/base.html' %}
 
 {% block dashboard_content %}
-<div class="section-header" style="text-align: left; margin-bottom: var(--space-8);">
+<div class="mb-8">
     <h2>My Profile</h2>
 </div>
-<div style="max-width: 600px; background: var(--white); border-radius: var(--radius-xl); padding: var(--space-8); border: 1px solid var(--gray-200);">
+<div class="dashboard-card" style="max-width: 600px;">
     <form method="post">
         {% csrf_token %}
         <div class="form-grid">

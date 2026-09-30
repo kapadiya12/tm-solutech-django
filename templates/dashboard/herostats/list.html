@@ -1,0 +1,34 @@
+{% extends 'dashboard/base.html' %}
+{% block dashboard_content %}
+<div class="flex-between mb-8">
+    <h2>{{ page_title }}</h2>
+    <a href="{% url 'dashboard:herostat_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add Hero Stat</a>
+</div>
+<div class="dashboard-card">
+    <div class="dashboard-table-wrap">
+        <table class="dashboard-table">
+            <thead>
+                <tr><th>Icon</th><th>Label</th><th>Value</th><th>Order</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                {% for stat in stats %}
+                <tr>
+                    <td><i class="{{ stat.icon }}"></i></td><td><strong>{{ stat.label }}</strong></td><td>{{ stat.value }}</td><td>{{ stat.display_order }}</td>
+                    <td>
+                        <div class="flex gap-2">
+                            <a href="{% url 'dashboard:herostat_edit' stat.pk %}" class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></a>
+                            <form method="post" action="{% url 'dashboard:herostat_delete' stat.pk %}" onsubmit="return confirm('Delete this item?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm" style="color: var(--danger);"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="text-center">No hero stats yet. <a href="{% url 'dashboard:herostat_create' %}">Create one</a></td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

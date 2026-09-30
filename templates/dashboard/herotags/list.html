@@ -1,0 +1,34 @@
+{% extends 'dashboard/base.html' %}
+{% block dashboard_content %}
+<div class="flex-between mb-8">
+    <h2>{{ page_title }}</h2>
+    <a href="{% url 'dashboard:herotag_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add Hero Tag</a>
+</div>
+<div class="dashboard-card">
+    <div class="dashboard-table-wrap">
+        <table class="dashboard-table">
+            <thead>
+                <tr><th>Icon</th><th>Label</th><th>Order</th><th>Active</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                {% for tag in tags %}
+                <tr>
+                    <td><i class="{{ tag.icon }}"></i></td><td><strong>{{ tag.label }}</strong></td><td>{{ tag.display_order }}</td><td><span class="status-badge {% if tag.is_active %}status-active{% else %}status-draft{% endif %}">{% if tag.is_active %}Active{% else %}Inactive{% endif %}</span></td>
+                    <td>
+                        <div class="flex gap-2">
+                            <a href="{% url 'dashboard:herotag_edit' tag.pk %}" class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></a>
+                            <form method="post" action="{% url 'dashboard:herotag_delete' tag.pk %}" onsubmit="return confirm('Delete this item?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm" style="color: var(--danger);"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="text-center">No hero tags yet. <a href="{% url 'dashboard:herotag_create' %}">Create one</a></td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

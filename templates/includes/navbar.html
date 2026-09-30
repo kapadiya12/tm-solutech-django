@@ -1,99 +1,244 @@
 {% load static %}
-<nav class="navbar" id="mainNavbar">
+{% load asset_tags %}
+<link rel="stylesheet" href="{% static_v 'css/navbar.css' %}">
+
+<nav class="navbar" id="mainNavbar" aria-label="Main navigation" role="navigation">
     <div class="container">
         <div class="navbar-inner">
-            <a href="{% url 'core:home' %}" class="navbar-brand">
-                <div class="brand-logo-pill">
-                    {% if site_settings and site_settings.logo %}
-                    <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.company_name }}">
+
+            <!-- Brand -->
+            <a href="{% url 'core:home' %}"
+               class="navbar-brand"
+               aria-label="{{ site_settings.company_name|default:'TM Solutech' }} Home">
+
+                {% if site_settings and site_settings.logo %}
+                        <img
+                            src="{{ site_settings.logo.url }}"
+                            alt="{{ site_settings.company_name|default:'TM Solutech' }}"
+                            class="brand-logo-img"
+                            loading="eager"
+                        >
                     {% else %}
-                    <img src="{% static 'images/logo/tm-solutech-logo.png' %}" alt="TM Solutech">
+                        <img
+                            src="{% static 'images/logo/tm-solutech-logo.png' %}"
+                            alt="TM Solutech"
+                            class="brand-logo-img"
+                            loading="eager"
+                        >
                     {% endif %}
-                </div>
             </a>
 
-            <div class="navbar-nav-container">
-                <ul class="navbar-nav">
+            <!-- Main Navigation -->
+            <div class="navbar-nav-container" id="navbarNavContainer">
+
+                <span class="nav-indicator" id="navIndicator" aria-hidden="true"></span>
+                <ul class="navbar-nav" id="navbarNavList">
+
+                    <!-- Home -->
                     <li class="nav-item">
-                        <a href="{% url 'core:home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+                        <a
+                            href="{% url 'core:home' %}"
+                            class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}"
+                        >
                             <span>Home</span>
                         </a>
                     </li>
+
+                    <!-- About -->
                     <li class="nav-item">
-                        <a href="{% url 'core:about' %}" class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}">
+                        <a
+                            href="{% url 'core:about' %}"
+                            class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}"
+                        >
                             <span>About</span>
                         </a>
                     </li>
+
+                    <!-- Why Us -->
                     <li class="nav-item">
-                        <a href="{% url 'core:why_us' %}" class="nav-link {% if request.resolver_match.url_name == 'why_us' %}active{% endif %}">
+                        <a
+                            href="{% url 'core:why_us' %}"
+                            class="nav-link {% if request.resolver_match.url_name == 'why_us' %}active{% endif %}"
+                        >
                             <span>Why Us</span>
                         </a>
                     </li>
-                    <li class="nav-item has-dropdown">
-                        <a href="{% url 'services:service_list' %}" class="nav-link {% if request.resolver_match.app_name == 'services' %}active{% endif %}">
+
+                    <!-- Services -->
+                    <li class="nav-item has-dropdown" id="servicesNavItem">
+
+                        <a
+                            href="{% url 'services:service_list' %}"
+                            class="nav-link {% if request.resolver_match.app_name == 'services' %}active{% endif %}"
+                            id="servicesNavLink"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                        >
                             <span>Services</span>
                             <i class="fas fa-chevron-down dropdown-arrow"></i>
                         </a>
-                        <div class="mega-dropdown">
+
+                        <div class="mega-dropdown" id="servicesMegaDropdown">
+
                             <div class="mega-dropdown-header">
+                                <div class="mega-dropdown-header-glow"></div>
                                 <div>
-                                    <h5>Enterprise Solutions & Services</h5>
-                                    <p>Comprehensive technology architectures engineered for scale and security</p>
+                                    <span class="mega-dropdown-eyebrow"><i class="fas fa-bolt"></i> Explore</span>
+                                    <h5>Enterprise Solutions &amp; Services</h5>
+                                    <p>
+                                        Comprehensive technology architectures engineered for scale and security
+                                    </p>
                                 </div>
-                                <a href="{% url 'services:service_list' %}" class="view-all-link">All Services <i class="fas fa-arrow-right"></i></a>
+
+                                <a
+                                    href="{% url 'services:service_list' %}"
+                                    class="view-all-link"
+                                >
+                                    <span>All Services</span>
+                                    <i class="fas fa-arrow-right"></i>
+                                </a>
                             </div>
-                            <div class="mega-dropdown-grid">
+
+                            <div class="mega-dropdown-grid" id="megaDropdownGrid">
+
                                 {% for category in nav_service_categories %}
-                                <div class="mega-dropdown-category">
-                                    <div class="category-title-wrap">
-                                        <i class="{{ category.icon }}"></i>
-                                        <h6><a href="{{ category.get_absolute_url }}">{{ category.name }}</a></h6>
+
+                                    <div class="mega-dropdown-category">
+
+                                        <div class="category-title-wrap">
+                                            <span class="category-icon-badge"><i class="{{ category.icon }}"></i></span>
+
+                                            <h6>
+                                                <a href="{{ category.get_absolute_url }}">
+                                                    {{ category.name }}
+                                                </a>
+                                            </h6>
+                                        </div>
+
+                                        <div class="mega-dropdown-links">
+
+                                            {% for service in category.active_services|slice:":4" %}
+
+                                                <a
+                                                    href="{{ service.get_absolute_url }}"
+                                                    class="service-menu-link"
+                                                >
+                                                    <i class="fas fa-angle-right"></i>
+                                                    <span>{{ service.title }}</span>
+                                                </a>
+
+                                            {% empty %}
+
+                                                <a
+                                                    href="{{ category.get_absolute_url }}"
+                                                    class="service-menu-link"
+                                                >
+                                                    <i class="fas fa-angle-right"></i>
+                                                    <span>View Category</span>
+                                                </a>
+
+                                            {% endfor %}
+
+                                            {% if category.active_services.count > 4 %}
+                                            <a href="{{ category.get_absolute_url }}" class="service-menu-link service-menu-more">
+                                                <span>View all</span> <i class="fas fa-arrow-right"></i>
+                                            </a>
+                                            {% endif %}
+
+                                        </div>
                                     </div>
-                                    <div class="mega-dropdown-links">
-                                        {% for service in category.active_services %}
-                                        <a href="{{ service.get_absolute_url }}" class="service-menu-link">
-                                            <i class="fas fa-angle-right"></i>
-                                            <span>{{ service.title }}</span>
-                                        </a>
-                                        {% endfor %}
-                                    </div>
-                                </div>
+
                                 {% empty %}
-                                <div class="mega-dropdown-category">
-                                    <h6>Our Services</h6>
-                                    <div class="mega-dropdown-links">
-                                        <a href="{% url 'services:service_list' %}"><i class="fas fa-chevron-right"></i> View All Services</a>
+
+                                    <div class="mega-dropdown-category">
+
+                                        <div class="category-title-wrap">
+                                            <span class="category-icon-badge"><i class="fas fa-layer-group"></i></span>
+
+                                            <h6>
+                                                <a href="{% url 'services:service_list' %}">
+                                                    Our Services
+                                                </a>
+                                            </h6>
+                                        </div>
+
+                                        <div class="mega-dropdown-links">
+                                            <a
+                                                href="{% url 'services:service_list' %}"
+                                                class="service-menu-link"
+                                            >
+                                                <i class="fas fa-angle-right"></i>
+                                                <span>View All Services</span>
+                                            </a>
+                                        </div>
+
                                     </div>
-                                </div>
+
                                 {% endfor %}
+
+                            </div>
+
+                            <div class="mega-dropdown-footer">
+                                <div class="mega-dropdown-footer-text">
+                                    <i class="fas fa-headset"></i>
+                                    <span>Not sure where to start? <strong>Talk to a solutions expert.</strong></span>
+                                </div>
+                                <a href="{% url 'contact:contact' %}" class="mega-dropdown-footer-cta">
+                                    Get Free Consultation <i class="fas fa-arrow-right"></i>
+                                </a>
                             </div>
                         </div>
                     </li>
+
+                    <!-- Insights -->
                     <li class="nav-item">
-                        <a href="{% url 'insights:post_list' %}" class="nav-link {% if request.resolver_match.app_name == 'insights' %}active{% endif %}">
+                        <a
+                            href="{% url 'insights:post_list' %}"
+                            class="nav-link {% if request.resolver_match.app_name == 'insights' %}active{% endif %}"
+                        >
                             <span>Insights</span>
                         </a>
                     </li>
+
+                    <!-- Contact -->
                     <li class="nav-item">
-                        <a href="{% url 'contact:contact' %}" class="nav-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}">
+                        <a
+                            href="{% url 'contact:contact' %}"
+                            class="nav-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}"
+                        >
                             <span>Contact</span>
                         </a>
                     </li>
+
                 </ul>
             </div>
 
+            <!-- Right Side -->
             <div class="navbar-right">
-                <a href="{% url 'contact:contact' %}" class="btn-navbar-cta">
+
+                <a
+                    href="{% url 'contact:contact' %}"
+                    class="btn-navbar-cta"
+                >
                     <span>Get a Consultation</span>
                     <i class="fas fa-arrow-right"></i>
                 </a>
 
-                <button class="mobile-toggle" id="mobileMenuToggle" aria-label="Toggle mobile menu">
+                <button
+                    class="mobile-toggle"
+                    id="mobileMenuToggle"
+                    type="button"
+                    aria-label="Open navigation menu"
+                    aria-controls="navbarNavContainer"
+                    aria-expanded="false"
+                >
                     <span class="bar"></span>
                     <span class="bar"></span>
                     <span class="bar"></span>
                 </button>
+
             </div>
+
         </div>
     </div>
 </nav>

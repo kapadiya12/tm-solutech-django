@@ -3,6 +3,8 @@
 
 {% block content %}
 <div class="page-hero">
+    <div class="hero-orb hero-orb-1"></div>
+    <div class="hero-orb hero-orb-2"></div>
     <div class="container">
         <ul class="breadcrumb-list">
             <li><a href="{% url 'core:home' %}"><i class="fas fa-home"></i> Home</a></li>
@@ -10,6 +12,7 @@
             <li><span class="separator"><i class="fas fa-chevron-right"></i></span> <a href="{{ category.get_absolute_url }}">{{ category.name }}</a></li>
             <li><span class="separator"><i class="fas fa-chevron-right"></i></span> {{ service.title }}</li>
         </ul>
+        <div class="service-hero-badge"><i class="{{ service.icon }}"></i></div>
         <h1 class="page-title">{{ page_title }}</h1>
         <p class="page-subtitle">{{ page_subtitle }}</p>
     </div>
@@ -18,12 +21,16 @@
 {# Service Introduction #}
 <section class="section">
     <div class="container">
-        <div class="service-detail-intro animate-on-scroll">
-            <div>
+        <div class="service-detail-intro animate-on-scroll {% if not service.image %}service-detail-intro-solo{% endif %}">
+            <div class="service-detail-intro-content">
+                <span class="section-badge"><i class="{{ service.icon }}"></i> {{ category.name }}</span>
                 <h2>{{ service.title }}</h2>
                 {% if service.description %}
-                <div style="color: var(--gray-600); line-height: 1.8;">{{ service.description|safe }}</div>
+                <div class="typography-pro">{{ service.description|safe }}</div>
+                {% else %}
+                <p>{{ service.short_description }}</p>
                 {% endif %}
+                <a href="{% url 'contact:contact' %}" class="btn btn-primary" style="margin-top: 1rem;">Get Free Consultation <i class="fas fa-arrow-right"></i></a>
             </div>
             {% if service.image %}
             <div class="service-detail-image">
@@ -39,9 +46,10 @@
 <section class="section section-gray">
     <div class="container">
         <div class="section-header animate-on-scroll">
+            <span class="section-badge"><i class="fas fa-list-check"></i> What's Included</span>
             <h2>Key <span class="highlight">Features</span></h2>
         </div>
-        <div class="animate-on-scroll">{{ service.features|safe }}</div>
+        <div class="animate-on-scroll typography-pro service-feature-list">{{ service.features|safe }}</div>
     </div>
 </section>
 {% endif %}
@@ -51,21 +59,23 @@
 <section class="section">
     <div class="container">
         <div class="section-header animate-on-scroll">
+            <span class="section-badge"><i class="fas fa-award"></i> Why It Matters</span>
             <h2>Benefits</h2>
         </div>
-        <div class="animate-on-scroll">{{ service.benefits|safe }}</div>
+        <div class="animate-on-scroll typography-pro service-benefit-list">{{ service.benefits|safe }}</div>
     </div>
 </section>
 {% endif %}
 
 {# Process #}
 {% if service.process %}
-<section class="section section-gray">
+<section class="section section-dark">
     <div class="container">
         <div class="section-header animate-on-scroll">
+            <span class="section-badge"><i class="fas fa-route"></i> How We Work</span>
             <h2>Our Process</h2>
         </div>
-        <div class="animate-on-scroll">{{ service.process|safe }}</div>
+        <div class="animate-on-scroll service-process-list">{{ service.process|safe }}</div>
     </div>
 </section>
 {% endif %}
@@ -75,6 +85,7 @@
 <section class="section">
     <div class="container-narrow">
         <div class="section-header animate-on-scroll">
+            <span class="section-badge"><i class="fas fa-circle-question"></i> FAQ</span>
             <h2>Frequently Asked Questions</h2>
         </div>
         <div class="accordion">
@@ -99,6 +110,7 @@
 <section class="section section-gray">
     <div class="container">
         <div class="section-header animate-on-scroll">
+            <span class="section-badge"><i class="fas fa-layer-group"></i> Explore More</span>
             <h2>Related Services</h2>
         </div>
         <div class="related-services">

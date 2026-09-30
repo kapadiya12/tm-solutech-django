@@ -1,6 +1,9 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q
-from .models import SiteSettings, Statistic, WhyUsReason, Testimonial, Leadership, FAQ, SEOSettings
+from .models import (
+    SiteSettings, Statistic, WhyUsReason, Testimonial, Leadership, FAQ, SEOSettings,
+    Capability, ClientLogo, HeroTag, HeroStat,
+)
 from services.models import ServiceCategory, Service, Industry
 from insights.models import BlogPost
 from contact.models import ContactInquiry
@@ -16,6 +19,10 @@ def home(request):
         'testimonials': Testimonial.objects.filter(is_active=True)[:5],
         'leadership': Leadership.objects.filter(is_active=True)[:5],
         'latest_posts': BlogPost.objects.filter(is_published=True)[:3],
+        'capabilities': Capability.objects.filter(is_active=True),
+        'client_logos': ClientLogo.objects.filter(is_active=True),
+        'hero_tags': HeroTag.objects.filter(is_active=True),
+        'hero_stats': HeroStat.objects.filter(is_active=True),
         'page_title': 'Smart IT Solutions for Modern Businesses',
     }
     return render(request, 'core/home.html', context)

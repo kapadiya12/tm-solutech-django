@@ -46,4 +46,39 @@ urlpatterns = [
     path('pages/create/', views.page_create, name='page_create'),
     path('pages/<int:pk>/edit/', views.page_edit, name='page_edit'),
     path('pages/<int:pk>/delete/', views.page_delete, name='page_delete'),
+    # Statistics
+    path('statistics/', views.statistic_list, name='statistic_list'),
+    path('statistics/create/', views.statistic_create, name='statistic_create'),
+    path('statistics/<int:pk>/edit/', views.statistic_edit, name='statistic_edit'),
+    path('statistics/<int:pk>/delete/', views.statistic_delete, name='statistic_delete'),
+    # Why Us Reasons
+    path('why-us/', views.whyus_list, name='whyus_list'),
+    path('why-us/create/', views.whyus_create, name='whyus_create'),
+    path('why-us/<int:pk>/edit/', views.whyus_edit, name='whyus_edit'),
+    path('why-us/<int:pk>/delete/', views.whyus_delete, name='whyus_delete'),
+    # Blog Categories
+    path('blog-categories/', views.blogcategory_list, name='blogcategory_list'),
+    path('blog-categories/create/', views.blogcategory_create, name='blogcategory_create'),
+    path('blog-categories/<int:pk>/edit/', views.blogcategory_edit, name='blogcategory_edit'),
+    path('blog-categories/<int:pk>/delete/', views.blogcategory_delete, name='blogcategory_delete'),
+    # Capabilities
+    path('capabilities/', views.capability_list, name='capability_list'),
+    path('capabilities/create/', views.capability_create, name='capability_create'),
+    path('capabilities/<int:pk>/edit/', views.capability_edit, name='capability_edit'),
+    path('capabilities/<int:pk>/delete/', views.capability_delete, name='capability_delete'),
+    # Client Logos
+    path('client-logos/', views.clientlogo_list, name='clientlogo_list'),
+    path('client-logos/create/', views.clientlogo_create, name='clientlogo_create'),
+    path('client-logos/<int:pk>/edit/', views.clientlogo_edit, name='clientlogo_edit'),
+    path('client-logos/<int:pk>/delete/', views.clientlogo_delete, name='clientlogo_delete'),
+    # Hero Tags
+    path('hero-tags/', views.herotag_list, name='herotag_list'),
+    path('hero-tags/create/', views.herotag_create, name='herotag_create'),
+    path('hero-tags/<int:pk>/edit/', views.herotag_edit, name='herotag_edit'),
+    path('hero-tags/<int:pk>/delete/', views.herotag_delete, name='herotag_delete'),
+    # Hero Stats
+    path('hero-stats/', views.herostat_list, name='herostat_list'),
+    path('hero-stats/create/', views.herostat_create, name='herostat_create'),
+    path('hero-stats/<int:pk>/edit/', views.herostat_edit, name='herostat_edit'),
+    path('hero-stats/<int:pk>/delete/', views.herostat_delete, name='herostat_delete'),
 ]

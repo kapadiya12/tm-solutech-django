@@ -1,4 +1,5 @@
 {% load static %}
+{% load asset_tags %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,7 +15,7 @@
     {% if site_settings and site_settings.favicon %}
     <link rel="icon" href="{{ site_settings.favicon.url }}" type="image/png">
     {% else %}
-    <link rel="icon" href="{% static 'images/logo/favicon.png' %}" type="image/png">
+    <link rel="icon" href="{% static_v 'images/logo/favicon.png' %}" type="image/png">
     {% endif %}
 
     {# Google Fonts & Font Awesome #}
@@ -23,8 +24,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    {# Main CSS with Instant Cache Busting #}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v={% now 'U' %}">
+    {# Main CSS #}
+    <link rel="stylesheet" href="{% static_v 'css/style.css' %}">
     {% block extra_css %}{% endblock %}
 
     {% if site_settings and site_settings.header_scripts %}
@@ -32,6 +33,7 @@
     {% endif %}
 </head>
 <body>
+    <div class="page-loader-bar" id="pageLoaderBar"></div>
     <div class="scroll-progress"></div>
     <div class="mobile-overlay"></div>
 
@@ -68,7 +70,7 @@
         </div>
     </div>
 
-    <script src="{% static 'js/main.js' %}?v={% now 'U' %}"></script>
+    <script src="{% static_v 'js/main.js' %}"></script>
     {% block extra_js %}{% endblock %}
 
     {% if site_settings and site_settings.footer_scripts %}

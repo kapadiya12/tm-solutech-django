@@ -4,37 +4,48 @@
 {% block title %}Login | TM Solutech Admin{% endblock %}
 
 {% block content %}
-<section style="min-height: 100vh; display: flex; align-items: center; background: var(--gradient-dark); padding-top: 5rem;">
-    <div class="container" style="max-width: 480px;">
-        <div style="background: var(--white); border-radius: var(--radius-2xl); padding: var(--space-10); box-shadow: var(--shadow-2xl);">
-            <div class="text-center" style="margin-bottom: var(--space-8);">
-                <img src="{% static 'images/logo/tm-solutech-logo.png' %}" alt="TM Solutech" style="height: 48px; margin: 0 auto var(--space-4);">
-                <h2 style="font-size: var(--text-2xl);">Welcome Back</h2>
-                <p style="color: var(--gray-500); font-size: var(--text-sm);">Sign in to access the admin dashboard</p>
-            </div>
-            <form method="post">
-                {% csrf_token %}
-                <div class="form-group">
-                    <label class="form-label">Username</label>
-                    {{ form.username }}
-                    {% if form.username.errors %}<div class="form-error">{{ form.username.errors.0 }}</div>{% endif %}
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Password</label>
-                    {{ form.password }}
-                    {% if form.password.errors %}<div class="form-error">{{ form.password.errors.0 }}</div>{% endif %}
-                </div>
-                {% if form.non_field_errors %}
-                <div style="background: rgba(239,68,68,0.1); border: 1px solid var(--danger); border-radius: var(--radius-lg); padding: var(--space-3) var(--space-4); margin-bottom: var(--space-4); color: var(--danger); font-size: var(--text-sm);">
-                    {% for error in form.non_field_errors %}{{ error }}{% endfor %}
-                </div>
-                {% endif %}
-                <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: var(--space-4);">Sign In <i class="fas fa-arrow-right"></i></button>
-            </form>
-            <div class="text-center" style="margin-top: var(--space-6);">
-                <a href="{% url 'core:home' %}" style="font-size: var(--text-sm); color: var(--gray-500);"><i class="fas fa-arrow-left"></i> Back to Website</a>
-            </div>
+<section class="auth-section">
+    <div class="hero-pattern"></div>
+    <div class="auth-orb auth-orb-1"></div>
+    <div class="auth-orb auth-orb-2"></div>
+
+    <div class="auth-card">
+        <div class="auth-logo-box">
+            <img src="{% static 'images/logo/tm-solutech-logo.png' %}" alt="TM Solutech">
         </div>
+        <h2>Welcome Back</h2>
+        <p class="auth-subtitle">Sign in to access the admin dashboard</p>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group input-icon-group">
+                <label class="form-label">Username</label>
+                <div class="input-wrap">
+                    <i class="fas fa-user input-icon"></i>
+                    {{ form.username }}
+                </div>
+                {% if form.username.errors %}<div class="form-error">{{ form.username.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="form-group input-icon-group">
+                <label class="form-label">Password</label>
+                <div class="input-wrap">
+                    <i class="fas fa-lock input-icon"></i>
+                    {{ form.password }}
+                </div>
+                {% if form.password.errors %}<div class="form-error">{{ form.password.errors.0 }}</div>{% endif %}
+            </div>
+
+            {% if form.non_field_errors %}
+            <div class="auth-error-box">
+                <i class="fas fa-exclamation-circle"></i>
+                <span>{% for error in form.non_field_errors %}{{ error }}{% endfor %}</span>
+            </div>
+            {% endif %}
+
+            <button type="submit" class="btn btn-primary btn-lg auth-submit-btn">Sign In <i class="fas fa-arrow-right"></i></button>
+        </form>
+
+        <a href="{% url 'core:home' %}" class="auth-back-link"><i class="fas fa-arrow-left"></i> Back to Website</a>
     </div>
 </section>
 {% endblock %}

@@ -3,6 +3,9 @@
 
 {% block content %}
 <div class="page-hero">
+    <div class="hero-orb hero-orb-1"></div>
+    <div class="hero-orb hero-orb-2"></div>
+    <div class="hero-orb hero-orb-3"></div>
     <div class="container">
         <ul class="breadcrumb-list">
             <li><a href="{% url 'core:home' %}"><i class="fas fa-home"></i> Home</a></li>
@@ -14,12 +17,13 @@
 </div>
 
 {% for category in categories %}
-<section class="section {% if forloop.counter|divisibleby:2 %}section-gray{% endif %}">
+<section class="section {% if forloop.counter|divisibleby:2 %}section-gray{% endif %} services-section">
+    {% if forloop.counter|divisibleby:2 %}<div class="section-glow services-glow"></div>{% endif %}
     <div class="container">
         <div class="section-header animate-on-scroll">
-            <span class="section-badge"><i class="{{ category.icon }}"></i> {{ category.name }}</span>
+            <span class="section-badge"><i class="{{ category.icon }}"></i> {{ category.active_services.count }} Service{{ category.active_services.count|pluralize }}</span>
             <h2>{{ category.name }}</h2>
-            <p>{{ category.short_description|default:category.description|truncatewords:30 }}</p>
+            <p>{{ category.short_description|default:category.description|truncatewords:20 }}</p>
         </div>
         <div class="grid grid-3">
             {% for service in category.active_services %}

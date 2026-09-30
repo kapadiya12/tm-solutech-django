@@ -1,5 +1,8 @@
 from django import forms
-from core.models import SiteSettings, WhyUsReason, Testimonial, Leadership, FAQ, Statistic, Gallery, SEOSettings
+from core.models import (
+    SiteSettings, WhyUsReason, Testimonial, Leadership, FAQ, Statistic, Gallery, SEOSettings,
+    Capability, ClientLogo, HeroTag, HeroStat,
+)
 from services.models import ServiceCategory, Service, Industry
 from insights.models import BlogPost, BlogCategory
 from cms.models import Page
@@ -86,4 +89,34 @@ class TestimonialForm(FormStyleMixin, forms.ModelForm):
 class GalleryForm(FormStyleMixin, forms.ModelForm):
     class Meta:
         model = Gallery
+        fields = '__all__'
+
+
+class WhyUsReasonForm(FormStyleMixin, forms.ModelForm):
+    class Meta:
+        model = WhyUsReason
+        fields = '__all__'
+
+
+class CapabilityForm(FormStyleMixin, forms.ModelForm):
+    class Meta:
+        model = Capability
+        fields = '__all__'
+
+
+class ClientLogoForm(FormStyleMixin, forms.ModelForm):
+    class Meta:
+        model = ClientLogo
+        fields = '__all__'
+
+
+class HeroTagForm(FormStyleMixin, forms.ModelForm):
+    class Meta:
+        model = HeroTag
+        fields = '__all__'
+
+
+class HeroStatForm(FormStyleMixin, forms.ModelForm):
+    class Meta:
+        model = HeroStat
         fields = '__all__'

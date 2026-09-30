@@ -1,0 +1,34 @@
+{% extends 'dashboard/base.html' %}
+{% block dashboard_content %}
+<div class="flex-between mb-8">
+    <h2>{{ page_title }}</h2>
+    <a href="{% url 'dashboard:clientlogo_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add Client Logo</a>
+</div>
+<div class="dashboard-card">
+    <div class="dashboard-table-wrap">
+        <table class="dashboard-table">
+            <thead>
+                <tr><th>Logo</th><th>Name</th><th>Order</th><th>Active</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                {% for logo in logos %}
+                <tr>
+                    <td>{% if logo.logo %}<img src="{{ logo.logo.url }}" alt="{{ logo.name }}" style="height:32px;width:auto;object-fit:contain;">{% endif %}</td><td><strong>{{ logo.name }}</strong></td><td>{{ logo.display_order }}</td><td><span class="status-badge {% if logo.is_active %}status-active{% else %}status-draft{% endif %}">{% if logo.is_active %}Active{% else %}Inactive{% endif %}</span></td>
+                    <td>
+                        <div class="flex gap-2">
+                            <a href="{% url 'dashboard:clientlogo_edit' logo.pk %}" class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></a>
+                            <form method="post" action="{% url 'dashboard:clientlogo_delete' logo.pk %}" onsubmit="return confirm('Delete this item?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm" style="color: var(--danger);"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="text-center">No client logos yet. <a href="{% url 'dashboard:clientlogo_create' %}">Create one</a></td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

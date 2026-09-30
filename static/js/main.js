@@ -1,21 +1,178 @@
+// Page-load progress bar — shows instant feedback on navigation clicks,
+// then completes as soon as this script runs on the newly-loaded page.
+(function () {
+    var bar = document.getElementById('pageLoaderBar');
+    if (!bar) return;
+
+    requestAnimationFrame(function () {
+        bar.style.width = '100%';
+        setTimeout(function () { bar.classList.add('done'); }, 200);
+    });
+
+    window.addEventListener('pageshow', function (e) {
+        if (e.persisted) {
+            bar.classList.remove('done');
+            bar.style.width = '100%';
+            setTimeout(function () { bar.classList.add('done'); }, 150);
+        }
+    });
+
+    document.addEventListener('click', function (e) {
+        var link = e.target.closest('a');
+        if (!link || e.defaultPrevented || e.ctrlKey || e.metaKey || e.shiftKey) return;
+        if (link.target === '_blank' || link.hasAttribute('download')) return;
+        var href = link.getAttribute('href');
+        if (!href || href.charAt(0) === '#' || href.indexOf('mailto:') === 0 || href.indexOf('tel:') === 0 || href.indexOf('javascript:') === 0) return;
+        if (link.origin !== window.location.origin) return;
+
+        bar.classList.remove('done');
+        bar.style.width = '0%';
+        requestAnimationFrame(function () {
+            requestAnimationFrame(function () { bar.style.width = '75%'; });
+        });
+    }, true);
+})();
+
 document.addEventListener('DOMContentLoaded', function () {
-    // 1. Animated Sticky Glassmorphism Navbar
-    const navbar = document.querySelector('.navbar');
-    if (navbar) {
-        const updateNavbar = () => {
-            if (window.scrollY > 40) {
-                navbar.classList.add('scrolled');
-                navbar.classList.remove('transparent');
-            } else {
-                navbar.classList.remove('scrolled');
-                if (navbar.getAttribute('data-transparent') === 'true') {
-                    navbar.classList.add('transparent');
-                }
-            }
-        };
-        updateNavbar();
-        window.addEventListener('scroll', updateNavbar, { passive: true });
+    // 0. Scroll-Reveal System
+    const revealEls = document.querySelectorAll('.animate-on-scroll');
+    if (revealEls.length > 0) {
+        if ('IntersectionObserver' in window) {
+            const revealObserver = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('in-view');
+                        revealObserver.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.15, rootMargin: '0px 0px -60px 0px' });
+            revealEls.forEach((el) => revealObserver.observe(el));
+        } else {
+            revealEls.forEach((el) => el.classList.add('in-view'));
+        }
     }
+
+    // 1. Premium Sticky Navbar — scroll state, hide-on-scroll-down, mobile drawer, mega-dropdown
+    (function initNavbar() {
+        const navbar = document.getElementById('mainNavbar');
+        const mobileToggle = document.getElementById('mobileMenuToggle');
+        const navContainer = document.getElementById('navbarNavContainer');
+        const servicesItem = document.getElementById('servicesNavItem');
+        const servicesLink = document.getElementById('servicesNavLink');
+        const mobileOverlay = document.querySelector('.mobile-overlay');
+
+        if (!navbar || !mobileToggle || !navContainer) return;
+
+        let lastScrollY = window.scrollY;
+
+        function handleScroll() {
+            const currentScrollY = window.scrollY;
+            navbar.classList.toggle('scrolled', currentScrollY > 30);
+
+            if (currentScrollY > 160 && currentScrollY > lastScrollY && !navbar.classList.contains('menu-open')) {
+                navbar.classList.add('navbar-hidden');
+            } else {
+                navbar.classList.remove('navbar-hidden');
+            }
+            lastScrollY = currentScrollY;
+        }
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        handleScroll();
+
+        function closeMobileMenu() {
+            navContainer.classList.remove('mobile-open');
+            navbar.classList.remove('menu-open');
+            if (mobileOverlay) mobileOverlay.classList.remove('active');
+            mobileToggle.setAttribute('aria-expanded', 'false');
+            mobileToggle.setAttribute('aria-label', 'Open navigation menu');
+            servicesItem?.classList.remove('dropdown-open');
+            servicesLink?.setAttribute('aria-expanded', 'false');
+        }
+
+        mobileToggle.addEventListener('click', function () {
+            const isOpen = navContainer.classList.toggle('mobile-open');
+            navbar.classList.toggle('menu-open', isOpen);
+            if (mobileOverlay) mobileOverlay.classList.toggle('active', isOpen);
+            mobileToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            mobileToggle.setAttribute('aria-label', isOpen ? 'Close navigation menu' : 'Open navigation menu');
+            navbar.classList.remove('navbar-hidden');
+        });
+
+        if (servicesItem && servicesLink) {
+            servicesLink.addEventListener('click', function (event) {
+                if (window.innerWidth <= 1024) {
+                    if (!servicesItem.classList.contains('dropdown-open')) {
+                        event.preventDefault();
+                        servicesItem.classList.add('dropdown-open');
+                        servicesLink.setAttribute('aria-expanded', 'true');
+                    }
+                }
+            });
+        }
+
+        navContainer.querySelectorAll('.nav-link:not(#servicesNavLink), .service-menu-link, .view-all-link').forEach(function (link) {
+            link.addEventListener('click', function () {
+                if (window.innerWidth <= 1024) closeMobileMenu();
+            });
+        });
+
+        if (mobileOverlay) mobileOverlay.addEventListener('click', closeMobileMenu);
+
+        document.addEventListener('click', function (event) {
+            if (window.innerWidth > 1024) return;
+            if (!navbar.contains(event.target)) closeMobileMenu();
+        });
+
+        window.addEventListener('resize', function () {
+            if (window.innerWidth > 1024) closeMobileMenu();
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') closeMobileMenu();
+        });
+
+        // Sliding hover indicator behind nav links (desktop only)
+        const navList = document.getElementById('navbarNavList');
+        const indicator = document.getElementById('navIndicator');
+        if (navList && indicator) {
+            const links = Array.from(navList.querySelectorAll('.nav-link'));
+
+            function moveIndicatorTo(el) {
+                if (!el || window.innerWidth <= 1024) return;
+                const listRect = navList.getBoundingClientRect();
+                const linkRect = el.getBoundingClientRect();
+                indicator.style.width = linkRect.width + 'px';
+                indicator.style.transform = 'translateX(' + (linkRect.left - listRect.left) + 'px)';
+                indicator.style.opacity = '1';
+            }
+
+            links.forEach((link) => {
+                link.addEventListener('mouseenter', () => moveIndicatorTo(link));
+            });
+
+            navList.addEventListener('mouseleave', () => {
+                const activeLink = navList.querySelector('.nav-link.active');
+                if (activeLink) {
+                    moveIndicatorTo(activeLink);
+                    indicator.style.opacity = '0';
+                } else {
+                    indicator.style.opacity = '0';
+                }
+            });
+
+            window.addEventListener('resize', () => { indicator.style.opacity = '0'; });
+        }
+
+        // Mega-dropdown spotlight: dim sibling categories while one is hovered
+        const megaGrid = document.getElementById('megaDropdownGrid');
+        if (megaGrid && window.matchMedia('(pointer: fine)').matches) {
+            const categories = megaGrid.querySelectorAll('.mega-dropdown-category');
+            categories.forEach((cat) => {
+                cat.addEventListener('mouseenter', () => megaGrid.classList.add('has-focus'));
+            });
+            megaGrid.addEventListener('mouseleave', () => megaGrid.classList.remove('has-focus'));
+        }
+    })();
 
     // 2. Interactive Testimonial Carousel
     const track = document.querySelector('.carousel-track');
@@ -93,6 +250,25 @@ document.addEventListener('DOMContentLoaded', function () {
         startAutoSlide();
     }
 
+    // 2b. Tilt-on-hover for service & capability cards
+    (function initCardTilt() {
+        if (window.matchMedia('(pointer: coarse)').matches) return;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+        const tiltCards = document.querySelectorAll('.service-card, .capability-card, .why-us-card');
+        tiltCards.forEach((card) => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / rect.width - 0.5;
+                const y = (e.clientY - rect.top) / rect.height - 0.5;
+                card.style.transform = `perspective(1000px) rotateY(${x * 8}deg) rotateX(${-y * 8}deg) translateY(-8px)`;
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = '';
+            });
+        });
+    })();
+
     // 3. Animated Metric Counters
     const counters = document.querySelectorAll('[data-counter]');
     if (counters.length > 0) {
@@ -123,11 +299,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // 4. Accordion Toggle
     document.querySelectorAll('.accordion-header').forEach((header) => {
         header.addEventListener('click', function () {
-            const body = this.nextElementSibling;
-            if (body && body.classList.contains('accordion-body')) {
-                const isOpen = body.style.display === 'block' || getComputedStyle(body).display === 'block';
-                body.style.display = isOpen ? 'none' : 'block';
-            }
+            const item = this.closest('.accordion-item');
+            if (item) item.classList.toggle('open');
         });
     });
 
@@ -150,184 +323,47 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // 6. Auto-dismiss Toasts
+    // 6. Toasts — auto-dismiss + manual close
+    function dismissToast(toast) {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(20px)';
+        setTimeout(() => toast.remove(), 300);
+    }
     document.querySelectorAll('.toast').forEach((toast) => {
-        setTimeout(() => {
-            toast.style.opacity = '0';
-            setTimeout(() => toast.remove(), 300);
-        }, 4000);
+        const closeBtn = toast.querySelector('.toast-close');
+        if (closeBtn) closeBtn.addEventListener('click', () => dismissToast(toast));
+        setTimeout(() => dismissToast(toast), 5000);
     });
 
-    // 7. Leadership / Director Interactive Carousel
-    function initLeadershipCarousel() {
-        const track = document.getElementById('leadershipCarouselTrack');
-        const viewport = document.getElementById('leadershipCarouselViewport');
-        const prevBtn = document.getElementById('leaderPrevBtn');
-        const nextBtn = document.getElementById('leaderNextBtn');
-        const counterEl = document.getElementById('leaderCounter');
-        const dotsContainer = document.getElementById('leadershipDots');
-        if (!track || !viewport) return;
+    // 6b. Scroll Progress Bar
+    const scrollProgress = document.querySelector('.scroll-progress');
+    if (scrollProgress) {
+        const updateScrollProgress = () => {
+            const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = scrollHeight > 0 ? (window.scrollY / scrollHeight) * 100 : 0;
+            scrollProgress.style.width = progress + '%';
+        };
+        window.addEventListener('scroll', updateScrollProgress, { passive: true });
+        updateScrollProgress();
+    }
 
-        const slides = Array.from(track.querySelectorAll('.leadership-slide'));
-        if (slides.length === 0) return;
-
-        let currentIndex = 0;
-        let autoSlideInterval = null;
-        let startX = 0;
-        let isDragging = false;
-
-        function getVisibleCount() {
-            if (window.innerWidth <= 640) return 1;
-            if (window.innerWidth <= 1024) return 2;
-            return 3;
-        }
-
-        function getMaxIndex() {
-            const visible = getVisibleCount();
-            return Math.max(0, slides.length - visible);
-        }
-
-        function updateDots() {
-            if (!dotsContainer) return;
-            dotsContainer.innerHTML = '';
-            const maxIdx = getMaxIndex();
-            for (let i = 0; i <= maxIdx; i++) {
-                const dot = document.createElement('button');
-                dot.className = 'leader-dot' + (i === currentIndex ? ' active' : '');
-                dot.setAttribute('aria-label', 'Go to slide ' + (i + 1));
-                dot.addEventListener('click', () => {
-                    goToSlide(i);
-                    resetAutoSlide();
-                });
-                dotsContainer.appendChild(dot);
+    // 6c. Cookie Notice
+    const cookieNotice = document.querySelector('.cookie-notice');
+    if (cookieNotice) {
+        try {
+            if (!localStorage.getItem('tmsolutech_cookie_ack')) {
+                setTimeout(() => cookieNotice.classList.add('visible'), 1200);
             }
+        } catch (e) {
+            setTimeout(() => cookieNotice.classList.add('visible'), 1200);
         }
-
-        function updateCarousel() {
-            const maxIdx = getMaxIndex();
-            if (currentIndex > maxIdx) currentIndex = maxIdx;
-            if (currentIndex < 0) currentIndex = 0;
-
-            const slideWidth = slides[0].getBoundingClientRect().width;
-            const gap = 28; // 1.75rem
-            const offset = currentIndex * (slideWidth + gap);
-
-            track.style.transform = `translateX(-${offset}px)`;
-
-            if (counterEl) {
-                counterEl.textContent = `${currentIndex + 1} / ${maxIdx + 1}`;
-            }
-
-            if (prevBtn) prevBtn.style.opacity = currentIndex === 0 ? '0.5' : '1';
-            if (nextBtn) nextBtn.style.opacity = currentIndex >= maxIdx ? '0.5' : '1';
-
-            if (dotsContainer) {
-                const dots = dotsContainer.querySelectorAll('.leader-dot');
-                dots.forEach((dot, idx) => {
-                    dot.classList.toggle('active', idx === currentIndex);
-                });
-            }
-        }
-
-        function goToSlide(index) {
-            currentIndex = index;
-            updateCarousel();
-        }
-
-        function nextSlide() {
-            const maxIdx = getMaxIndex();
-            if (currentIndex >= maxIdx) {
-                currentIndex = 0;
-            } else {
-                currentIndex++;
-            }
-            updateCarousel();
-        }
-
-        function prevSlide() {
-            const maxIdx = getMaxIndex();
-            if (currentIndex <= 0) {
-                currentIndex = maxIdx;
-            } else {
-                currentIndex--;
-            }
-            updateCarousel();
-        }
-
-        if (nextBtn) {
-            nextBtn.addEventListener('click', () => {
-                nextSlide();
-                resetAutoSlide();
+        const acceptBtn = cookieNotice.querySelector('.cookie-accept');
+        if (acceptBtn) {
+            acceptBtn.addEventListener('click', () => {
+                cookieNotice.classList.remove('visible');
+                try { localStorage.setItem('tmsolutech_cookie_ack', '1'); } catch (e) {}
             });
         }
-
-        if (prevBtn) {
-            prevBtn.addEventListener('click', () => {
-                prevSlide();
-                resetAutoSlide();
-            });
-        }
-
-        function startAutoSlide() {
-            stopAutoSlide();
-            autoSlideInterval = setInterval(nextSlide, 5000);
-        }
-
-        function stopAutoSlide() {
-            if (autoSlideInterval) clearInterval(autoSlideInterval);
-        }
-
-        function resetAutoSlide() {
-            stopAutoSlide();
-            startAutoSlide();
-        }
-
-        viewport.addEventListener('mouseenter', stopAutoSlide);
-        viewport.addEventListener('mouseleave', startAutoSlide);
-
-        // Touch & Drag Support
-        viewport.addEventListener('touchstart', (e) => {
-            startX = e.touches[0].clientX;
-            stopAutoSlide();
-        }, { passive: true });
-
-        viewport.addEventListener('touchend', (e) => {
-            const endX = e.changedTouches[0].clientX;
-            const diff = endX - startX;
-            if (diff > 45) {
-                prevSlide();
-            } else if (diff < -45) {
-                nextSlide();
-            }
-            startAutoSlide();
-        }, { passive: true });
-
-        viewport.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            startX = e.clientX;
-            stopAutoSlide();
-        });
-
-        window.addEventListener('mouseup', (e) => {
-            if (!isDragging) return;
-            isDragging = false;
-            const diff = e.clientX - startX;
-            if (diff > 50) {
-                prevSlide();
-            } else if (diff < -50) {
-                nextSlide();
-            }
-            startAutoSlide();
-        });
-
-        window.addEventListener('resize', () => {
-            updateDots();
-            updateCarousel();
-        });
-
-        updateDots();
-        updateCarousel();
-        startAutoSlide();
     }
 
     // 8. Executive Bio Modal Controller
@@ -372,7 +408,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         document.querySelectorAll('.open-bio-modal').forEach(btn => {
-            btn.addEventListener('click', function (e) {
+            const trigger = function (e) {
                 e.stopPropagation();
                 const data = {
                     name: this.getAttribute('data-name'),
@@ -383,6 +419,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     bio: this.getAttribute('data-bio')
                 };
                 openModal(data);
+            };
+            btn.addEventListener('click', trigger);
+            btn.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    trigger.call(this, e);
+                }
             });
         });
 
@@ -414,7 +457,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Initialize New Interactive Modules
-    initLeadershipCarousel();
     initLeadershipBioModal();
     initBackToTop();
 

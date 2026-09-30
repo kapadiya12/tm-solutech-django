@@ -1,21 +1,20 @@
 {% load static %}
 <footer class="footer">
+    <div class="footer-glow"></div>
     <div class="footer-main">
         <div class="container">
             <div class="footer-grid">
                 <div class="footer-brand">
-                    {% if site_settings and site_settings.logo %}
-                    <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.company_name }}">
-                    {% else %}
-                    <img src="{% static 'images/logo/tm-solutech-logo.png' %}" alt="TM Solutech">
-                    {% endif %}
-                    <p>{% if site_settings and site_settings.footer_description %}{{ site_settings.footer_description }}{% else %}TM Solutech Private Limited is a leading IT solutions company specializing in Cloud Solutions, Network & Security, and Remote Infrastructure Management. We deliver customized, cost-effective technology solutions that help businesses grow and thrive.{% endif %}</p>
+                    <div class="footer-logo-box">
+                        {% if site_settings and site_settings.logo %}
+                        <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.company_name }}">
+                        {% else %}
+                        <img src="{% static 'images/logo/tm-solutech-logo.png' %}" alt="TM Solutech">
+                        {% endif %}
+                    </div>
+                    <p>{% if site_settings and site_settings.footer_description %}{{ site_settings.footer_description|truncatewords:18 }}{% else %}Smart IT solutions — Cloud, Security & Infrastructure — built around your business.{% endif %}</p>
 
                     <div class="footer-contact-info">
-                        <div class="footer-contact-item">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span>{% if site_settings %}{{ site_settings.address }}{% else %}805/806 Aditya Building, Near Mithakhali Six Roads, Ellisbridge, Ahmedabad, Gujarat 380006{% endif %}</span>
-                        </div>
                         <div class="footer-contact-item">
                             <i class="fas fa-phone"></i>
                             <a href="tel:{% if site_settings %}{{ site_settings.phone }}{% else %}+917947717070{% endif %}">{% if site_settings %}{{ site_settings.phone }}{% else %}+91 79 4771 7070{% endif %}</a>
@@ -49,10 +48,8 @@
                     <h4>Company</h4>
                     <div class="footer-links">
                         <a href="{% url 'core:about' %}">About Us</a>
-                        <a href="{% url 'core:why_us' %}">Why Us</a>
                         <a href="{% url 'core:leadership' %}">Leadership</a>
                         <a href="{% url 'contact:contact' %}">Contact</a>
-                        <a href="{% url 'core:faqs' %}">FAQs</a>
                     </div>
                 </div>
 
@@ -73,7 +70,6 @@
                         <a href="{% url 'insights:post_list' %}">Insights</a>
                         <a href="{% url 'core:faqs' %}">FAQs</a>
                         <a href="{% url 'cms:page_detail' slug='privacy-policy' %}">Privacy Policy</a>
-                        <a href="{% url 'cms:page_detail' slug='terms-and-conditions' %}">Terms & Conditions</a>
                     </div>
                 </div>
             </div>
@@ -82,7 +78,7 @@
 
     <div class="container">
         <div class="footer-bottom">
-            <p>{% if site_settings and site_settings.copyright_text %}{{ site_settings.copyright_text }}{% else %}&copy; {% now "Y" %} TM Solutech Private Limited. All Rights Reserved.{% endif %}</p>
+            <p>{% if site_settings and site_settings.copyright_text %}{{ site_settings.copyright_text }}{% else %}&copy; {% now "Y" %} TM Solutech Private Limited.{% endif %}</p>
             <div class="footer-bottom-links">
                 <a href="{% url 'cms:page_detail' slug='privacy-policy' %}">Privacy Policy</a>
                 <a href="{% url 'cms:page_detail' slug='terms-and-conditions' %}">Terms & Conditions</a>

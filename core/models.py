@@ -77,6 +77,61 @@ class WhyUsReason(models.Model):
         return self.title
 
 
+class Capability(models.Model):
+    title = models.CharField(max_length=200)
+    icon = models.CharField(max_length=50, default='fas fa-cogs')
+    description = models.TextField()
+    display_order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['display_order']
+        verbose_name_plural = 'Capabilities'
+
+    def __str__(self):
+        return self.title
+
+
+class ClientLogo(models.Model):
+    name = models.CharField(max_length=200)
+    logo = models.ImageField(upload_to='clients/')
+    display_order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['display_order']
+
+    def __str__(self):
+        return self.name
+
+
+class HeroTag(models.Model):
+    icon = models.CharField(max_length=50, default='fas fa-cloud')
+    label = models.CharField(max_length=100)
+    display_order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['display_order']
+
+    def __str__(self):
+        return self.label
+
+
+class HeroStat(models.Model):
+    icon = models.CharField(max_length=50, default='fas fa-chart-line')
+    label = models.CharField(max_length=100)
+    value = models.CharField(max_length=100)
+    display_order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['display_order']
+
+    def __str__(self):
+        return f"{self.label}: {self.value}"
+
+
 class Testimonial(models.Model):
     name = models.CharField(max_length=200)
     designation = models.CharField(max_length=200, blank=True)
