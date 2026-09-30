@@ -162,6 +162,8 @@ TEMPLATES = [
                 # Custom context processors
                 "core.context_processors.site_settings",
 
+                "core.context_processors.nav_stats",
+
                 "services.context_processors.service_categories",
             ],
         },

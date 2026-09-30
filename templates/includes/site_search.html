@@ -1,0 +1,61 @@
+<div class="site-search" id="siteSearch" role="dialog" aria-modal="true" aria-label="Search the site" hidden
+     data-suggest-url="{% url 'core:search_suggest' %}" data-search-url="{% url 'core:search' %}">
+    <div class="ss-backdrop" data-ss-close></div>
+    <div class="ss-panel">
+        <form class="ss-form" action="{% url 'core:search' %}" method="get" role="search">
+            <i class="fas fa-magnifying-glass ss-icon" aria-hidden="true"></i>
+            <input type="search" name="q" id="ssInput" class="ss-input"
+                   placeholder="Search services, industries, insights…"
+                   autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search"
+                   role="combobox" aria-expanded="true" aria-controls="ssResults" aria-autocomplete="list" aria-label="Search">
+            <span class="ss-spinner" aria-hidden="true"></span>
+            <button type="button" class="ss-clear" aria-label="Clear search"><i class="fas fa-xmark"></i></button>
+            <button type="button" class="ss-esc" data-ss-close aria-label="Close search"><span class="ss-esc-text">Esc</span><i class="fas fa-xmark ss-esc-icon"></i></button>
+        </form>
+
+        <div class="ss-body" id="ssResults" role="listbox" aria-label="Search results" data-lenis-prevent>
+            {# Shown before typing #}
+            <div class="ss-default">
+                <div class="ss-section ss-recent" hidden>
+                    <div class="ss-section-head"><span>Recent searches</span><button type="button" class="ss-link-btn" data-ss-clear-recent>Clear</button></div>
+                    <div class="ss-chips" data-ss-recent></div>
+                </div>
+                {% if nav_service_categories %}
+                <div class="ss-section">
+                    <div class="ss-section-head"><span>Service areas</span></div>
+                    <div class="ss-quick">
+                        {% for category in nav_service_categories %}
+                        <a href="{{ category.get_absolute_url }}" class="ss-quick-item accent-{% cycle 'blue' 'green' 'orange' %}">
+                            <span class="ss-quick-icon"><i class="{{ category.icon }}"></i></span>
+                            <span class="ss-quick-text"><strong>{{ category.menu_label }}</strong><span>{{ category.nav_service_count }} service{{ category.nav_service_count|pluralize }}</span></span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                <div class="ss-section">
+                    <div class="ss-section-head"><span>Quick links</span></div>
+                    <div class="ss-chips">
+                        <a href="{% url 'core:about' %}" class="ss-chip"><i class="fas fa-building"></i> About Us</a>
+                        <a href="{% url 'core:clients' %}" class="ss-chip"><i class="fas fa-handshake"></i> Our Clients</a>
+                        <a href="{% url 'insights:post_list' %}" class="ss-chip"><i class="fas fa-lightbulb"></i> Insights</a>
+                        <a href="{% url 'core:faqs' %}" class="ss-chip"><i class="fas fa-circle-question"></i> FAQs</a>
+                        <a href="{% url 'contact:contact' %}" class="ss-chip"><i class="fas fa-envelope"></i> Contact</a>
+                    </div>
+                </div>
+            </div>
+
+            {# Filled by JS #}
+            <div class="ss-results" aria-live="polite"></div>
+        </div>
+
+        <div class="ss-footer">
+            <div class="ss-hints" aria-hidden="true">
+                <span><kbd>↑</kbd><kbd>↓</kbd> navigate</span>
+                <span><kbd>↵</kbd> open</span>
+                <span><kbd>esc</kbd> close</span>
+            </div>
+            <a href="{% url 'core:search' %}" class="ss-see-all" data-ss-see-all hidden>See all results <i class="fas fa-arrow-right"></i></a>
+        </div>
+    </div>
+</div>

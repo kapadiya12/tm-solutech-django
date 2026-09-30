@@ -1,36 +1,37 @@
 {% extends 'dashboard/base.html' %}
 {% block dashboard_content %}
-<div class="flex-between mb-8">
-    <h2>{{ page_title }}</h2>
-    <a href="{% url 'dashboard:category_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add Category</a>
-</div>
-<div class="dashboard-card">
-    <div class="dashboard-table-wrap">
-        <table class="dashboard-table">
-            <thead>
-                <tr><th>Name</th><th>Active</th><th>Order</th><th>Actions</th></tr>
-            </thead>
-            <tbody>
-                {% for category in categories %}
-                <tr>
-                    <td><strong>{{ category.name }}</strong></td>
-                    <td><span class="status-badge {% if category.is_active %}status-active{% else %}status-draft{% endif %}">{% if category.is_active %}Active{% else %}Inactive{% endif %}</span></td>
-                    <td>{{ category.display_order }}</td>
-                    <td>
-                        <div class="flex gap-2">
-                            <a href="{% url 'dashboard:category_edit' category.pk %}" class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></a>
-                            <form method="post" action="{% url 'dashboard:category_delete' category.pk %}" onsubmit="return confirm('Delete this category?');">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-sm" style="color: var(--danger);"><i class="fas fa-trash"></i></button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr><td colspan="4" class="text-center">No categories yet. <a href="{% url 'dashboard:category_create' %}">Create one</a></td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
+<div class="ed-head">
+    <div>
+        <h2>Service Categories</h2>
+        <p class="form-help" style="margin:0">Your service areas. Each has its own page and a column in the navbar's Services menu.</p>
     </div>
+    <div class="ed-head-actions">
+        <a href="{% url 'dashboard:navbar_services' %}" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-down-short-wide"></i> Reorder in Services Menu</a>
+        <a href="{% url 'dashboard:category_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add category</a>
+    </div>
+</div>
+
+<div class="cat-cards">
+    {% for category in categories %}
+    <div class="cat-card nsm-accent-{% cycle 'blue' 'green' 'orange' %}">
+        <div class="cat-card-top">
+            <span class="nsm-icon nsm-accent-{% cycle 'blue' 'green' 'orange' as a2 %}"><i class="{{ category.icon }}"></i></span>
+            <span class="ls-status">
+                {% if category.is_active %}<span class="status-badge status-active">Published</span>{% else %}<span class="status-badge status-draft">Hidden</span>{% endif %}
+                {% if not category.show_in_nav %}<span class="status-badge status-draft">Not in navbar</span>{% endif %}
+            </span>
+        </div>
+        <h3>{{ category.name }}</h3>
+        <p>{{ category.short_description|truncatechars:120 }}</p>
+        <div class="cat-card-meta"><i class="fas fa-cogs"></i> {{ category.live_count }} of {{ category.service_count }} service{{ category.service_count|pluralize }} published</div>
+        <div class="cat-card-actions">
+            <a href="{% url 'dashboard:category_edit' category.pk %}" class="nsm-btn nsm-btn-primary"><i class="fas fa-pen"></i><span>Edit</span></a>
+            <a href="{% url 'dashboard:service_create' %}?category={{ category.pk }}" class="nsm-btn"><i class="fas fa-plus"></i><span>Service</span></a>
+            <a href="{{ category.get_absolute_url }}" target="_blank" rel="noopener" class="nsm-btn" title="View page"><i class="fas fa-arrow-up-right-from-square"></i></a>
+        </div>
+    </div>
+    {% empty %}
+    <div class="dashboard-card nsm-empty-state"><i class="fas fa-layer-group"></i><h3>No categories yet</h3><p>Create a service area, then add services to it.</p><a href="{% url 'dashboard:category_create' %}" class="btn btn-primary"><i class="fas fa-plus"></i> Add category</a></div>
+    {% endfor %}
 </div>
 {% endblock %}

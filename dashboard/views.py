@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.http import JsonResponse
-from django.db.models import Count, Q
+from django.db.models import Count, Prefetch, Q
 from django.db.models.functions import TruncMonth
 from django.utils import timezone
 from datetime import timedelta
@@ -12,7 +12,7 @@ import json
 
 from core.models import (
     SiteSettings, Statistic, WhyUsReason, Testimonial, Leadership, FAQ, SEOSettings, Gallery,
-    Capability, ClientLogo, HeroTag, HeroStat,
+    Capability, ClientLogo, HeroTag, HeroStat, HeroSlide,
 )
 from services.models import ServiceCategory, Service, Industry
 from insights.models import BlogPost, BlogCategory
@@ -79,72 +79,144 @@ def run_migrations(request):
 @staff_required
 def dashboard_index(request):
     now = timezone.now()
-    thirty_days_ago = now - timedelta(days=30)
-    
+    last_30 = now - timedelta(days=30)
+    prev_30 = now - timedelta(days=60)
+
+    inquiries = ContactInquiry.objects.all()
+    recent_count = inquiries.filter(created_at__gte=last_30).count()
+    previous_count = inquiries.filter(created_at__gte=prev_30, created_at__lt=last_30).count()
+    if previous_count:
+        trend = round((recent_count - previous_count) / previous_count * 100)
+    else:
+        trend = None  # no baseline to compare against
+
+    # Last 12 calendar months, zero-filled so the chart always has a full axis
+    months = []
+    y, m = now.year, now.month
+    for _ in range(12):
+        months.append((y, m))
+        m -= 1
+        if m == 0:
+            y, m = y - 1, 12
+    months.reverse()
+    from datetime import datetime as _dt
+    start = timezone.make_aware(_dt(months[0][0], months[0][1], 1))
+    counts = {
+        (d['month'].year, d['month'].month): d['count']
+        for d in inquiries.filter(created_at__gte=start).annotate(month=TruncMonth('created_at')).values('month').annotate(count=Count('id'))
+    }
+    import calendar
+    chart_labels = [f"{calendar.month_abbr[mm]} {str(yy)[2:]}" for yy, mm in months]
+    chart_data = [counts.get(k, 0) for k in months]
+
+    status_counts = {row['status']: row['count'] for row in inquiries.values('status').annotate(count=Count('id'))}
+    status_rows = [
+        {'key': key, 'label': label, 'count': status_counts.get(key, 0)}
+        for key, label in ContactInquiry.STATUS_CHOICES
+    ]
+
+    services = Service.objects.all()
+    categories = ServiceCategory.objects.all()
+    health = [
+        {'label': 'Service categories', 'value': categories.filter(is_active=True).count(), 'icon': 'fas fa-layer-group', 'url': 'dashboard:category_list', 'note': f"{categories.filter(is_active=False).count()} hidden"},
+        {'label': 'Services published', 'value': services.filter(is_active=True).count(), 'icon': 'fas fa-cogs', 'url': 'dashboard:service_list', 'note': f"{services.filter(show_in_nav=False).count()} not in navbar"},
+        {'label': 'Hero slides', 'value': HeroSlide.objects.filter(is_active=True).count(), 'icon': 'fas fa-images', 'url': 'dashboard:heroslide_list', 'note': 'on the homepage'},
+        {'label': 'Industries', 'value': Industry.objects.filter(is_active=True).count(), 'icon': 'fas fa-industry', 'url': 'dashboard:industry_list', 'note': 'active'},
+        {'label': 'Leadership', 'value': Leadership.objects.filter(is_active=True).count(), 'icon': 'fas fa-user-tie', 'url': 'dashboard:leadership_list', 'note': 'profiles'},
+        {'label': 'Client logos', 'value': ClientLogo.objects.filter(is_active=True).count(), 'icon': 'fas fa-building', 'url': 'dashboard:clientlogo_list', 'note': 'in the logo strip'},
+        {'label': 'FAQs', 'value': FAQ.objects.filter(is_active=True).count(), 'icon': 'fas fa-circle-question', 'url': 'dashboard:faq_list', 'note': 'answered'},
+        {'label': 'Pages', 'value': Page.objects.filter(is_published=True).count(), 'icon': 'fas fa-file-lines', 'url': 'dashboard:page_list', 'note': 'published'},
+    ]
+
+    hour = timezone.localtime(now).hour
+    greeting = 'Good morning' if hour < 12 else 'Good afternoon' if hour < 17 else 'Good evening'
+
     context = {
-        'total_services': Service.objects.filter(is_active=True).count(),
-        'total_posts': BlogPost.objects.count(),
+        'greeting': greeting,
+        'today': timezone.localtime(now),
+        'total_services': services.filter(is_active=True).count(),
+        'total_categories': categories.filter(is_active=True).count(),
         'published_posts': BlogPost.objects.filter(is_published=True).count(),
-        'total_inquiries': ContactInquiry.objects.count(),
-        'new_inquiries': ContactInquiry.objects.filter(status='new').count(),
-        'total_industries': Industry.objects.filter(is_active=True).count(),
-        'total_leadership': Leadership.objects.filter(is_active=True).count(),
-        'recent_inquiries': ContactInquiry.objects.order_by('-created_at')[:5],
-        'recent_posts': BlogPost.objects.order_by('-created_at')[:5],
+        'draft_posts': BlogPost.objects.filter(is_published=False).count(),
+        'total_inquiries': inquiries.count(),
+        'recent_inquiry_count': recent_count,
+        'inquiry_trend': trend,
+        'new_inquiries': inquiries.filter(status='new').count(),
+        'recent_inquiries': inquiries.order_by('-created_at')[:6],
+        'recent_posts': BlogPost.objects.select_related('category').order_by('-created_at')[:5],
+        'status_rows': status_rows,
+        'health': health,
+        'chart': {'labels': chart_labels, 'data': chart_data, 'status': [r['count'] for r in status_rows], 'status_labels': [r['label'] for r in status_rows]},
         'page_title': 'Dashboard',
     }
-    
-    # Chart data - inquiries over months
-    inquiry_data = (
-        ContactInquiry.objects
-        .filter(created_at__gte=now - timedelta(days=180))
-        .annotate(month=TruncMonth('created_at'))
-        .values('month')
-        .annotate(count=Count('id'))
-        .order_by('month')
-    )
-    context['inquiry_chart_labels'] = json.dumps([d['month'].strftime('%b %Y') for d in inquiry_data])
-    context['inquiry_chart_data'] = json.dumps([d['count'] for d in inquiry_data])
-    
-    # Status distribution
-    status_data = (
-        ContactInquiry.objects
-        .values('status')
-        .annotate(count=Count('id'))
-    )
-    context['status_labels'] = json.dumps([d['status'].title() for d in status_data])
-    context['status_data'] = json.dumps([d['count'] for d in status_data])
-    
     return render(request, 'dashboard/index.html', context)
 
 
 # ---- Services CRUD ----
+def _after_save(request, obj, list_url, edit_url):
+    """'Save & keep editing' stays on the form; plain Save returns to the list."""
+    if 'save_continue' in request.POST:
+        return redirect(edit_url, pk=obj.pk)
+    return redirect(list_url)
+
+
 @login_required
 @staff_required
 def service_list(request):
-    services = Service.objects.select_related('category').all()
-    categories = ServiceCategory.objects.all()
+    services = Service.objects.select_related('category').order_by('category__display_order', 'display_order')
+    categories = ServiceCategory.objects.annotate(service_count=Count('services')).order_by('display_order')
+    q = request.GET.get('q', '').strip()
+    cat = request.GET.get('category', '')
+    status = request.GET.get('status', '')
+    if q:
+        services = services.filter(Q(title__icontains=q) | Q(short_description__icontains=q))
+    if cat.isdigit():
+        services = services.filter(category_id=int(cat))
+    if status == 'published':
+        services = services.filter(is_active=True)
+    elif status == 'hidden':
+        services = services.filter(is_active=False)
+    elif status == 'not_in_nav':
+        services = services.filter(show_in_nav=False)
     context = {
         'services': services,
         'categories': categories,
-        'page_title': 'Manage Services',
+        'total': Service.objects.count(),
+        'q': q, 'current_category': cat, 'current_status': status,
+        'page_title': 'Services',
     }
     return render(request, 'dashboard/services/list.html', context)
+
+
+def _service_form_context(form, title, service=None):
+    return {
+        'form': form,
+        'service': service,
+        'page_title': title,
+        'category_slugs': {str(c.pk): c.slug for c in ServiceCategory.objects.all()},
+    }
 
 
 @login_required
 @staff_required
 def service_create(request):
     from dashboard.forms import ServiceForm
+    initial = {}
+    if request.GET.get('category', '').isdigit():
+        initial['category'] = int(request.GET['category'])
     if request.method == 'POST':
         form = ServiceForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Service created successfully.')
-            return redirect('dashboard:service_list')
+            service = form.save(commit=False)
+            last = Service.objects.filter(category=service.category).order_by('-display_order').values_list('display_order', flat=True).first()
+            service.display_order = (last or 0) + 1
+            service.save()
+            messages.success(request, f'"{service.title}" created. Its page is live at {service.get_absolute_url()}')
+            return _after_save(request, service, 'dashboard:service_list', 'dashboard:service_edit')
+        messages.error(request, 'Please fix the highlighted fields.')
     else:
-        form = ServiceForm()
-    return render(request, 'dashboard/services/form.html', {'form': form, 'page_title': 'Add Service'})
+        form = ServiceForm(initial=initial)
+    return render(request, 'dashboard/services/form.html', _service_form_context(form, 'Add Service'))
 
 
 @login_required
@@ -153,14 +225,20 @@ def service_edit(request, pk):
     from dashboard.forms import ServiceForm
     service = get_object_or_404(Service, pk=pk)
     if request.method == 'POST':
+        old_category = service.category_id
         form = ServiceForm(request.POST, request.FILES, instance=service)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Service updated successfully.')
-            return redirect('dashboard:service_list')
+            service = form.save(commit=False)
+            if service.category_id != old_category:
+                last = Service.objects.filter(category_id=service.category_id).exclude(pk=service.pk).order_by('-display_order').values_list('display_order', flat=True).first()
+                service.display_order = (last or 0) + 1
+            service.save()
+            messages.success(request, f'"{service.title}" saved.')
+            return _after_save(request, service, 'dashboard:service_list', 'dashboard:service_edit')
+        messages.error(request, 'Please fix the highlighted fields.')
     else:
         form = ServiceForm(instance=service)
-    return render(request, 'dashboard/services/form.html', {'form': form, 'page_title': 'Edit Service', 'service': service})
+    return render(request, 'dashboard/services/form.html', _service_form_context(form, 'Edit Service', service))
 
 
 @login_required
@@ -168,8 +246,9 @@ def service_edit(request, pk):
 def service_delete(request, pk):
     service = get_object_or_404(Service, pk=pk)
     if request.method == 'POST':
+        name = service.title
         service.delete()
-        messages.success(request, 'Service deleted successfully.')
+        messages.success(request, f'"{name}" deleted.')
     return redirect('dashboard:service_list')
 
 
@@ -177,7 +256,10 @@ def service_delete(request, pk):
 @login_required
 @staff_required
 def category_list(request):
-    categories = ServiceCategory.objects.annotate(service_count=Count('services'))
+    categories = ServiceCategory.objects.annotate(
+        service_count=Count('services'),
+        live_count=Count('services', filter=Q(services__is_active=True)),
+    ).order_by('display_order')
     return render(request, 'dashboard/categories/list.html', {'categories': categories, 'page_title': 'Service Categories'})
 
 
@@ -188,9 +270,13 @@ def category_create(request):
     if request.method == 'POST':
         form = ServiceCategoryForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Category created successfully.')
-            return redirect('dashboard:category_list')
+            category = form.save(commit=False)
+            last = ServiceCategory.objects.order_by('-display_order').values_list('display_order', flat=True).first()
+            category.display_order = (last or 0) + 1
+            category.save()
+            messages.success(request, f'Category "{category.name}" created. Now add services to it.')
+            return _after_save(request, category, 'dashboard:category_list', 'dashboard:category_edit')
+        messages.error(request, 'Please fix the highlighted fields.')
     else:
         form = ServiceCategoryForm()
     return render(request, 'dashboard/categories/form.html', {'form': form, 'page_title': 'Add Category'})
@@ -204,12 +290,14 @@ def category_edit(request, pk):
     if request.method == 'POST':
         form = ServiceCategoryForm(request.POST, request.FILES, instance=category)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Category updated successfully.')
-            return redirect('dashboard:category_list')
+            category = form.save()
+            messages.success(request, f'Category "{category.name}" saved.')
+            return _after_save(request, category, 'dashboard:category_list', 'dashboard:category_edit')
+        messages.error(request, 'Please fix the highlighted fields.')
     else:
         form = ServiceCategoryForm(instance=category)
-    return render(request, 'dashboard/categories/form.html', {'form': form, 'page_title': 'Edit Category'})
+    services = category.services.order_by('display_order')
+    return render(request, 'dashboard/categories/form.html', {'form': form, 'category': category, 'services': services, 'page_title': 'Edit Category'})
 
 
 @login_required
@@ -217,8 +305,12 @@ def category_edit(request, pk):
 def category_delete(request, pk):
     category = get_object_or_404(ServiceCategory, pk=pk)
     if request.method == 'POST':
-        category.delete()
-        messages.success(request, 'Category deleted successfully.')
+        count = category.services.count()
+        if count:
+            messages.error(request, f'"{category.name}" still has {count} service{"s" if count != 1 else ""}. Move or delete them first, so no service is lost by accident.')
+        else:
+            category.delete()
+            messages.success(request, f'Category "{category.name}" deleted.')
     return redirect('dashboard:category_list')
 
 
@@ -835,6 +927,55 @@ def herotag_delete(request, pk):
     return redirect('dashboard:herotag_list')
 
 
+# ---- HeroSlide CRUD (homepage carousel) ----
+@login_required
+@staff_required
+def heroslide_list(request):
+    slides = HeroSlide.objects.all()
+    return render(request, 'dashboard/heroslides/list.html', {'slides': slides, 'page_title': 'Hero Slides'})
+
+
+@login_required
+@staff_required
+def heroslide_create(request):
+    from dashboard.forms import HeroSlideForm
+    if request.method == 'POST':
+        form = HeroSlideForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Slide added.')
+            return redirect('dashboard:heroslide_list')
+    else:
+        form = HeroSlideForm(initial={'display_order': HeroSlide.objects.count() + 1})
+    return render(request, 'dashboard/heroslides/form.html', {'form': form, 'page_title': 'Add Hero Slide'})
+
+
+@login_required
+@staff_required
+def heroslide_edit(request, pk):
+    from dashboard.forms import HeroSlideForm
+    slide = get_object_or_404(HeroSlide, pk=pk)
+    if request.method == 'POST':
+        form = HeroSlideForm(request.POST, request.FILES, instance=slide)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Slide updated.')
+            return redirect('dashboard:heroslide_list')
+    else:
+        form = HeroSlideForm(instance=slide)
+    return render(request, 'dashboard/heroslides/form.html', {'form': form, 'slide': slide, 'page_title': 'Edit Hero Slide'})
+
+
+@login_required
+@staff_required
+def heroslide_delete(request, pk):
+    slide = get_object_or_404(HeroSlide, pk=pk)
+    if request.method == 'POST':
+        slide.delete()
+        messages.success(request, 'Slide deleted.')
+    return redirect('dashboard:heroslide_list')
+
+
 # ---- HeroStat CRUD ----
 @login_required
 @staff_required
@@ -882,3 +1023,88 @@ def herostat_delete(request, pk):
         stat.delete()
         messages.success(request, 'Stat deleted.')
     return redirect('dashboard:herostat_list')
+
+
+# ==========================================================================
+# NAVBAR → SERVICES MENU
+# Manages which service categories/services appear in the site's Services
+# mega-menu, their order, navbar labels, descriptions and badges.
+# ==========================================================================
+
+def _unique_slug(model, value):
+    from django.utils.text import slugify
+    base = slugify(value)[:180] or 'item'
+    slug, n = base, 2
+    while model.objects.filter(slug=slug).exists():
+        slug = f'{base}-{n}'
+        n += 1
+    return slug
+
+
+@login_required
+@staff_required
+def navbar_services(request):
+    categories = ServiceCategory.objects.prefetch_related(
+        Prefetch('services', queryset=Service.objects.order_by('display_order'))
+    ).order_by('display_order')
+    in_nav = Service.objects.filter(is_active=True, show_in_nav=True, category__is_active=True, category__show_in_nav=True).count()
+    context = {
+        'categories': categories,
+        'badge_choices': Service.NAV_BADGE_CHOICES,
+        'nav_service_total': in_nav,
+        'nav_category_total': ServiceCategory.objects.filter(is_active=True, show_in_nav=True).count(),
+        'page_title': 'Navbar · Services Menu',
+    }
+    return render(request, 'dashboard/navbar/services.html', context)
+
+
+@login_required
+@staff_required
+def navbar_services_update(request):
+    """JSON endpoint for drag-reorder, visibility toggles, badges and navbar text."""
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'error': 'POST required'}, status=405)
+    try:
+        data = json.loads(request.body or '{}')
+    except ValueError:
+        return JsonResponse({'ok': False, 'error': 'Invalid JSON'}, status=400)
+
+    action = data.get('action')
+    models_by_kind = {'category': ServiceCategory, 'service': Service}
+
+    if action == 'reorder_categories':
+        ids = [int(i) for i in data.get('ids', [])]
+        for order, pk in enumerate(ids, start=1):
+            ServiceCategory.objects.filter(pk=pk).update(display_order=order)
+        return JsonResponse({'ok': True})
+
+    if action == 'reorder_services':
+        category = get_object_or_404(ServiceCategory, pk=data.get('category_id'))
+        ids = [int(i) for i in data.get('ids', [])]
+        for order, pk in enumerate(ids, start=1):
+            # Moving a service into another category is allowed (drag across groups)
+            Service.objects.filter(pk=pk).update(display_order=order, category=category)
+        return JsonResponse({'ok': True})
+
+    model = models_by_kind.get(data.get('kind'))
+    if model is None:
+        return JsonResponse({'ok': False, 'error': 'Unknown item type'}, status=400)
+    obj = get_object_or_404(model, pk=data.get('id'))
+
+    if action == 'toggle':
+        field = data.get('field')
+        if field not in ('show_in_nav', 'is_active'):
+            return JsonResponse({'ok': False, 'error': 'Field not allowed'}, status=400)
+        setattr(obj, field, bool(data.get('value')))
+        obj.save(update_fields=[field])
+        return JsonResponse({'ok': True, 'value': getattr(obj, field)})
+
+    if action == 'badge' and model is Service:
+        badge = data.get('badge', '')
+        if badge not in dict(Service.NAV_BADGE_CHOICES):
+            return JsonResponse({'ok': False, 'error': 'Invalid badge'}, status=400)
+        obj.nav_badge = badge
+        obj.save(update_fields=['nav_badge'])
+        return JsonResponse({'ok': True})
+
+    return JsonResponse({'ok': False, 'error': 'Unknown action'}, status=400)

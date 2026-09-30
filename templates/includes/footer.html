@@ -6,7 +6,7 @@
             <div class="footer-grid">
                 <div class="footer-brand">
                     <div class="footer-logo-box">
-                        {% if site_settings and site_settings.logo %}
+                        {% if site_settings and site_settings.logo_available %}
                         <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.company_name }}">
                         {% else %}
                         <img src="{% static 'images/logo/tm-solutech-logo.png' %}" alt="TM Solutech">
@@ -49,6 +49,8 @@
                     <div class="footer-links">
                         <a href="{% url 'core:about' %}">About Us</a>
                         <a href="{% url 'core:leadership' %}">Leadership</a>
+                        <a href="{% url 'core:clients' %}">Our Clients</a>
+                        <a href="{% url 'cms:page_detail' 'careers' %}">Careers</a>
                         <a href="{% url 'contact:contact' %}">Contact</a>
                     </div>
                 </div>

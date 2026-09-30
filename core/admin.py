@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import SiteSettings, Statistic, WhyUsReason, Testimonial, Gallery, SEOSettings, Leadership, FAQ
+from .models import SiteSettings, Statistic, WhyUsReason, Testimonial, Gallery, SEOSettings, Leadership, FAQ, HeroSlide
 
 
 @admin.register(SiteSettings)
@@ -69,3 +69,10 @@ class FAQAdmin(admin.ModelAdmin):
 admin.site.site_header = 'TM Solutech Admin'
 admin.site.site_title = 'TM Solutech Administration'
 admin.site.index_title = 'Administration Dashboard'
+
+
+@admin.register(HeroSlide)
+class HeroSlideAdmin(admin.ModelAdmin):
+    list_display = ('tab_label', 'title', 'accent', 'display_order', 'is_active')
+    list_editable = ('display_order', 'is_active')
+    ordering = ('display_order',)

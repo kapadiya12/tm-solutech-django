@@ -42,40 +42,75 @@
 </section>
 
 {# Features #}
-{% if service.features %}
+{% if service.feature_items or service.features %}
 <section class="section section-gray">
     <div class="container">
         <div class="section-header animate-on-scroll">
             <span class="section-badge"><i class="fas fa-list-check"></i> What's Included</span>
             <h2>Key <span class="highlight">Features</span></h2>
         </div>
+        {% if service.feature_items %}
+        <div class="svc-features">
+            {% for item in service.feature_items %}
+            <div class="svc-feature animate-on-scroll animate-delay-{{ forloop.counter }}">
+                <span class="svc-feature-icon"><i class="{{ item.icon|default:'fas fa-check' }}"></i></span>
+                <h3>{{ item.title }}</h3>
+                {% if item.text %}<p>{{ item.text }}</p>{% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
         <div class="animate-on-scroll typography-pro service-feature-list">{{ service.features|safe }}</div>
+        {% endif %}
     </div>
 </section>
 {% endif %}
 
 {# Benefits #}
-{% if service.benefits %}
+{% if service.benefit_items or service.benefits %}
 <section class="section">
     <div class="container">
         <div class="section-header animate-on-scroll">
             <span class="section-badge"><i class="fas fa-award"></i> Why It Matters</span>
-            <h2>Benefits</h2>
+            <h2>Business <span class="highlight">Benefits</span></h2>
         </div>
+        {% if service.benefit_items %}
+        <div class="svc-benefits">
+            {% for item in service.benefit_items %}
+            <div class="svc-benefit animate-on-scroll animate-delay-{{ forloop.counter }}">
+                <span class="svc-benefit-check"><i class="fas fa-check"></i></span>
+                <div><h3>{{ item.title }}</h3>{% if item.text %}<p>{{ item.text }}</p>{% endif %}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
         <div class="animate-on-scroll typography-pro service-benefit-list">{{ service.benefits|safe }}</div>
+        {% endif %}
     </div>
 </section>
 {% endif %}
 
 {# Process #}
-{% if service.process %}
+{% if service.process_items or service.process %}
 <section class="section section-dark">
     <div class="container">
         <div class="section-header animate-on-scroll">
             <span class="section-badge"><i class="fas fa-route"></i> How We Work</span>
-            <h2>Our Process</h2>
+            <h2>Our <span class="highlight">Process</span></h2>
         </div>
+        {% if service.process_items %}
+        <ol class="svc-process">
+            {% for item in service.process_items %}
+            <li class="svc-step animate-on-scroll animate-delay-{{ forloop.counter }}">
+                <span class="svc-step-num">{{ forloop.counter|stringformat:"02d" }}</span>
+                <h3>{{ item.title }}</h3>
+                {% if item.text %}<p>{{ item.text }}</p>{% endif %}
+            </li>
+            {% endfor %}
+        </ol>
+        {% else %}
         <div class="animate-on-scroll service-process-list">{{ service.process|safe }}</div>
+        {% endif %}
     </div>
 </section>
 {% endif %}

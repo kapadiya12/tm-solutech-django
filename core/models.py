@@ -1,4 +1,21 @@
+from django.core.cache import cache
 from django.db import models
+
+
+def file_available(field, ttl=600):
+    """Whether a FileField's file exists in storage, cached so remote storage
+    (Cloudinary) isn't queried on every page render."""
+    if not field:
+        return False
+    key = 'file-exists:' + field.name
+    result = cache.get(key)
+    if result is None:
+        try:
+            result = field.storage.exists(field.name)
+        except Exception:
+            result = False
+        cache.set(key, result, ttl)
+    return result
 from django.utils.text import slugify
 from django_ckeditor_5.fields import CKEditor5Field
 
@@ -33,6 +50,12 @@ class SiteSettings(models.Model):
 
     def __str__(self):
         return self.company_name
+
+    @property
+    def logo_available(self):
+        # The DB is shared across environments but media/ is not, so a row can
+        # reference a logo file that doesn't exist on this machine's disk.
+        return file_available(self.logo)
 
     def save(self, *args, **kwargs):
         # Ensure only one instance
@@ -226,3 +249,40 @@ class FAQ(models.Model):
 
     def __str__(self):
         return self.question
+
+
+
+class HeroSlide(models.Model):
+    """A slide in the homepage hero carousel (Dashboard → Homepage Content → Hero Slides)."""
+    ACCENT_CHOICES = [
+        ('blue', 'Blue'),
+        ('green', 'Green'),
+        ('orange', 'Orange'),
+    ]
+
+    tab_label = models.CharField(max_length=40, help_text='Short name on the slide tab, e.g. "Cloud"')
+    tab_icon = models.CharField(max_length=50, default='fas fa-bolt', help_text='Font Awesome class for the tab')
+    eyebrow = models.CharField(max_length=80, blank=True, help_text='Small label above the title')
+    title = models.CharField(max_length=120, help_text='Main headline, e.g. "Smart IT Solutions for"')
+    highlight = models.CharField(max_length=80, blank=True, help_text='Gradient words shown after the title, e.g. "Modern Businesses"')
+    subtitle = models.CharField(max_length=300, blank=True)
+    image = models.ImageField(upload_to='hero_slides/', blank=True, help_text='Wide background image (1920×1080 or larger). Leave empty for a designed gradient background.')
+    primary_label = models.CharField('Primary button label', max_length=40, blank=True)
+    primary_url = models.CharField('Primary button link', max_length=300, blank=True)
+    secondary_label = models.CharField('Secondary button label', max_length=40, blank=True)
+    secondary_url = models.CharField('Secondary button link', max_length=300, blank=True)
+    accent = models.CharField(max_length=10, choices=ACCENT_CHOICES, default='blue')
+    display_order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['display_order']
+        verbose_name = 'Hero Slide'
+        verbose_name_plural = 'Hero Slides'
+
+    def __str__(self):
+        return self.tab_label
+
+    @property
+    def image_available(self):
+        return file_available(self.image)

@@ -1,0 +1,117 @@
+{% load static %}
+<section class="hc" id="heroCarousel" aria-roledescription="carousel" aria-label="Highlights" data-interval="7000">
+
+    {# ---------- Backgrounds (cross-fade + slow zoom) ---------- #}
+    <div class="hc-backdrops" aria-hidden="true">
+        {% for slide in hero_slides %}
+        <div class="hc-backdrop hc-accent-{{ slide.accent }}{% if forloop.first %} is-active{% endif %}" data-hc-backdrop>
+            {% if slide.image_available %}
+            <img src="{{ slide.image.url }}" alt="" {% if forloop.first %}fetchpriority="high"{% else %}loading="lazy"{% endif %} decoding="async">
+            {% else %}
+            <span class="hc-backdrop-design"></span>
+            {% endif %}
+        </div>
+        {% empty %}
+        <div class="hc-backdrop is-active"><span class="hc-backdrop-design"></span></div>
+        {% endfor %}
+        <span class="hc-shade"></span>
+        <span class="hc-grid"></span>
+        <span class="hc-glow hc-glow-blue"></span>
+        <span class="hc-glow hc-glow-green"></span>
+        <span class="hc-glow hc-glow-orange"></span>
+    </div>
+
+    <div class="container hc-container">
+        <div class="hc-main">
+
+            {# ---------- Slides ---------- #}
+            <div class="hc-slides">
+                {% for slide in hero_slides %}
+                <div class="hc-slide hc-accent-{{ slide.accent }}{% if forloop.first %} is-active{% endif %}"
+                     id="hcSlide{{ forloop.counter }}"
+                     role="group" aria-roledescription="slide" aria-label="{{ forloop.counter }} of {{ hero_slides|length }}: {{ slide.tab_label }}"
+                     {% if not forloop.first %}aria-hidden="true"{% endif %} data-hc-slide>
+                    {% if slide.eyebrow %}
+                    <span class="hc-eyebrow hc-line"><span class="hc-eyebrow-dot" aria-hidden="true"></span>{{ slide.eyebrow }}</span>
+                    {% endif %}
+                    {% if forloop.first %}<h1 class="hc-title">{% else %}<h2 class="hc-title">{% endif %}
+                        <span class="hc-line">{{ slide.title }}</span>
+                        {% if slide.highlight %}<span class="hc-line hc-highlight">{{ slide.highlight }}</span>{% endif %}
+                    {% if forloop.first %}</h1>{% else %}</h2>{% endif %}
+                    {% if slide.subtitle %}<p class="hc-subtitle hc-line">{{ slide.subtitle }}</p>{% endif %}
+
+                    {% if forloop.first and hero_tags %}
+                    <div class="hc-tags hc-line">
+                        {% for tag in hero_tags %}<span class="hc-tag"><i class="{{ tag.icon }}"></i> {{ tag.label }}</span>{% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% if slide.primary_label or slide.secondary_label %}
+                    <div class="hc-actions hc-line">
+                        {% if slide.primary_label and slide.primary_url %}
+                        <a href="{{ slide.primary_url }}" class="hc-btn hc-btn-primary" {% if not forloop.first %}tabindex="-1"{% endif %}>
+                            <span>{{ slide.primary_label }}</span>
+                            <span class="hc-btn-arrow" aria-hidden="true"><i class="fas fa-arrow-right"></i></span>
+                        </a>
+                        {% endif %}
+                        {% if slide.secondary_label and slide.secondary_url %}
+                        <a href="{{ slide.secondary_url }}" class="hc-btn hc-btn-ghost" {% if not forloop.first %}tabindex="-1"{% endif %}>{{ slide.secondary_label }}</a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% empty %}
+                <div class="hc-slide is-active">
+                    <span class="hc-eyebrow hc-line"><span class="hc-eyebrow-dot" aria-hidden="true"></span>Trusted IT Solutions Since 1985</span>
+                    <h1 class="hc-title"><span class="hc-line">Smart IT Solutions for</span><span class="hc-line hc-highlight">Modern Businesses</span></h1>
+                    <p class="hc-subtitle hc-line">Cloud, Security, Networking &amp; Infrastructure — built around your business.</p>
+                    <div class="hc-actions hc-line">
+                        <a href="{% url 'services:service_list' %}" class="hc-btn hc-btn-primary"><span>Explore Our Services</span><span class="hc-btn-arrow" aria-hidden="true"><i class="fas fa-arrow-right"></i></span></a>
+                        <a href="{% url 'contact:contact' %}" class="hc-btn hc-btn-ghost">Get Free Consultation</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            {# ---------- Floating stat cards (Dashboard → Hero Floating Stats) ---------- #}
+            {% if hero_stats %}
+            <aside class="hc-stats" aria-label="At a glance">
+                {% for stat in hero_stats %}
+                <div class="hc-stat hc-stat-{% cycle 'blue' 'green' 'orange' %}">
+                    <span class="hc-stat-icon"><i class="{{ stat.icon }}"></i></span>
+                    <span class="hc-stat-text">
+                        <span class="hc-stat-label">{{ stat.label }}</span>
+                        <strong class="hc-stat-value">{{ stat.value }}</strong>
+                    </span>
+                </div>
+                {% endfor %}
+            </aside>
+            {% endif %}
+        </div>
+
+        {# ---------- Controls: numbered tabs with progress, arrows, pause ---------- #}
+        {% if hero_slides|length > 1 %}
+        <div class="hc-controls">
+            <div class="hc-tabs" role="tablist" aria-label="Choose a slide">
+                {% for slide in hero_slides %}
+                <button type="button" class="hc-tab hc-accent-{{ slide.accent }}{% if forloop.first %} is-active{% endif %}"
+                        role="tab" aria-controls="hcSlide{{ forloop.counter }}" aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+                        data-hc-tab="{{ forloop.counter0 }}">
+                    <span class="hc-tab-top">
+                        <span class="hc-tab-num">{{ forloop.counter|stringformat:"02d" }}</span>
+                        <i class="{{ slide.tab_icon }}" aria-hidden="true"></i>
+                    </span>
+                    <span class="hc-tab-label">{{ slide.tab_label }}</span>
+                    <span class="hc-tab-progress" aria-hidden="true"><span></span></span>
+                </button>
+                {% endfor %}
+            </div>
+            <div class="hc-nav">
+                <button type="button" class="hc-nav-btn" data-hc-prev aria-label="Previous slide"><i class="fas fa-arrow-left"></i></button>
+                <button type="button" class="hc-nav-btn hc-pause" data-hc-pause aria-label="Pause slideshow"><i class="fas fa-pause"></i></button>
+                <button type="button" class="hc-nav-btn" data-hc-next aria-label="Next slide"><i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>

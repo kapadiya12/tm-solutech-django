@@ -6,6 +6,9 @@ app_name = 'dashboard'
 urlpatterns = [
     path('', views.dashboard_index, name='index'),
     path('run-migrations/', views.run_migrations, name='run_migrations'),
+    # Navbar → Services Menu
+    path('navbar/services/', views.navbar_services, name='navbar_services'),
+    path('navbar/services/update/', views.navbar_services_update, name='navbar_services_update'),
     # Services
     path('services/', views.service_list, name='service_list'),
     path('services/create/', views.service_create, name='service_create'),
@@ -73,6 +76,10 @@ urlpatterns = [
     path('client-logos/<int:pk>/edit/', views.clientlogo_edit, name='clientlogo_edit'),
     path('client-logos/<int:pk>/delete/', views.clientlogo_delete, name='clientlogo_delete'),
     # Hero Tags
+    path('hero-slides/', views.heroslide_list, name='heroslide_list'),
+    path('hero-slides/create/', views.heroslide_create, name='heroslide_create'),
+    path('hero-slides/<int:pk>/edit/', views.heroslide_edit, name='heroslide_edit'),
+    path('hero-slides/<int:pk>/delete/', views.heroslide_delete, name='heroslide_delete'),
     path('hero-tags/', views.herotag_list, name='herotag_list'),
     path('hero-tags/create/', views.herotag_create, name='herotag_create'),
     path('hero-tags/<int:pk>/edit/', views.herotag_edit, name='herotag_edit'),

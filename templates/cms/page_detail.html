@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block meta_description %}{{ page.meta_description|default:page.title }}{% endblock %}
+
 {% block title %}{{ page.meta_title|default:page.title }} | TM Solutech{% endblock %}
 
 {% block content %}
@@ -11,12 +13,13 @@
             <li><span class="separator"><i class="fas fa-chevron-right"></i></span> {{ page.title }}</li>
         </ul>
         <h1 class="page-title">{{ page.title }}</h1>
+        {% if page.meta_description %}<p class="page-subtitle">{{ page.meta_description }}</p>{% endif %}
     </div>
 </div>
 
 <section class="section">
     <div class="container-narrow">
-        <article style="color: var(--gray-700); line-height: 1.8;">{{ page.content|safe }}</article>
+        <article class="cms-prose">{{ page.content|safe }}</article>
     </div>
 </section>
 {% endblock %}

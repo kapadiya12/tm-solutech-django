@@ -1,0 +1,45 @@
+{% extends 'dashboard/base.html' %}
+{% block dashboard_content %}
+<div class="flex-between mb-8">
+    <div>
+        <h2>{{ page_title }}</h2>
+        <p style="color: var(--gray-500); font-size: 0.875rem; margin-top: 0.25rem;">The homepage hero carousel. Slides play in the order below; each shows for 7 seconds and pauses while a visitor hovers.</p>
+    </div>
+    <a href="{% url 'dashboard:heroslide_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add Slide</a>
+</div>
+<div class="dashboard-card">
+    <div class="dashboard-table-wrap">
+        <table class="dashboard-table">
+            <thead>
+                <tr><th>Background</th><th>Tab</th><th>Headline</th><th>Accent</th><th>Order</th><th>Active</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                {% for slide in slides %}
+                <tr>
+                    <td>
+                        {% if slide.image_available %}<img src="{{ slide.image.url }}" alt="" style="width: 96px; height: 54px; object-fit: cover; border-radius: 8px;">
+                        {% else %}<span style="display: inline-flex; align-items: center; justify-content: center; width: 96px; height: 54px; border-radius: 8px; font-size: 0.7rem; color: #fff; background: linear-gradient(135deg, #0B1247, #1B2585 60%, #0AAEE0);">Gradient</span>{% endif %}
+                    </td>
+                    <td><i class="{{ slide.tab_icon }}"></i> <strong>{{ slide.tab_label }}</strong></td>
+                    <td>{{ slide.title }} <strong>{{ slide.highlight }}</strong></td>
+                    <td>{{ slide.get_accent_display }}</td>
+                    <td>{{ slide.display_order }}</td>
+                    <td><span class="status-badge {% if slide.is_active %}status-active{% else %}status-draft{% endif %}">{% if slide.is_active %}Active{% else %}Inactive{% endif %}</span></td>
+                    <td>
+                        <div class="flex gap-2">
+                            <a href="{% url 'dashboard:heroslide_edit' slide.pk %}" class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></a>
+                            <form method="post" action="{% url 'dashboard:heroslide_delete' slide.pk %}" onsubmit="return confirm('Delete this slide?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm" style="color: var(--danger);"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="text-center">No slides yet — the homepage shows a default hero. <a href="{% url 'dashboard:heroslide_create' %}">Add a slide</a></td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

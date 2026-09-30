@@ -1,24 +1,111 @@
 {% extends 'dashboard/base.html' %}
+{% load static %}
+{% block extra_css %}{{ form.media.css }}{% endblock %}
 {% block dashboard_content %}
-<div class="flex-between mb-8">
-    <h2>{{ page_title }}</h2>
-    <a href="{% url 'dashboard:service_list' %}" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Back</a>
-</div>
-<div class="dashboard-card">
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {% for field in form %}
-        <div class="form-group">
-            <label class="form-label">{{ field.label }} {% if field.field.required %}<span class="required">*</span>{% endif %}</label>
-            {{ field }}
-            {% if field.errors %}<div class="form-error">{{ field.errors.0 }}</div>{% endif %}
-            {% if field.help_text %}<p style="font-size: var(--text-xs); color: var(--gray-500); margin-top: var(--space-1);">{{ field.help_text }}</p>{% endif %}
+
+<div class="ed-head">
+    <div class="ed-head-text">
+        <a href="{% url 'dashboard:service_list' %}" class="ed-back"><i class="fas fa-arrow-left"></i> All services</a>
+        <h2>{% if service %}{{ service.title }}{% else %}New service{% endif %}</h2>
+        <p class="ed-url" data-url-preview data-kind="service" data-base="/services/"></p>
+    </div>
+    <div class="ed-head-actions">
+        <div class="ed-progress" data-progress title="Sections complete">
+            <svg viewBox="0 0 36 36" aria-hidden="true"><circle class="ed-progress-bg" cx="18" cy="18" r="15.5"/><circle class="ed-progress-bar" cx="18" cy="18" r="15.5"/></svg>
+            <span class="ed-progress-text"><strong data-progress-count>0</strong>/<span data-progress-total>7</span><small>complete</small></span>
         </div>
-        {% endfor %}
-        <div class="flex gap-4">
-            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save</button>
-            <a href="{% url 'dashboard:service_list' %}" class="btn btn-secondary">Cancel</a>
-        </div>
-    </form>
+        {% if service %}<a href="{{ service.get_absolute_url }}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-up-right-from-square"></i> View page</a>{% endif %}
+    </div>
 </div>
+
+{{ category_slugs|json_script:"categorySlugs" }}
+
+<form method="post" enctype="multipart/form-data" class="ed" data-guard data-validate novalidate>
+    {% csrf_token %}
+    {% if form.errors %}<div class="ed-alert"><i class="fas fa-circle-exclamation"></i> Some fields need your attention. They're marked in red below.</div>{% endif %}
+
+    <nav class="ed-nav" data-section-nav aria-label="Form sections">
+        <span class="ed-nav-title">Sections</span>
+        <a href="#sec-basics"><span class="ed-nav-dot"></span> Basics</a>
+        <a href="#sec-overview"><span class="ed-nav-dot"></span> Overview</a>
+        <a href="#sec-features"><span class="ed-nav-dot"></span> Key features</a>
+        <a href="#sec-benefits"><span class="ed-nav-dot"></span> Benefits</a>
+        <a href="#sec-process"><span class="ed-nav-dot"></span> Process</a>
+        <a href="#sec-faqs"><span class="ed-nav-dot"></span> FAQs</a>
+        <a href="#sec-visibility"><span class="ed-nav-dot"></span> Visibility</a>
+    </nav>
+
+    <div class="ed-main">
+
+        <section class="ed-card" id="sec-basics" data-section>
+            <header class="ed-card-head"><span class="ed-card-num">1</span><div><h3>Basics</h3><p>Name, service area, icon and summary. Used in the navbar, cards and search.</p></div><span class="ed-card-state"></span></header>
+            <div class="ed-grid-2">
+                {% include 'dashboard/partials/field.html' with field=form.title %}
+                {% include 'dashboard/partials/field.html' with field=form.category %}
+            </div>
+            {% include 'dashboard/partials/field.html' with field=form.slug %}
+            {% include 'dashboard/partials/field.html' with field=form.icon %}
+            {% include 'dashboard/partials/field.html' with field=form.short_description %}
+        </section>
+
+        <section class="ed-card" id="sec-overview" data-section>
+            <header class="ed-card-head"><span class="ed-card-num">2</span><div><h3>Overview</h3><p>The introduction and image at the top of the service page.</p></div><span class="ed-card-state"></span></header>
+            {% include 'dashboard/partials/field.html' with field=form.description %}
+            {% include 'dashboard/partials/field.html' with field=form.image %}
+        </section>
+
+        <section class="ed-card" id="sec-features" data-section>
+            <header class="ed-card-head"><span class="ed-card-num">3</span><div><h3>Key features</h3><p>What the service includes, shown as icon cards. At least 3.</p></div><span class="ed-card-state"></span></header>
+            {% include 'dashboard/partials/repeater.html' with field=form.feature_items title='Features' noun='feature' add_label='Add feature' icon='fas fa-list-check' min=3 schema='[{"key":"icon","label":"Icon","type":"icon"},{"key":"title","label":"Feature title","placeholder":"e.g. 24/7 Threat Monitoring","max":120},{"key":"text","label":"Short description","type":"textarea","placeholder":"One or two sentences"}]' %}
+        </section>
+
+        <section class="ed-card" id="sec-benefits" data-section>
+            <header class="ed-card-head"><span class="ed-card-num">4</span><div><h3>Benefits</h3><p>The business outcomes customers get, shown with check marks. At least 2.</p></div><span class="ed-card-state"></span></header>
+            {% include 'dashboard/partials/repeater.html' with field=form.benefit_items title='Benefits' noun='benefit' add_label='Add benefit' icon='fas fa-award' min=2 schema='[{"key":"title","label":"Benefit","placeholder":"e.g. Zero Downtime","max":120},{"key":"text","label":"Explanation","type":"textarea","placeholder":"How the customer gains"}]' %}
+        </section>
+
+        <section class="ed-card" id="sec-process" data-section>
+            <header class="ed-card-head"><span class="ed-card-num">5</span><div><h3>Process</h3><p>How you deliver it, step by step. Numbered 01, 02, 03… automatically. At least 3.</p></div><span class="ed-card-state"></span></header>
+            {% include 'dashboard/partials/repeater.html' with field=form.process_items title='Steps' noun='step' add_label='Add step' icon='fas fa-route' min=3 schema='[{"key":"title","label":"Step title","placeholder":"e.g. Assessment","max":120},{"key":"text","label":"What happens","type":"textarea","placeholder":"What you do in this step"}]' %}
+        </section>
+
+        <section class="ed-card" id="sec-faqs" data-section>
+            <header class="ed-card-head"><span class="ed-card-num">6</span><div><h3>FAQs</h3><p>Common questions, shown as an expandable list and included in site search. At least 2.</p></div><span class="ed-card-state"></span></header>
+            {% include 'dashboard/partials/repeater.html' with field=form.faq_items title='Questions' noun='question' add_label='Add question' icon='fas fa-circle-question' min=2 max=20 schema='[{"key":"question","label":"Question","placeholder":"e.g. How long does setup take?","max":300},{"key":"answer","label":"Answer","type":"textarea","rows":3,"placeholder":"A clear, helpful answer"}]' %}
+        </section>
+
+        <section class="ed-card" id="sec-visibility" data-section>
+            <header class="ed-card-head"><span class="ed-card-num">7</span><div><h3>Visibility</h3><p>Where the service appears. Menu order is set by dragging in <a href="{% url 'dashboard:navbar_services' %}">Services Menu</a>.</p></div><span class="ed-card-state"></span></header>
+            <div class="ed-toggles">
+                {% include 'dashboard/partials/field.html' with field=form.is_active %}
+                {% include 'dashboard/partials/field.html' with field=form.show_in_nav %}
+            </div>
+            {% include 'dashboard/partials/field.html' with field=form.nav_badge %}
+            {% if service %}
+            <div class="ed-danger">
+                <div><strong>Delete this service</strong><span>Removes the page permanently. This cannot be undone.</span></div>
+                <button type="submit" form="deleteServiceForm" class="btn btn-sm ed-danger-btn"><i class="fas fa-trash"></i> Delete</button>
+            </div>
+            {% endif %}
+        </section>
+
+        <div class="ed-savebar">
+            <span class="ed-savebar-hint" data-savebar-hint><i class="fas fa-circle-info"></i> All fields marked <span class="required">*</span> are required.</span>
+            <div class="ed-savebar-actions">
+                <a href="{% url 'dashboard:service_list' %}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" name="save_continue" class="btn btn-secondary ed-btn-continue"><i class="fas fa-floppy-disk"></i> <span class="ed-lbl-long">Save &amp; keep editing</span><span class="ed-lbl-short">Save draft</span></button>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> {% if service %}Save changes{% else %}Create service{% endif %}</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+{% if service %}
+<form id="deleteServiceForm" method="post" action="{% url 'dashboard:service_delete' service.pk %}" onsubmit="return confirm('Delete “{{ service.title|escapejs }}” permanently?');">{% csrf_token %}</form>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+{{ form.media.js }}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
 {% endblock %}

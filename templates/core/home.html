@@ -1,78 +1,16 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load humanize %}
+{% load asset_tags %}
 
 {% block title %}TM Solutech | Smart IT Solutions for Modern Businesses{% endblock %}
 {% block meta_description %}TM Solutech provides enterprise Cloud Solutions, Network & Security, and Remote Infrastructure Management services. Trusted by 150+ organizations across India.{% endblock %}
 
+{% block extra_css %}<link rel="stylesheet" href="{% static_v 'css/home.css' %}">{% endblock %}
+
 {% block content %}
-{# ===== HERO SECTION ===== #}
-<section class="hero">
-    <div class="hero-bg">
-        <img src="{% static 'images/hero/hero-bg.jpg' %}" alt="Technology Background" loading="eager">
-    </div>
-    <div class="hero-overlay"></div>
-    <div class="hero-pattern"></div>
-    <div class="hero-orb hero-orb-1"></div>
-    <div class="hero-orb hero-orb-2"></div>
-    <div class="hero-orb hero-orb-3"></div>
-
-    <div class="container">
-        <div class="hero-content">
-            <div class="hero-badge hero-enter hero-enter-1">
-                <span class="pulse-dot"></span>
-                Trusted IT Solutions Since 1985
-            </div>
-            <h1 class="hero-enter hero-enter-2">Smart IT Solutions<br>for <span class="gradient-text">Modern Businesses</span></h1>
-            <p class="hero-description hero-enter hero-enter-3">Cloud, Security, Networking & Infrastructure — built around your business.</p>
-            <div class="hero-tags hero-enter hero-enter-4">
-                {% for tag in hero_tags %}
-                <span class="hero-tag"><i class="{{ tag.icon }}"></i> {{ tag.label }}</span>
-                {% empty %}
-                <span class="hero-tag"><i class="fas fa-cloud"></i> Cloud Solutions</span>
-                <span class="hero-tag"><i class="fas fa-shield-alt"></i> Cyber Security</span>
-                <span class="hero-tag"><i class="fas fa-network-wired"></i> Networking</span>
-                <span class="hero-tag"><i class="fas fa-server"></i> Enterprise IT</span>
-                {% endfor %}
-            </div>
-            <div class="hero-actions hero-enter hero-enter-5">
-                <a href="{% url 'services:service_list' %}" class="btn btn-primary btn-lg">Explore Our Services</a>
-                <a href="{% url 'contact:contact' %}" class="btn btn-outline-white btn-lg">Get Free Consultation</a>
-            </div>
-        </div>
-    </div>
-
-    <div class="hero-floating">
-        {% for stat in hero_stats %}
-        <div class="hero-float-card">
-            <div class="float-icon"><i class="{{ stat.icon }}"></i></div>
-            <div class="float-label">{{ stat.label }}</div>
-            <div class="float-value">{{ stat.value }}</div>
-        </div>
-        {% empty %}
-        <div class="hero-float-card">
-            <div class="float-icon"><i class="fas fa-cloud-upload-alt"></i></div>
-            <div class="float-label">Cloud Migrations</div>
-            <div class="float-value">Seamless</div>
-        </div>
-        <div class="hero-float-card">
-            <div class="float-icon"><i class="fas fa-shield-alt"></i></div>
-            <div class="float-label">Security Level</div>
-            <div class="float-value">Enterprise</div>
-        </div>
-        <div class="hero-float-card">
-            <div class="float-icon"><i class="fas fa-headset"></i></div>
-            <div class="float-label">Support</div>
-            <div class="float-value">24/7</div>
-        </div>
-        {% endfor %}
-    </div>
-
-    <div class="hero-scroll">
-        <span>Scroll Down</span>
-        <div class="scroll-line"></div>
-    </div>
-</section>
+{# ===== HERO CAROUSEL (Dashboard → Homepage Content → Hero Slides) ===== #}
+{% include 'includes/hero_carousel.html' %}
 
 {# ===== TRUST / STATS BAR ===== #}
 <section class="trust-bar">
@@ -408,12 +346,12 @@
 {# Leader Bio Modal #}
 <div class="leader-bio-modal" id="leaderBioModal">
     <div class="leader-bio-modal-backdrop" id="leaderBioModalBackdrop"></div>
-    <div class="leader-bio-modal-panel" role="dialog" aria-modal="true" aria-label="Leader biography">
+    <div class="leader-bio-modal-panel" data-lenis-prevent role="dialog" aria-modal="true" aria-label="Leader biography">
         <button class="leader-bio-modal-close" id="leaderBioModalClose" aria-label="Close">
             <i class="fas fa-times"></i>
         </button>
         <div class="leader-bio-modal-photo">
-            <img id="modalLeaderImg" src="" alt="">
+            <img id="modalLeaderImg" alt="">
         </div>
         <div class="leader-bio-modal-content">
             <p class="leader-bio-modal-role" id="modalLeaderRole"></p>

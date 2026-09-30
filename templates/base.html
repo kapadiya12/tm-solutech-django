@@ -26,6 +26,8 @@
 
     {# Main CSS #}
     <link rel="stylesheet" href="{% static_v 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static_v 'css/navbar.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lenis@1.1.20/dist/lenis.css">
     {% block extra_css %}{% endblock %}
 
     {% if site_settings and site_settings.header_scripts %}
@@ -34,10 +36,10 @@
 </head>
 <body>
     <div class="page-loader-bar" id="pageLoaderBar"></div>
-    <div class="scroll-progress"></div>
     <div class="mobile-overlay"></div>
 
     {% include 'includes/navbar.html' %}
+    {% include 'includes/site_search.html' %}
 
     {% if messages %}
     <div class="toast-container">
@@ -70,6 +72,7 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.20/dist/lenis.min.js"></script>
     <script src="{% static_v 'js/main.js' %}"></script>
     {% block extra_js %}{% endblock %}
 

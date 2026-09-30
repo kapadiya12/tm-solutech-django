@@ -4,8 +4,9 @@ from django.conf import settings
 from django.core.files import File
 from django.core.management.base import BaseCommand
 
-from core.models import Leadership, ClientLogo
+from core.models import ClientLogo, HeroSlide, Leadership, SiteSettings
 from insights.models import BlogPost
+from services.models import Service
 
 
 LEADERSHIP_PHOTOS = [
@@ -86,6 +87,31 @@ class Command(BaseCommand):
             logo = ClientLogo.objects.filter(display_order=i).first()
             if logo:
                 ensure(logo.logo, static_path('clients', filename), 'clients')
+
+        # Seeded from any file with the same name under static/images/
+        index = {}
+        for dirpath, _dirs, files in os.walk(os.path.join(settings.BASE_DIR, 'static', 'images')):
+            for filename in files:
+                index.setdefault(filename, os.path.join(dirpath, filename))
+
+        self.stdout.write("Hero slide backgrounds:")
+        for slide in HeroSlide.objects.exclude(image=''):
+            src = index.get(os.path.basename(slide.image.name))
+            if src:
+                ensure(slide.image, src, 'hero_slides')
+
+        self.stdout.write("Service images:")
+        for service in Service.objects.exclude(image=''):
+            src = index.get(os.path.basename(service.image.name))
+            if src:
+                ensure(service.image, src, 'services')
+
+        self.stdout.write("Site logo & favicon:")
+        site = SiteSettings.objects.first()
+        if site and site.logo:
+            ensure(site.logo, static_path('logo', 'tm-solutech-logo.png'), 'settings')
+        if site and site.favicon:
+            ensure(site.favicon, static_path('logo', 'favicon.png'), 'settings')
 
         self.stdout.write(self.style.SUCCESS(
             f"\nDone. {written} file(s) written, {skipped} already present, {missing_src} source(s) missing."

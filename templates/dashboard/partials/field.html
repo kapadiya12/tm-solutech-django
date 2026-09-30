@@ -1,0 +1,24 @@
+{% comment %}Usage: {% include 'dashboard/partials/field.html' with field=form.title %}{% endcomment %}
+{% if field.field.widget.input_type == 'checkbox' %}
+<div class="form-group field-toggle{% if field.errors %} has-error{% endif %}">
+    <label class="toggle-row" for="{{ field.id_for_label }}">
+        <span class="toggle-text">
+            <strong>{{ field.label }}</strong>
+            {% if field.help_text %}<span>{{ field.help_text }}</span>{% endif %}
+        </span>
+        <span class="nsm-switch">{{ field }}<span class="nsm-switch-track"></span></span>
+    </label>
+</div>
+{% else %}
+<div class="form-group{% if field.errors %} has-error is-invalid{% endif %}" data-field="{{ field.html_name }}">
+    <div class="form-label-row">
+        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required or field.field.show_required %} <span class="required">*</span>{% endif %}</label>
+    </div>
+    <div class="field-control">
+        {{ field }}
+        <span class="field-state" aria-hidden="true"><i class="fas fa-check"></i><i class="fas fa-exclamation"></i></span>
+    </div>
+    <div class="form-error" data-live-error {% if not field.errors %}hidden{% endif %}><i class="fas fa-circle-exclamation"></i> <span>{{ field.errors.0 }}</span></div>
+    {% if field.help_text %}<p class="form-help">{{ field.help_text }}</p>{% endif %}
+</div>
+{% endif %}

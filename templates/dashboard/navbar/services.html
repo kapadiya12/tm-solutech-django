@@ -1,0 +1,208 @@
+{% extends 'dashboard/base.html' %}
+{% block dashboard_content %}
+<div class="nsm" id="navbarServicesManager" data-update-url="{% url 'dashboard:navbar_services_update' %}">
+    {% csrf_token %}
+
+    {# ---------- Header ---------- #}
+    <div class="nsm-hero">
+        <div class="nsm-hero-text">
+            <span class="nsm-eyebrow"><i class="fas fa-bars-staggered"></i> Navbar</span>
+            <h2>Services Menu</h2>
+            <p>Control what appears in the <strong>Services</strong> mega-menu on the website. Drag to reorder, switch items in or out of the navbar, and add badges. Every category and service here also has its own page on the site.</p>
+        </div>
+        <div class="nsm-hero-side">
+            <div class="nsm-stats">
+                <div class="nsm-stat"><strong>{{ nav_category_total }}</strong><span>Categories in navbar</span></div>
+                <div class="nsm-stat"><strong>{{ nav_service_total }}</strong><span>Services in navbar</span></div>
+            </div>
+            <div class="nsm-hero-actions">
+                <a href="{% url 'dashboard:category_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add category</a>
+                <a href="{% url 'core:home' %}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm"><i class="fas fa-eye"></i> Preview on site</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="nsm-hint"><i class="fas fa-circle-info"></i> <span><strong>Show in navbar</strong> only hides an item from the menu; its page stays live. <strong>Active</strong> takes the page offline everywhere. Moving a service to another category changes its page address. Changes save instantly.</span></div>
+
+    {# ---------- Category tree ---------- #}
+    <div class="nsm-categories" id="nsmCategories">
+        {% for category in categories %}
+        <section class="nsm-category{% if not category.show_in_nav or not category.is_active %} is-hidden{% endif %}" data-id="{{ category.pk }}">
+            <header class="nsm-category-head">
+                <span class="nsm-handle nsm-category-handle" title="Drag to reorder"><i class="fas fa-grip-vertical"></i></span>
+                <span class="nsm-icon nsm-accent-{% cycle 'blue' 'green' 'orange' %}"><i class="{{ category.icon }}"></i></span>
+                <div class="nsm-title-wrap">
+                    <div class="nsm-title">
+                        <span data-nsm-label>{{ category.menu_label }}</span>
+                    </div>
+                    <div class="nsm-sub">
+                        <span>{{ category.services.all|length }} service{{ category.services.all|length|pluralize }}</span>
+                        <span class="nsm-dot"></span>
+                        <a href="{{ category.get_absolute_url }}" target="_blank" rel="noopener">{{ category.get_absolute_url }} <i class="fas fa-arrow-up-right-from-square"></i></a>
+                    </div>
+                </div>
+
+                <div class="nsm-controls">
+                    <label class="nsm-switch" title="Show this category in the navbar">
+                        <input type="checkbox" data-nsm-toggle data-kind="category" data-id="{{ category.pk }}" data-field="show_in_nav" {% if category.show_in_nav %}checked{% endif %}>
+                        <span class="nsm-switch-track"></span><span class="nsm-switch-label">In navbar</span>
+                    </label>
+                    <label class="nsm-switch" title="Category page and services visible on the site">
+                        <input type="checkbox" data-nsm-toggle data-kind="category" data-id="{{ category.pk }}" data-field="is_active" {% if category.is_active %}checked{% endif %}>
+                        <span class="nsm-switch-track"></span><span class="nsm-switch-label">Active</span>
+                    </label>
+                    <div class="nsm-actions">
+                        <a href="{% url 'dashboard:category_edit' category.pk %}" class="nsm-btn" title="Edit category"><i class="fas fa-file-pen"></i></a>
+                        <a href="{% url 'dashboard:service_create' %}?category={{ category.pk }}" class="nsm-btn nsm-btn-primary" title="Add a service to this category"><i class="fas fa-plus"></i><span>Service</span></a>
+                        <button type="button" class="nsm-btn nsm-collapse" title="Collapse" aria-expanded="true"><i class="fas fa-chevron-up"></i></button>
+                    </div>
+                </div>
+            </header>
+
+            <ul class="nsm-services" data-category-id="{{ category.pk }}">
+                {% for service in category.services.all %}
+                <li class="nsm-service{% if not service.show_in_nav or not service.is_active %} is-hidden{% endif %}" data-id="{{ service.pk }}">
+                    <span class="nsm-handle" title="Drag to reorder or move to another category"><i class="fas fa-grip-vertical"></i></span>
+                    <span class="nsm-service-icon"><i class="{{ service.icon }}"></i></span>
+                    <div class="nsm-title-wrap">
+                        <div class="nsm-title nsm-title-sm">
+                            <span data-nsm-label>{{ service.menu_label }}</span>
+                        </div>
+                        <div class="nsm-sub nsm-desc" data-nsm-desc>{{ service.menu_description|default:"No navbar description yet"|truncatechars:90 }}</div>
+                    </div>
+                    <div class="nsm-controls">
+                        <select class="nsm-badge-select" data-nsm-badge data-id="{{ service.pk }}" title="Navbar badge">
+                            {% for value, label in badge_choices %}<option value="{{ value }}" {% if service.nav_badge == value %}selected{% endif %}>{% if value %}{{ label }}{% else %}No badge{% endif %}</option>{% endfor %}
+                        </select>
+                        <label class="nsm-switch" title="Show this service in the navbar">
+                            <input type="checkbox" data-nsm-toggle data-kind="service" data-id="{{ service.pk }}" data-field="show_in_nav" {% if service.show_in_nav %}checked{% endif %}>
+                            <span class="nsm-switch-track"></span><span class="nsm-switch-label">In navbar</span>
+                        </label>
+                        <label class="nsm-switch" title="Service page visible on the site">
+                            <input type="checkbox" data-nsm-toggle data-kind="service" data-id="{{ service.pk }}" data-field="is_active" {% if service.is_active %}checked{% endif %}>
+                            <span class="nsm-switch-track"></span><span class="nsm-switch-label">Active</span>
+                        </label>
+                        <div class="nsm-actions">
+                            <a href="{% url 'dashboard:service_edit' service.pk %}" class="nsm-btn" title="Edit service"><i class="fas fa-file-pen"></i></a>
+                            <a href="{{ service.get_absolute_url }}" target="_blank" rel="noopener" class="nsm-btn" title="View page"><i class="fas fa-arrow-up-right-from-square"></i></a>
+                        </div>
+                    </div>
+                </li>
+                {% endfor %}
+                <li class="nsm-empty-drop">No services yet. Add one, or drag a service here.</li>
+            </ul>
+        </section>
+        {% empty %}
+        <div class="dashboard-card nsm-empty-state">
+            <i class="fas fa-layer-group"></i>
+            <h3>No service categories yet</h3>
+            <p>Create your first category, then add services to it. They'll appear in the website's Services menu.</p>
+            <a href="{% url 'dashboard:category_create' %}" class="btn btn-primary"><i class="fas fa-plus"></i> Add category</a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="nsm-toast" id="nsmToast" role="status" aria-live="polite"></div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
+<script>
+(function () {
+    const root = document.getElementById('navbarServicesManager');
+    if (!root) return;
+    const updateUrl = root.dataset.updateUrl;
+    const csrf = root.querySelector('input[name=csrfmiddlewaretoken]').value;
+    const toastEl = document.getElementById('nsmToast');
+    let toastTimer;
+
+    function toast(message, isError) {
+        toastEl.textContent = message;
+        toastEl.classList.toggle('is-error', !!isError);
+        toastEl.classList.add('is-visible');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toastEl.classList.remove('is-visible'), 2200);
+    }
+
+    async function send(payload) {
+        try {
+            const res = await fetch(updateUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
+                body: JSON.stringify(payload),
+            });
+            const data = await res.json();
+            if (!res.ok || !data.ok) throw new Error(data.error || 'Save failed');
+            toast('Saved');
+            return data;
+        } catch (err) {
+            toast(err.message || 'Could not save. Please retry.', true);
+            throw err;
+        }
+    }
+
+    // Drag & drop: categories, and services (within or across categories)
+    if (window.Sortable) {
+        const catList = document.getElementById('nsmCategories');
+        Sortable.create(catList, {
+            handle: '.nsm-category-handle',
+            draggable: '.nsm-category',
+            animation: 220,
+            ghostClass: 'nsm-ghost',
+            onEnd: () => send({ action: 'reorder_categories', ids: [...catList.querySelectorAll(':scope > .nsm-category')].map((el) => el.dataset.id) }),
+        });
+        root.querySelectorAll('.nsm-services').forEach((list) => {
+            Sortable.create(list, {
+                group: 'nsm-services',
+                handle: '.nsm-handle',
+                draggable: '.nsm-service',
+                animation: 220,
+                ghostClass: 'nsm-ghost',
+                onEnd: (evt) => {
+                    const lists = new Set([evt.from, evt.to]);
+                    lists.forEach((l) => send({
+                        action: 'reorder_services',
+                        category_id: l.dataset.categoryId,
+                        ids: [...l.querySelectorAll('.nsm-service')].map((el) => el.dataset.id),
+                    }));
+                },
+            });
+        });
+    }
+
+    // Toggles
+    root.querySelectorAll('[data-nsm-toggle]').forEach((input) => {
+        input.addEventListener('change', async () => {
+            const row = input.closest('.nsm-service, .nsm-category');
+            try {
+                await send({ action: 'toggle', kind: input.dataset.kind, id: input.dataset.id, field: input.dataset.field, value: input.checked });
+                const nav = row.querySelector('[data-field=show_in_nav]');
+                const active = row.querySelector('[data-field=is_active]');
+                row.classList.toggle('is-hidden', !(nav.checked && active.checked));
+            } catch (e) {
+                input.checked = !input.checked;
+            }
+        });
+    });
+
+    // Badges
+    root.querySelectorAll('[data-nsm-badge]').forEach((select) => {
+        let previous = select.value;
+        select.addEventListener('change', async () => {
+            try { await send({ action: 'badge', kind: 'service', id: select.dataset.id, badge: select.value }); previous = select.value; }
+            catch (e) { select.value = previous; }
+        });
+    });
+
+    // Collapse category
+    root.querySelectorAll('.nsm-collapse').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const collapsed = btn.closest('.nsm-category').classList.toggle('is-collapsed');
+            btn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+        });
+    });
+
+})();
+</script>
+{% endblock %}

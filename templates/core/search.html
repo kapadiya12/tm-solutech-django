@@ -1,6 +1,9 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title %}{% if query %}Search: {{ query }}{% else %}Search{% endif %} | TM Solutech{% endblock %}
+{% block meta_description %}Search TM Solutech services, industries, insights and pages.{% endblock %}
+
 {% block content %}
 <div class="page-hero">
     <div class="container">
@@ -8,69 +11,165 @@
             <li><a href="{% url 'core:home' %}"><i class="fas fa-home"></i> Home</a></li>
             <li><span class="separator"><i class="fas fa-chevron-right"></i></span> Search</li>
         </ul>
-        <h1 class="page-title">{{ page_title }}</h1>
+        <h1 class="page-title" id="spTitle">{% if query %}Results for “{{ query }}”{% else %}Search{% endif %}</h1>
+        <p class="page-subtitle" id="spSummary"{% if not query %} hidden{% endif %}>{{ total_results }} result{{ total_results|pluralize }} across services, industries, insights and pages</p>
     </div>
 </div>
 
-<section class="section">
-    <div class="container">
-        <form class="search-form" action="{% url 'core:search' %}" method="get">
-            <input type="text" name="q" value="{{ query }}" placeholder="Search services, insights, industries..." required>
-            <button type="submit"><i class="fas fa-search"></i></button>
+<section class="section sp-section">
+    <div class="container-narrow">
+        <form class="sp-form" id="spForm" action="{% url 'core:search' %}" method="get" role="search" data-suggest-url="{% url 'core:search_suggest' %}">
+            <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+            <input type="search" name="q" id="spInput" value="{{ query }}" placeholder="Search services, industries, insights…" aria-label="Search" minlength="2" required autocomplete="off" aria-controls="spResults">
+            <span class="ss-spinner sp-spinner" aria-hidden="true"></span>
+            <button type="submit">Search <i class="fas fa-arrow-right"></i></button>
         </form>
 
-        {% if query %}
-        <p class="text-center text-muted mb-8">Found <strong>{{ total_results }}</strong> result{{ total_results|pluralize }} for "<strong>{{ query }}</strong>"</p>
+        <div id="spResults" aria-live="polite">
 
-        {% if results.services %}
-        <h3 class="mb-6"><i class="fas fa-cogs text-primary"></i> Services ({{ results.services|length }})</h3>
-        <div class="grid grid-3 mb-12">
-            {% for service in results.services %}
-            <div class="service-card">
-                <div class="service-card-icon"><i class="{{ service.icon }}"></i></div>
-                <h3>{{ service.title }}</h3>
-                <p>{{ service.short_description|truncatewords:20 }}</p>
-                <a href="{{ service.get_absolute_url }}" class="service-card-link">View Details <i class="fas fa-arrow-right"></i></a>
+        {% if query %}
+            {% if groups %}
+            <nav class="sp-filters" aria-label="Jump to result type">
+                {% for group in groups %}<a href="#sp-{{ group.key }}" class="sp-filter"><i class="{{ group.icon }}"></i> {{ group.label }} <span>{{ group.count }}</span></a>{% endfor %}
+            </nav>
+            {% for group in groups %}
+            <div class="sp-group" id="sp-{{ group.key }}">
+                <h2 class="sp-group-title"><i class="{{ group.icon }}"></i> {{ group.label }} <span>{{ group.count }}</span></h2>
+                <div class="sp-list">
+                    {% for item in group.items %}
+                    <a href="{{ item.url }}" class="sp-item sp-{{ group.key }}">
+                        <span class="sp-item-icon"><i class="{{ item.icon|default:group.icon }}"></i></span>
+                        <span class="sp-item-body">
+                            <span class="sp-item-title">{{ item.title }}{% if item.badge %} <span class="ms-badge ms-badge-{{ item.badge|lower }}">{{ item.badge }}</span>{% endif %}</span>
+                            {% if item.subtitle %}<span class="sp-item-sub">{{ item.subtitle }}</span>{% endif %}
+                        </span>
+                        {% if item.meta %}<span class="sp-item-meta">{{ item.meta }}</span>{% endif %}
+                        <i class="fas fa-arrow-right sp-item-go" aria-hidden="true"></i>
+                    </a>
+                    {% endfor %}
+                </div>
             </div>
             {% endfor %}
-        </div>
-        {% endif %}
-
-        {% if results.posts %}
-        <h3 class="mb-6"><i class="fas fa-newspaper text-primary"></i> Insights ({{ results.posts|length }})</h3>
-        <div class="grid grid-3 mb-12">
-            {% for post in results.posts %}
-            <a href="{{ post.get_absolute_url }}" class="blog-card" style="text-decoration:none;color:inherit;">
-                <div class="blog-card-content">
-                    <h3>{{ post.title }}</h3>
-                    <p>{{ post.excerpt|truncatewords:20 }}</p>
+            {% else %}
+            <div class="sp-empty">
+                <div class="ss-empty-icon"><i class="fas fa-magnifying-glass"></i></div>
+                <h3>No results for “{{ query }}”</h3>
+                <p>Try a broader term such as “cloud”, “security” or “infrastructure”, or ask our team directly.</p>
+                <div class="sp-empty-actions">
+                    <a href="{% url 'services:service_list' %}" class="ss-chip"><i class="fas fa-layer-group"></i> Browse all services</a>
+                    <a href="{% url 'contact:contact' %}" class="ss-chip"><i class="fas fa-headset"></i> Contact a solutions expert</a>
                 </div>
-            </a>
-            {% endfor %}
+            </div>
+            {% endif %}
+        {% else %}
+            <div class="sp-empty">
+                <div class="ss-empty-icon"><i class="fas fa-magnifying-glass"></i></div>
+                <h3>What are you looking for?</h3>
+                <p>Search across our services, industries, insights and FAQs. Tip: press <kbd>/</kbd> anywhere on the site to search.</p>
+            </div>
+        {% endif %}
         </div>
-        {% endif %}
-
-        {% if results.industries %}
-        <h3 class="mb-6"><i class="fas fa-industry text-primary"></i> Industries ({{ results.industries|length }})</h3>
-        <div class="grid grid-3 mb-12">
-            {% for industry in results.industries %}
-            <a href="{{ industry.get_absolute_url }}" class="industry-card" style="text-decoration:none;color:inherit;">
-                <div class="industry-icon"><i class="{{ industry.icon }}"></i></div>
-                <h4>{{ industry.name }}</h4>
-                <p>{{ industry.short_description|truncatewords:15 }}</p>
-            </a>
-            {% endfor %}
-        </div>
-        {% endif %}
-
-        {% if total_results == 0 %}
-        <div class="text-center" style="padding: var(--space-16) 0;">
-            <i class="fas fa-search" style="font-size: 3rem; color: var(--gray-300); margin-bottom: var(--space-4);"></i>
-            <h3>No results found</h3>
-            <p>Try different keywords or browse our <a href="{% url 'services:service_list' %}">services</a>.</p>
-        </div>
-        {% endif %}
-        {% endif %}
     </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Live (AJAX) results on the search page: updates as you type, keeps the URL in sync.
+(function () {
+    const form = document.getElementById('spForm');
+    const input = document.getElementById('spInput');
+    const results = document.getElementById('spResults');
+    const title = document.getElementById('spTitle');
+    const summary = document.getElementById('spSummary');
+    if (!form || !input || !results) return;
+    const url = form.dataset.suggestUrl;
+    const cache = new Map();
+    let timer = null, controller = null;
+
+    const esc = (v) => String(v || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const reEsc = (v) => v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    function mark(text, q) {
+        const safe = esc(text);
+        const terms = q.trim().split(/\s+/).filter((t) => t.length > 1).map(reEsc);
+        return terms.length ? safe.replace(new RegExp('(' + terms.join('|') + ')', 'gi'), '<mark>$1</mark>') : safe;
+    }
+
+    function renderEmpty(q) {
+        results.innerHTML = '<div class="sp-empty"><div class="ss-empty-icon"><i class="fas fa-magnifying-glass"></i></div>' +
+            (q ? '<h3>No results for “' + esc(q) + '”</h3><p>Try a broader term such as “cloud”, “security” or “infrastructure”, or ask our team directly.</p>' +
+                 '<div class="sp-empty-actions"><a href="/services/" class="ss-chip"><i class="fas fa-layer-group"></i> Browse all services</a><a href="/contact/" class="ss-chip"><i class="fas fa-headset"></i> Contact a solutions expert</a></div>'
+               : '<h3>What are you looking for?</h3><p>Search across our services, industries, insights and FAQs.</p>') + '</div>';
+    }
+
+    function render(data, q) {
+        title.textContent = q ? 'Results for “' + q + '”' : 'Search';
+        summary.hidden = !q;
+        summary.textContent = data.total + ' result' + (data.total === 1 ? '' : 's') + ' across services, industries, insights and pages';
+        document.title = (q ? 'Search: ' + q : 'Search') + ' | TM Solutech';
+        if (!data.groups.length) { renderEmpty(q); return; }
+        results.innerHTML =
+            '<nav class="sp-filters" aria-label="Jump to result type">' +
+            data.groups.map((g) => '<a href="#sp-' + g.key + '" class="sp-filter"><i class="' + esc(g.icon) + '"></i> ' + esc(g.label) + ' <span>' + g.count + '</span></a>').join('') +
+            '</nav>' +
+            data.groups.map((g) =>
+                '<div class="sp-group" id="sp-' + g.key + '"><h2 class="sp-group-title"><i class="' + esc(g.icon) + '"></i> ' + esc(g.label) + ' <span>' + g.count + '</span></h2><div class="sp-list">' +
+                g.items.map((it, i) =>
+                    '<a href="' + esc(it.url) + '" class="sp-item sp-' + g.key + '" style="animation-delay:' + Math.min(i * 0.03, 0.3) + 's">' +
+                    '<span class="sp-item-icon"><i class="' + esc(it.icon || g.icon) + '"></i></span>' +
+                    '<span class="sp-item-body"><span class="sp-item-title">' + mark(it.title, q) +
+                        (it.badge ? ' <span class="ms-badge ms-badge-' + esc(it.badge.toLowerCase()) + '">' + esc(it.badge) + '</span>' : '') + '</span>' +
+                        (it.subtitle ? '<span class="sp-item-sub">' + mark(it.subtitle, q) + '</span>' : '') + '</span>' +
+                    (it.meta ? '<span class="sp-item-meta">' + esc(it.meta) + '</span>' : '') +
+                    '<i class="fas fa-arrow-right sp-item-go" aria-hidden="true"></i></a>').join('') +
+                '</div></div>').join('');
+    }
+
+    async function run(q, push) {
+        const next = q ? '?q=' + encodeURIComponent(q) : location.pathname;
+        if (push) history.pushState({ q }, '', next); else history.replaceState({ q }, '', next);
+        if (q.length < 2) { render({ total: 0, groups: [] }, ''); renderEmpty(''); summary.hidden = true; return; }
+        form.classList.add('is-loading');
+        try {
+            let data = cache.get(q);
+            if (!data) {
+                controller?.abort();
+                controller = new AbortController();
+                const res = await fetch(url + '?limit=25&q=' + encodeURIComponent(q), { signal: controller.signal, headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                if (!res.ok) throw new Error('Search failed');
+                data = await res.json();
+                cache.set(q, data);
+            }
+            if (input.value.trim() === q) render(data, q);
+        } catch (err) {
+            if (err.name !== 'AbortError') form.submit(); // fall back to a normal page load
+        } finally {
+            if (input.value.trim() === q) form.classList.remove('is-loading');
+        }
+    }
+
+    input.addEventListener('input', () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => run(input.value.trim(), false), 200);
+    });
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        clearTimeout(timer);
+        run(input.value.trim(), true);
+        try { const k = 'tm_recent_searches', q = input.value.trim(); if (q.length > 1) localStorage.setItem(k, JSON.stringify([q, ...JSON.parse(localStorage.getItem(k) || '[]').filter((r) => r.toLowerCase() !== q.toLowerCase())].slice(0, 5))); } catch (e2) { /* storage unavailable */ }
+    });
+    window.addEventListener('popstate', () => {
+        const q = new URLSearchParams(location.search).get('q') || '';
+        input.value = q;
+        run(q, false);
+    });
+    // On this page, "/" focuses the page's own search box instead of opening the overlay
+    document.addEventListener('keydown', (e) => {
+        if (e.key === '/' && document.activeElement !== input && !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName)) {
+            e.preventDefault(); e.stopImmediatePropagation(); input.focus(); input.select();
+        }
+    }, true);
+    if (!input.value) input.focus();
+})();
+</script>
 {% endblock %}

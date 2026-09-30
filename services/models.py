@@ -15,6 +15,11 @@ class ServiceCategory(models.Model):
     meta_title = models.CharField(max_length=200, blank=True)
     meta_description = models.TextField(blank=True)
 
+    # Navbar mega-menu
+    show_in_nav = models.BooleanField('Show in navbar', default=True)
+    nav_label = models.CharField('Navbar label', max_length=60, blank=True, help_text='Optional shorter name for the navbar. Defaults to the category name.')
+    nav_description = models.CharField('Navbar description', max_length=160, blank=True, help_text='One line shown in the navbar. Defaults to the short description.')
+
     class Meta:
         ordering = ['display_order']
         verbose_name = 'Service Category'
@@ -29,6 +34,14 @@ class ServiceCategory(models.Model):
     def active_services(self):
         return self.services.filter(is_active=True).order_by('display_order')
 
+    @property
+    def menu_label(self):
+        return self.name
+
+    @property
+    def menu_description(self):
+        return self.short_description
+
 
 class Service(models.Model):
     category = models.ForeignKey(ServiceCategory, on_delete=models.CASCADE, related_name='services')
@@ -41,12 +54,31 @@ class Service(models.Model):
     features = CKEditor5Field('Features', config_name='extends', blank=True)
     benefits = CKEditor5Field('Benefits', config_name='extends', blank=True)
     process = CKEditor5Field('Process', config_name='extends', blank=True)
-    faq = models.TextField(blank=True, help_text='JSON format: [{"question": "...", "answer": "..."}]')
+    faq = models.TextField(blank=True, help_text='Legacy JSON FAQs (superseded by faq_items).')
+
+    # Structured page sections, edited as rows in the dashboard.
+    # The legacy HTML fields above are kept only as a read fallback.
+    feature_items = models.JSONField(default=list, blank=True, help_text='[{"icon", "title", "text"}]')
+    benefit_items = models.JSONField(default=list, blank=True, help_text='[{"title", "text"}]')
+    process_items = models.JSONField(default=list, blank=True, help_text='[{"title", "text"}]')
+    faq_items = models.JSONField(default=list, blank=True, help_text='[{"question", "answer"}]')
     meta_title = models.CharField(max_length=200, blank=True)
     meta_description = models.TextField(blank=True)
     is_featured = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     display_order = models.PositiveIntegerField(default=0)
+
+    # Navbar mega-menu
+    NAV_BADGE_CHOICES = [
+        ('', 'None'),
+        ('new', 'New'),
+        ('popular', 'Popular'),
+    ]
+    show_in_nav = models.BooleanField('Show in navbar', default=True)
+    nav_label = models.CharField('Navbar label', max_length=60, blank=True, help_text='Optional shorter name for the navbar. Defaults to the service title.')
+    nav_description = models.CharField('Navbar description', max_length=160, blank=True, help_text='One line shown in the navbar. Defaults to the short description.')
+    nav_badge = models.CharField('Navbar badge', max_length=10, choices=NAV_BADGE_CHOICES, blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -61,6 +93,14 @@ class Service(models.Model):
             'category_slug': self.category.slug,
             'service_slug': self.slug
         })
+
+    @property
+    def menu_label(self):
+        return self.title
+
+    @property
+    def menu_description(self):
+        return self.short_description
 
     def get_related_services(self):
         return Service.objects.filter(

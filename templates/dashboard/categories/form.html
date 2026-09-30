@@ -1,24 +1,94 @@
 {% extends 'dashboard/base.html' %}
 {% block dashboard_content %}
-<div class="flex-between mb-8">
-    <h2>{{ page_title }}</h2>
-    <a href="{% url 'dashboard:category_list' %}" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Back</a>
-</div>
-<div class="dashboard-card">
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {% for field in form %}
-        <div class="form-group">
-            <label class="form-label">{{ field.label }} {% if field.field.required %}<span class="required">*</span>{% endif %}</label>
-            {{ field }}
-            {% if field.errors %}<div class="form-error">{{ field.errors.0 }}</div>{% endif %}
-            {% if field.help_text %}<p style="font-size: var(--text-xs); color: var(--gray-500); margin-top: var(--space-1);">{{ field.help_text }}</p>{% endif %}
+
+<div class="ed-head">
+    <div class="ed-head-text">
+        <a href="{% url 'dashboard:category_list' %}" class="ed-back"><i class="fas fa-arrow-left"></i> All categories</a>
+        <h2>{% if category %}{{ category.name }}{% else %}New service category{% endif %}</h2>
+        <p class="ed-url" data-url-preview data-kind="category" data-base="/services/"></p>
+    </div>
+    <div class="ed-head-actions">
+        <div class="ed-progress" data-progress title="Sections complete">
+            <svg viewBox="0 0 36 36" aria-hidden="true"><circle class="ed-progress-bg" cx="18" cy="18" r="15.5"/><circle class="ed-progress-bar" cx="18" cy="18" r="15.5"/></svg>
+            <span class="ed-progress-text"><strong data-progress-count>0</strong>/<span data-progress-total>3</span><small>complete</small></span>
         </div>
-        {% endfor %}
-        <div class="flex gap-4">
-            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save</button>
-            <a href="{% url 'dashboard:category_list' %}" class="btn btn-secondary">Cancel</a>
-        </div>
-    </form>
+        {% if category %}<a href="{{ category.get_absolute_url }}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-up-right-from-square"></i> View page</a>{% endif %}
+    </div>
 </div>
+
+<form method="post" class="ed" data-guard data-validate novalidate>
+    {% csrf_token %}
+    {% if form.errors %}<div class="ed-alert"><i class="fas fa-circle-exclamation"></i> Some fields need your attention. They're marked in red below.</div>{% endif %}
+
+    <nav class="ed-nav" data-section-nav aria-label="Form sections">
+        <span class="ed-nav-title">Sections</span>
+        <a href="#sec-basics"><span class="ed-nav-dot"></span> Basics</a>
+        <a href="#sec-page"><span class="ed-nav-dot"></span> Category page</a>
+        <a href="#sec-visibility"><span class="ed-nav-dot"></span> Visibility</a>
+        {% if category %}<a href="#sec-services" class="ed-nav-extra"><i class="fas fa-cogs"></i> Services ({{ services|length }})</a>{% endif %}
+    </nav>
+
+    <div class="ed-main">
+        <section class="ed-card" id="sec-basics" data-section>
+            <header class="ed-card-head"><span class="ed-card-num">1</span><div><h3>Basics</h3><p>A category is a service area, e.g. <em>Cloud Solutions</em>. It gets its own page and a column in the navbar.</p></div><span class="ed-card-state"></span></header>
+            {% include 'dashboard/partials/field.html' with field=form.name %}
+            {% include 'dashboard/partials/field.html' with field=form.slug %}
+            {% include 'dashboard/partials/field.html' with field=form.icon %}
+            {% include 'dashboard/partials/field.html' with field=form.short_description %}
+        </section>
+
+        <section class="ed-card" id="sec-page" data-section>
+            <header class="ed-card-head"><span class="ed-card-num">2</span><div><h3>Category page</h3><p>The introduction at the top of the category page, above its list of services.</p></div><span class="ed-card-state"></span></header>
+            {% include 'dashboard/partials/field.html' with field=form.description %}
+        </section>
+
+        <section class="ed-card" id="sec-visibility" data-section>
+            <header class="ed-card-head"><span class="ed-card-num">3</span><div><h3>Visibility</h3><p>Where the category appears. Order is set by dragging in <a href="{% url 'dashboard:navbar_services' %}">Services Menu</a>.</p></div><span class="ed-card-state"></span></header>
+            <div class="ed-toggles">
+                {% include 'dashboard/partials/field.html' with field=form.is_active %}
+                {% include 'dashboard/partials/field.html' with field=form.show_in_nav %}
+            </div>
+            {% if category %}
+            <div class="ed-danger">
+                <div><strong>Delete this category</strong><span>{% if services %}Move or delete its {{ services|length }} service{{ services|length|pluralize }} first. Categories with services can't be deleted, so nothing is lost by accident.{% else %}Removes the category page permanently.{% endif %}</span></div>
+                <button type="submit" form="deleteCategoryForm" class="btn btn-sm ed-danger-btn" {% if services %}disabled{% endif %}><i class="fas fa-trash"></i> Delete</button>
+            </div>
+            {% endif %}
+        </section>
+
+        {% if category %}
+        <section class="ed-card" id="sec-services">
+            <header class="ed-card-head">
+                <span class="ed-card-num"><i class="fas fa-cogs"></i></span>
+                <div><h3>Services in this category</h3><p>{{ services|length }} service{{ services|length|pluralize }}. Click one to edit it.</p></div>
+                <a href="{% url 'dashboard:service_create' %}?category={{ category.pk }}" class="btn btn-primary btn-sm ed-card-action"><i class="fas fa-plus"></i> Add service</a>
+            </header>
+            <div class="ed-mini-list">
+                {% for s in services %}
+                <a href="{% url 'dashboard:service_edit' s.pk %}" class="ed-mini-item">
+                    <span class="ed-mini-icon"><i class="{{ s.icon }}"></i></span>
+                    <span class="ed-mini-text"><strong>{{ s.title }}</strong><span>{{ s.short_description|truncatechars:90 }}</span></span>
+                    {% if not s.is_active %}<span class="status-badge status-draft">Hidden</span>{% elif not s.show_in_nav %}<span class="status-badge status-draft">Not in navbar</span>{% endif %}
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                {% empty %}
+                <p class="form-help">No services yet. <a href="{% url 'dashboard:service_create' %}?category={{ category.pk }}">Add the first one</a>.</p>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <div class="ed-savebar">
+            <span class="ed-savebar-hint" data-savebar-hint><i class="fas fa-circle-info"></i> All fields marked <span class="required">*</span> are required.</span>
+            <div class="ed-savebar-actions">
+                <a href="{% url 'dashboard:category_list' %}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" name="save_continue" class="btn btn-secondary ed-btn-continue"><i class="fas fa-floppy-disk"></i> <span class="ed-lbl-long">Save &amp; keep editing</span><span class="ed-lbl-short">Save draft</span></button>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> {% if category %}Save changes{% else %}Create category{% endif %}</button>
+            </div>
+        </div>
+    </div>
+</form>
+{% if category %}
+<form id="deleteCategoryForm" method="post" action="{% url 'dashboard:category_delete' category.pk %}" onsubmit="return confirm('Delete this category permanently?');">{% csrf_token %}</form>
+{% endif %}
 {% endblock %}

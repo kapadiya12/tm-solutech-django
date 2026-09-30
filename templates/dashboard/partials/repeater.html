@@ -1,0 +1,14 @@
+{% comment %}include with field title noun add_label icon schema min max{% endcomment %}
+<div class="rp{% if field.errors %} has-error is-invalid{% endif %}" data-repeater="{{ field.html_name }}" data-schema='{{ schema }}' data-min="{{ min|default:1 }}" data-max="{{ max|default:12 }}" data-noun="{{ noun }}">
+    {{ field }}
+    <div class="rp-list"></div>
+    <div class="rp-empty">
+        <span class="rp-empty-icon"><i class="{{ icon }}"></i></span>
+        <p>No {{ title|lower }} yet. Add at least {{ min|default:1 }}.</p>
+    </div>
+    <div class="rp-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-rp-add><i class="fas fa-plus"></i> {{ add_label }}</button>
+        <span class="rp-meta"><span class="rp-count-pill"><span data-rp-count>0</span> added · min {{ min|default:1 }}</span> <span class="rp-drag-hint">drag <i class="fas fa-grip-vertical"></i> to reorder</span></span>
+    </div>
+    <div class="form-error" data-live-error {% if not field.errors %}hidden{% endif %}><i class="fas fa-circle-exclamation"></i> <span>{{ field.errors.0 }}</span></div>
+</div>

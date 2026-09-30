@@ -1,146 +1,199 @@
 {% extends 'dashboard/base.html' %}
 
 {% block dashboard_content %}
-{# Stats Cards #}
-<div class="dashboard-stats">
-    <div class="stat-card">
-        <div class="stat-icon" style="background: rgba(var(--primary-rgb), 0.1); color: var(--primary);"><i class="fas fa-cogs"></i></div>
-        <div class="stat-info">
-            <div class="stat-value">{{ total_services }}</div>
-            <div class="stat-label">Active Services</div>
-        </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon" style="background: rgba(16,185,129,0.1); color: var(--success);"><i class="fas fa-newspaper"></i></div>
-        <div class="stat-info">
-            <div class="stat-value">{{ published_posts }}</div>
-            <div class="stat-label">Published Posts</div>
-        </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon" style="background: rgba(245,158,11,0.1); color: var(--warning);"><i class="fas fa-envelope"></i></div>
-        <div class="stat-info">
-            <div class="stat-value">{{ total_inquiries }}</div>
-            <div class="stat-label">Total Inquiries</div>
-        </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon" style="background: rgba(239,68,68,0.1); color: var(--danger);"><i class="fas fa-bell"></i></div>
-        <div class="stat-info">
-            <div class="stat-value">{{ new_inquiries }}</div>
-            <div class="stat-label">New Inquiries</div>
-        </div>
-    </div>
-</div>
+<div class="db">
 
-{# Charts Row #}
-<div class="dashboard-charts">
-    <div class="dashboard-card">
-        <h3 class="dashboard-card-title">Inquiries Over Time</h3>
-        <canvas id="inquiriesChart" height="250"></canvas>
-    </div>
-    <div class="dashboard-card">
-        <h3 class="dashboard-card-title">Inquiry Status</h3>
-        <canvas id="statusChart" height="250"></canvas>
-    </div>
-</div>
+    {# ---------- Welcome banner ---------- #}
+    <section class="db-hero">
+        <div class="db-hero-bg" aria-hidden="true"><span></span><span></span><span></span></div>
+        <div class="db-hero-text">
+            <span class="db-hero-date"><i class="far fa-calendar"></i> {{ today|date:"l, j F Y" }}</span>
+            <h2>{{ greeting }}, {{ request.user.first_name|default:request.user.username }}</h2>
+            <p>{% if new_inquiries %}You have <strong>{{ new_inquiries }} new inquir{{ new_inquiries|pluralize:"y,ies" }}</strong> waiting for a reply.{% else %}All inquiries are handled. Here's how your website is doing.{% endif %}</p>
+        </div>
+        <div class="db-hero-actions">
+            <a href="{% url 'dashboard:service_create' %}" class="db-action"><i class="fas fa-plus"></i><span>Add service</span></a>
+            <a href="{% url 'dashboard:blog_create' %}" class="db-action"><i class="fas fa-pen-nib"></i><span>Write post</span></a>
+            <a href="{% url 'dashboard:inquiry_list' %}" class="db-action"><i class="fas fa-inbox"></i><span>Inquiries</span>{% if new_inquiries %}<em>{{ new_inquiries }}</em>{% endif %}</a>
+            <a href="{% url 'core:home' %}" target="_blank" rel="noopener" class="db-action"><i class="fas fa-arrow-up-right-from-square"></i><span>View site</span></a>
+        </div>
+    </section>
 
-{# Recent Items #}
-<div class="dashboard-charts">
-    <div class="dashboard-card">
-        <h3 class="dashboard-card-title">Recent Inquiries</h3>
-        <div class="dashboard-table-wrap">
-            <table class="dashboard-table">
-                <thead>
-                    <tr><th>Name</th><th>Company</th><th>Date</th><th>Status</th></tr>
-                </thead>
-                <tbody>
-                    {% for inq in recent_inquiries %}
-                    <tr>
-                        <td><a href="{% url 'dashboard:inquiry_detail' inq.pk %}">{{ inq.name }}</a></td>
-                        <td>{{ inq.company }}</td>
-                        <td>{{ inq.created_at|date:"M d, Y" }}</td>
-                        <td><span class="status-badge status-{{ inq.status }}">{{ inq.get_status_display }}</span></td>
-                    </tr>
-                    {% empty %}
-                    <tr><td colspan="4" class="text-center">No inquiries yet</td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    {# ---------- KPIs ---------- #}
+    <section class="db-kpis">
+        <a href="{% url 'dashboard:service_list' %}" class="db-kpi c-blue">
+            <span class="db-kpi-icon"><i class="fas fa-cogs"></i></span>
+            <span class="db-kpi-label">Active services</span>
+            <strong class="db-kpi-value" data-count="{{ total_services }}">{{ total_services }}</strong>
+            <span class="db-kpi-foot">across {{ total_categories }} service area{{ total_categories|pluralize }}</span>
+        </a>
+        <a href="{% url 'dashboard:blog_list' %}" class="db-kpi c-green">
+            <span class="db-kpi-icon"><i class="fas fa-newspaper"></i></span>
+            <span class="db-kpi-label">Published posts</span>
+            <strong class="db-kpi-value" data-count="{{ published_posts }}">{{ published_posts }}</strong>
+            <span class="db-kpi-foot">{{ draft_posts }} draft{{ draft_posts|pluralize }}</span>
+        </a>
+        <a href="{% url 'dashboard:inquiry_list' %}" class="db-kpi c-orange">
+            <span class="db-kpi-icon"><i class="fas fa-envelope-open-text"></i></span>
+            <span class="db-kpi-label">Inquiries · 30 days</span>
+            <strong class="db-kpi-value" data-count="{{ recent_inquiry_count }}">{{ recent_inquiry_count }}</strong>
+            <span class="db-kpi-foot">
+                {% if inquiry_trend is not None %}
+                <span class="db-trend {% if inquiry_trend >= 0 %}is-up{% else %}is-down{% endif %}"><i class="fas fa-arrow-{% if inquiry_trend >= 0 %}up{% else %}down{% endif %}"></i> {{ inquiry_trend|stringformat:"+d" }}%</span> vs previous 30 days
+                {% else %}{{ total_inquiries }} all time{% endif %}
+            </span>
+        </a>
+        <a href="{% url 'dashboard:inquiry_list' %}" class="db-kpi c-red{% if new_inquiries %} is-alert{% endif %}">
+            <span class="db-kpi-icon"><i class="fas fa-bell"></i></span>
+            <span class="db-kpi-label">Awaiting reply</span>
+            <strong class="db-kpi-value" data-count="{{ new_inquiries }}">{{ new_inquiries }}</strong>
+            <span class="db-kpi-foot">{% if new_inquiries %}Respond soon <i class="fas fa-arrow-right"></i>{% else %}You're all caught up{% endif %}</span>
+        </a>
+    </section>
+
+    {# ---------- Charts ---------- #}
+    <section class="db-grid db-grid-charts">
+        <div class="db-card">
+            <header class="db-card-head">
+                <div><h3>Inquiries over time</h3><p>Contact form submissions, last 12 months</p></div>
+                <span class="db-pill"><i class="fas fa-chart-line"></i> {{ total_inquiries }} total</span>
+            </header>
+            <div class="db-chart"><canvas id="inquiriesChart" aria-label="Inquiries per month"></canvas></div>
         </div>
-    </div>
-    <div class="dashboard-card">
-        <h3 class="dashboard-card-title">Recent Posts</h3>
-        <div class="dashboard-table-wrap">
-            <table class="dashboard-table">
-                <thead>
-                    <tr><th>Title</th><th>Status</th><th>Date</th></tr>
-                </thead>
-                <tbody>
-                    {% for post in recent_posts %}
-                    <tr>
-                        <td><a href="{% url 'dashboard:blog_edit' post.pk %}">{{ post.title|truncatewords:5 }}</a></td>
-                        <td><span class="status-badge {% if post.is_published %}status-active{% else %}status-draft{% endif %}">{% if post.is_published %}Published{% else %}Draft{% endif %}</span></td>
-                        <td>{{ post.created_at|date:"M d" }}</td>
-                    </tr>
-                    {% empty %}
-                    <tr><td colspan="3" class="text-center">No posts yet</td></tr>
+        <div class="db-card">
+            <header class="db-card-head">
+                <div><h3>Inquiry status</h3><p>Where every inquiry stands</p></div>
+            </header>
+            <div class="db-donut">
+                <div class="db-donut-chart"><canvas id="statusChart" aria-label="Inquiries by status"></canvas>
+                    <div class="db-donut-center"><strong>{{ total_inquiries }}</strong><span>total</span></div>
+                </div>
+                <ul class="db-legend">
+                    {% for row in status_rows %}
+                    <li><span class="db-dot s-{{ row.key }}"></span><span>{{ row.label }}</span><strong>{{ row.count }}</strong></li>
                     {% endfor %}
-                </tbody>
-            </table>
+                </ul>
+            </div>
         </div>
-    </div>
+    </section>
+
+    {# ---------- Activity ---------- #}
+    <section class="db-grid db-grid-activity">
+        <div class="db-card">
+            <header class="db-card-head">
+                <div><h3>Recent inquiries</h3><p>Latest messages from the contact form</p></div>
+                <a href="{% url 'dashboard:inquiry_list' %}" class="db-link">View all <i class="fas fa-arrow-right"></i></a>
+            </header>
+            <div class="db-list">
+                {% for inq in recent_inquiries %}
+                <a href="{% url 'dashboard:inquiry_detail' inq.pk %}" class="db-row">
+                    <span class="db-avatar">{{ inq.name|slice:":1"|upper }}</span>
+                    <span class="db-row-main">
+                        <strong>{{ inq.name }}</strong>
+                        <span>{{ inq.company }}{% if inq.service %} · {{ inq.service }}{% endif %}</span>
+                    </span>
+                    <span class="db-row-meta">
+                        <span class="status-badge status-{{ inq.status }}">{{ inq.get_status_display }}</span>
+                        <small>{{ inq.created_at|timesince }} ago</small>
+                    </span>
+                </a>
+                {% empty %}
+                <div class="db-empty"><i class="fas fa-inbox"></i><p>No inquiries yet. New contact-form messages will appear here.</p></div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="db-card">
+            <header class="db-card-head">
+                <div><h3>Website content</h3><p>What's live on the site right now</p></div>
+            </header>
+            <div class="db-health">
+                {% for h in health %}
+                <a href="{% url h.url %}" class="db-health-item">
+                    <span class="db-health-icon"><i class="{{ h.icon }}"></i></span>
+                    <span class="db-health-text"><strong>{{ h.value }}</strong><span>{{ h.label }}</span><small>{{ h.note }}</small></span>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <section class="db-card">
+        <header class="db-card-head">
+            <div><h3>Recent blog posts</h3><p>Your latest insights</p></div>
+            <a href="{% url 'dashboard:blog_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> New post</a>
+        </header>
+        <div class="db-list">
+            {% for post in recent_posts %}
+            <a href="{% url 'dashboard:blog_edit' post.pk %}" class="db-row">
+                <span class="db-row-thumb">{% if post.featured_image %}<img src="{{ post.featured_image.url }}" alt="">{% else %}<i class="fas fa-newspaper"></i>{% endif %}</span>
+                <span class="db-row-main">
+                    <strong>{{ post.title }}</strong>
+                    <span>{% if post.category %}{{ post.category.name }} · {% endif %}{{ post.created_at|date:"j M Y" }}</span>
+                </span>
+                <span class="db-row-meta"><span class="status-badge {% if post.is_published %}status-active{% else %}status-draft{% endif %}">{% if post.is_published %}Published{% else %}Draft{% endif %}</span></span>
+            </a>
+            {% empty %}
+            <div class="db-empty"><i class="fas fa-newspaper"></i><p>No posts yet. <a href="{% url 'dashboard:blog_create' %}">Write your first post</a>.</p></div>
+            {% endfor %}
+        </div>
+    </section>
 </div>
+{{ chart|json_script:"dbChartData" }}
 {% endblock %}
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
-// Inquiries Chart
-const ctxInq = document.getElementById('inquiriesChart');
-if (ctxInq) {
-    new Chart(ctxInq, {
-        type: 'line',
-        data: {
-            labels: {{ inquiry_chart_labels|safe }},
-            datasets: [{
-                label: 'Inquiries',
-                data: {{ inquiry_chart_data|safe }},
-                borderColor: '#0055A4',
-                backgroundColor: 'rgba(0, 85, 164, 0.1)',
-                fill: true,
-                tension: 0.4,
-                borderWidth: 2,
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
-        }
-    });
-}
+(function () {
+    const data = JSON.parse(document.getElementById('dbChartData').textContent);
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-// Status Chart
-const ctxStatus = document.getElementById('statusChart');
-if (ctxStatus) {
-    new Chart(ctxStatus, {
-        type: 'doughnut',
-        data: {
-            labels: {{ status_labels|safe }},
-            datasets: [{
-                data: {{ status_data|safe }},
-                backgroundColor: ['#0055A4', '#00B4D8', '#FF6B35', '#10b981'],
-                borderWidth: 0,
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { position: 'bottom' } }
-        }
+    // Count-up on KPI values
+    if (!reduce) document.querySelectorAll('.db-kpi-value[data-count]').forEach((el) => {
+        const end = parseInt(el.dataset.count, 10) || 0, start = performance.now();
+        (function f(t) { const p = Math.min((t - start) / 900, 1); el.textContent = Math.round(end * (1 - Math.pow(1 - p, 3))); if (p < 1) requestAnimationFrame(f); })(start);
     });
-}
+
+    if (!window.Chart) return;
+    Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
+    Chart.defaults.color = '#64748B';
+
+    const line = document.getElementById('inquiriesChart');
+    const ctx = line.getContext('2d');
+    const grad = ctx.createLinearGradient(0, 0, 0, 280);
+    grad.addColorStop(0, 'rgba(10, 174, 224, 0.32)');
+    grad.addColorStop(1, 'rgba(10, 174, 224, 0)');
+    const maxVal = Math.max(...data.data, 0);
+    new Chart(line, {
+        type: 'line',
+        data: { labels: data.labels, datasets: [{
+            label: 'Inquiries', data: data.data, fill: true, backgroundColor: grad,
+            borderColor: '#1E75B0', borderWidth: 2.5, tension: 0.4,
+            pointRadius: 3, pointHoverRadius: 6, pointBackgroundColor: '#ffffff', pointBorderColor: '#1E75B0', pointBorderWidth: 2,
+        }] },
+        options: {
+            responsive: true, maintainAspectRatio: false, animation: reduce ? false : { duration: 900 },
+            interaction: { mode: 'index', intersect: false },
+            plugins: { legend: { display: false }, tooltip: { backgroundColor: '#0B1247', padding: 10, cornerRadius: 10, displayColors: false,
+                callbacks: { label: (c) => c.parsed.y + ' inquir' + (c.parsed.y === 1 ? 'y' : 'ies') } } },
+            scales: {
+                x: { grid: { display: false }, border: { display: false }, ticks: { maxRotation: 0, autoSkip: true, autoSkipPadding: 12 } },
+                y: { beginAtZero: true, suggestedMax: Math.max(4, maxVal + 1), ticks: { precision: 0, stepSize: maxVal > 10 ? undefined : 1 }, grid: { color: 'rgba(148, 163, 184, 0.18)' }, border: { display: false } },
+            },
+        },
+    });
+
+    const total = data.status.reduce((a, b) => a + b, 0);
+    new Chart(document.getElementById('statusChart'), {
+        type: 'doughnut',
+        data: { labels: data.status_labels, datasets: [{
+            data: total ? data.status : [1], borderWidth: 0, hoverOffset: 6,
+            backgroundColor: total ? ['#0AAEE0', '#9BC73B', '#F4A21E', '#1B2585'] : ['#E7ECF4'],
+        }] },
+        options: { responsive: true, maintainAspectRatio: false, cutout: '72%', animation: reduce ? false : undefined,
+            plugins: { legend: { display: false }, tooltip: { enabled: !!total, backgroundColor: '#0B1247', cornerRadius: 10 } } },
+    });
+})();
 </script>
 {% endblock %}

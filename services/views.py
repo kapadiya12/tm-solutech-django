@@ -33,9 +33,9 @@ def service_detail(request, category_slug, service_slug):
         category__slug=category_slug,
         is_active=True
     )
-    import json
-    faqs = []
-    if service.faq:
+    faqs = service.faq_items
+    if not faqs and service.faq:
+        import json
         try:
             faqs = json.loads(service.faq)
         except (json.JSONDecodeError, TypeError):

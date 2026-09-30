@@ -1,38 +1,57 @@
 {% extends 'dashboard/base.html' %}
 {% block dashboard_content %}
-<div class="flex-between mb-8">
-    <h2>{{ page_title }}</h2>
-    <a href="{% url 'dashboard:service_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add Service</a>
-</div>
-<div class="dashboard-card">
-    <div class="dashboard-table-wrap">
-        <table class="dashboard-table">
-            <thead>
-                <tr><th>Title</th><th>Category</th><th>Featured</th><th>Active</th><th>Order</th><th>Actions</th></tr>
-            </thead>
-            <tbody>
-                {% for service in services %}
-                <tr>
-                    <td><strong>{{ service.title }}</strong></td>
-                    <td>{{ service.category.name }}</td>
-                    <td>{% if service.is_featured %}<i class="fas fa-star text-accent"></i>{% else %}<i class="fas fa-star" style="color: var(--gray-300);"></i>{% endif %}</td>
-                    <td><span class="status-badge {% if service.is_active %}status-active{% else %}status-draft{% endif %}">{% if service.is_active %}Active{% else %}Inactive{% endif %}</span></td>
-                    <td>{{ service.display_order }}</td>
-                    <td>
-                        <div class="flex gap-2">
-                            <a href="{% url 'dashboard:service_edit' service.pk %}" class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></a>
-                            <form method="post" action="{% url 'dashboard:service_delete' service.pk %}" onsubmit="return confirm('Delete this service?');">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-sm" style="color: var(--danger);"><i class="fas fa-trash"></i></button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr><td colspan="6" class="text-center">No services yet. <a href="{% url 'dashboard:service_create' %}">Create one</a></td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
+<div class="ed-head">
+    <div>
+        <h2>Services</h2>
+        <p class="form-help" style="margin:0">Every service has its own page on the website. {{ total }} in total.</p>
     </div>
+    <div class="ed-head-actions">
+        <a href="{% url 'dashboard:navbar_services' %}" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-down-short-wide"></i> Reorder in Services Menu</a>
+        <a href="{% url 'dashboard:service_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add service</a>
+    </div>
+</div>
+
+<form method="get" class="ls-filters">
+    <div class="ls-search"><i class="fas fa-magnifying-glass"></i><input type="search" name="q" value="{{ q }}" placeholder="Search services…" class="form-control"></div>
+    <select name="category" class="form-control" onchange="this.form.submit()">
+        <option value="">All categories</option>
+        {% for c in categories %}<option value="{{ c.pk }}" {% if current_category == c.pk|stringformat:'s' %}selected{% endif %}>{{ c.name }} ({{ c.service_count }})</option>{% endfor %}
+    </select>
+    <select name="status" class="form-control" onchange="this.form.submit()">
+        <option value="">Any status</option>
+        <option value="published" {% if current_status == 'published' %}selected{% endif %}>Published</option>
+        <option value="hidden" {% if current_status == 'hidden' %}selected{% endif %}>Hidden</option>
+        <option value="not_in_nav" {% if current_status == 'not_in_nav' %}selected{% endif %}>Not in navbar</option>
+    </select>
+    {% if q or current_category or current_status %}<a href="{% url 'dashboard:service_list' %}" class="btn btn-secondary btn-sm">Clear</a>{% endif %}
+</form>
+
+<div class="ls-list">
+    {% for service in services %}
+    <div class="ls-row">
+        <span class="ls-icon"><i class="{{ service.icon }}"></i></span>
+        <a href="{% url 'dashboard:service_edit' service.pk %}" class="ls-main">
+            <strong>{{ service.title }}{% if service.nav_badge %} <span class="ms-badge ms-badge-{{ service.nav_badge }}">{{ service.get_nav_badge_display }}</span>{% endif %}</strong>
+            <span>{{ service.short_description|truncatechars:110 }}</span>
+        </a>
+        <span class="ls-cat">{{ service.category.name }}</span>
+        <span class="ls-stats" title="Features · Benefits · Steps · FAQs">
+            <span><i class="fas fa-list-check"></i> {{ service.feature_items|length }}</span>
+            <span><i class="fas fa-award"></i> {{ service.benefit_items|length }}</span>
+            <span><i class="fas fa-route"></i> {{ service.process_items|length }}</span>
+            <span><i class="fas fa-circle-question"></i> {{ service.faq_items|length }}</span>
+        </span>
+        <span class="ls-status">
+            {% if service.is_active %}<span class="status-badge status-active">Published</span>{% else %}<span class="status-badge status-draft">Hidden</span>{% endif %}
+            {% if not service.show_in_nav %}<span class="status-badge status-draft">Not in navbar</span>{% endif %}
+        </span>
+        <span class="ls-actions">
+            <a href="{{ service.get_absolute_url }}" target="_blank" rel="noopener" class="nsm-btn" title="View page"><i class="fas fa-arrow-up-right-from-square"></i></a>
+            <a href="{% url 'dashboard:service_edit' service.pk %}" class="nsm-btn nsm-btn-primary" title="Edit"><i class="fas fa-pen"></i><span>Edit</span></a>
+        </span>
+    </div>
+    {% empty %}
+    <div class="dashboard-card nsm-empty-state"><i class="fas fa-cogs"></i><h3>No services found</h3><p>{% if q or current_category or current_status %}Try clearing the filters.{% else %}Add your first service.{% endif %}</p><a href="{% url 'dashboard:service_create' %}" class="btn btn-primary"><i class="fas fa-plus"></i> Add service</a></div>
+    {% endfor %}
 </div>
 {% endblock %}

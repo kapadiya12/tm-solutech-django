@@ -40,13 +40,20 @@
                 </div>
 
                 <div class="sidebar-section">
-                    <div class="sidebar-section-title">Content</div>
-                    <a href="{% url 'dashboard:service_list' %}" class="sidebar-link {% if 'service' in request.resolver_match.url_name %}active{% endif %}">
+                    <div class="sidebar-section-title">Navbar &amp; Services</div>
+                    <a href="{% url 'dashboard:navbar_services' %}" class="sidebar-link {% if 'navbar_services' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-bars-staggered"></i> Services Menu
+                    </a>
+                    <a href="{% url 'dashboard:category_list' %}" class="sidebar-link {% if request.resolver_match.url_name in 'category_list category_create category_edit' %}active{% endif %}">
+                        <i class="fas fa-layer-group"></i> Service Categories
+                    </a>
+                    <a href="{% url 'dashboard:service_list' %}" class="sidebar-link {% if request.resolver_match.url_name in 'service_list service_create service_edit' %}active{% endif %}">
                         <i class="fas fa-cogs"></i> Services
                     </a>
-                    <a href="{% url 'dashboard:category_list' %}" class="sidebar-link {% if 'category' in request.resolver_match.url_name %}active{% endif %}">
-                        <i class="fas fa-folder"></i> Categories
-                    </a>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Content</div>
                     <a href="{% url 'dashboard:industry_list' %}" class="sidebar-link {% if 'industry' in request.resolver_match.url_name %}active{% endif %}">
                         <i class="fas fa-industry"></i> Industries
                     </a>
@@ -69,6 +76,9 @@
 
                 <div class="sidebar-section">
                     <div class="sidebar-section-title">Homepage Content</div>
+                    <a href="{% url 'dashboard:heroslide_list' %}" class="sidebar-link {% if 'heroslide' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-images"></i> Hero Slides
+                    </a>
                     <a href="{% url 'dashboard:herotag_list' %}" class="sidebar-link {% if 'herotag' in request.resolver_match.url_name %}active{% endif %}">
                         <i class="fas fa-tag"></i> Hero Tags
                     </a>
@@ -160,6 +170,7 @@
     </div>
 
     <script src="{% static_v 'js/main.js' %}"></script>
+    <script src="{% static_v 'js/dashboard-editor.js' %}"></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

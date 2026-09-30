@@ -17,7 +17,7 @@
     <div class="container-narrow">
         <div class="accordion">
             {% for faq in faqs %}
-            <div class="accordion-item animate-on-scroll {% if forloop.first %}active{% endif %}">
+            <div class="accordion-item animate-on-scroll {% if forloop.first %}active{% endif %}" id="faq-{{ faq.pk }}">
                 <div class="accordion-header">
                     <h4>{{ faq.question }}</h4>
                     <span class="accordion-icon"><i class="fas fa-chevron-down"></i></span>
