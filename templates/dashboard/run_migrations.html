@@ -1,0 +1,31 @@
+{% extends 'dashboard/base.html' %}
+{% block dashboard_content %}
+<div class="mb-8">
+    <h2>Run Migrations</h2>
+</div>
+<div class="dashboard-card" style="max-width: 700px;">
+    <p style="color: var(--gray-600); margin-bottom: 1.5rem;">
+        Applies any pending database migrations directly on this server — useful on hosts
+        (like Render's free tier) that don't have a shell available. Safe to click more than
+        once; already-applied migrations are skipped automatically.
+    </p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary"><i class="fas fa-database"></i> Run Migrations Now</button>
+    </form>
+
+    {% if output %}
+    <div style="margin-top: 1.5rem;">
+        <h4 style="margin-bottom: 0.5rem;">Output</h4>
+        <pre style="background: var(--gray-900); color: #ffffff; padding: 1rem; border-radius: var(--radius-md); overflow-x: auto; font-size: 0.8125rem; white-space: pre-wrap;">{{ output }}</pre>
+    </div>
+    {% endif %}
+
+    {% if error %}
+    <div style="margin-top: 1.5rem;">
+        <h4 style="margin-bottom: 0.5rem; color: var(--danger);">Error</h4>
+        <pre style="background: var(--gray-900); color: #fecaca; padding: 1rem; border-radius: var(--radius-md); overflow-x: auto; font-size: 0.8125rem; white-space: pre-wrap;">{{ error }}</pre>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -5,6 +5,7 @@ app_name = 'dashboard'
 
 urlpatterns = [
     path('', views.dashboard_index, name='index'),
+    path('run-migrations/', views.run_migrations, name='run_migrations'),
     # Services
     path('services/', views.service_list, name='service_list'),
     path('services/create/', views.service_create, name='service_create'),

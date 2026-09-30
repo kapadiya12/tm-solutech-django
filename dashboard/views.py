@@ -6,6 +6,8 @@ from django.db.models import Count, Q
 from django.db.models.functions import TruncMonth
 from django.utils import timezone
 from datetime import timedelta
+from django.core.management import call_command
+import io
 import json
 
 from core.models import (
@@ -23,6 +25,40 @@ def staff_required(view_func):
         lambda u: u.is_active and u.is_staff,
         login_url='accounts:login'
     )(view_func)
+
+
+def superuser_required(view_func):
+    return user_passes_test(
+        lambda u: u.is_active and u.is_superuser,
+        login_url='accounts:login'
+    )(view_func)
+
+
+@login_required
+@superuser_required
+def run_migrations(request):
+    """
+    One-click 'migrate' for hosts (like Render's free tier) with no shell
+    access. Runs in-process, in the exact same environment/filesystem that
+    serves the live site, so it's more reliable here than trying to get a
+    platform's Build Command configured correctly.
+    """
+    output = None
+    error = None
+    if request.method == 'POST':
+        buffer = io.StringIO()
+        try:
+            call_command('migrate', interactive=False, stdout=buffer, stderr=buffer)
+            output = buffer.getvalue()
+            messages.success(request, 'Migrations ran successfully.')
+        except Exception as e:
+            error = f"{buffer.getvalue()}\n{e}"
+            messages.error(request, 'Migration failed — see details below.')
+    return render(request, 'dashboard/run_migrations.html', {
+        'page_title': 'Run Migrations',
+        'output': output,
+        'error': error,
+    })
 
 
 @login_required
