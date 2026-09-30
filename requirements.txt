@@ -6,3 +6,5 @@ psycopg[binary]
 Pillow
 gunicorn
 whitenoise
+django-cloudinary-storage
+cloudinary

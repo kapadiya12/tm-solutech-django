@@ -104,6 +104,15 @@ INSTALLED_APPS = [
     "cms.apps.CmsConfig",
 ]
 
+# Cloudinary handles MEDIA (uploaded images) when CLOUDINARY_URL is set.
+# Hosts like Render have no persistent disk, so anything written to
+# MEDIA_ROOT is wiped on every restart/redeploy — Cloudinary is external,
+# shared storage that survives that. Falls back to local disk (unchanged
+# behavior) when the env var isn't set, e.g. a machine with no Cloudinary
+# account configured.
+if os.getenv("CLOUDINARY_URL"):
+    INSTALLED_APPS = ["cloudinary_storage"] + INSTALLED_APPS + ["cloudinary"]
+
 
 # ============================================================
 # MIDDLEWARE
@@ -264,8 +273,6 @@ STATICFILES_DIRS = [
 ]
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
-if not DEBUG:
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
 # ============================================================
@@ -275,6 +282,35 @@ if not DEBUG:
 MEDIA_URL = "/media/"
 
 MEDIA_ROOT = BASE_DIR / "media"
+
+
+# ============================================================
+# FILE STORAGE BACKENDS
+# ============================================================
+# Django 5.1 dropped the legacy STATICFILES_STORAGE/DEFAULT_FILE_STORAGE
+# auto-shim into STORAGES, so both are configured directly here together.
+#
+# MEDIA (uploaded images) uses Cloudinary when CLOUDINARY_URL is set. Hosts
+# like Render have no persistent disk, so anything written to MEDIA_ROOT is
+# wiped on every restart/redeploy — Cloudinary is external, shared storage
+# that survives that. Falls back to local disk when the env var isn't set.
+
+STORAGES = {
+    "default": {
+        "BACKEND": (
+            "cloudinary_storage.storage.MediaCloudinaryStorage"
+            if os.getenv("CLOUDINARY_URL")
+            else "django.core.files.storage.FileSystemStorage"
+        ),
+    },
+    "staticfiles": {
+        "BACKEND": (
+            "whitenoise.storage.CompressedManifestStaticFilesStorage"
+            if not DEBUG
+            else "django.contrib.staticfiles.storage.StaticFilesStorage"
+        ),
+    },
+}
 
 
 # ============================================================
