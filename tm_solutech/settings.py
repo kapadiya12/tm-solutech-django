@@ -104,14 +104,12 @@ INSTALLED_APPS = [
     "cms.apps.CmsConfig",
 ]
 
-# Cloudinary handles MEDIA (uploaded images) when CLOUDINARY_URL is set.
-# Hosts like Render have no persistent disk, so anything written to
-# MEDIA_ROOT is wiped on every restart/redeploy — Cloudinary is external,
-# shared storage that survives that. Falls back to local disk (unchanged
-# behavior) when the env var isn't set, e.g. a machine with no Cloudinary
-# account configured.
-if os.getenv("CLOUDINARY_URL"):
-    INSTALLED_APPS = ["cloudinary_storage"] + INSTALLED_APPS + ["cloudinary"]
+# Note: deliberately NOT adding "cloudinary_storage"/"cloudinary" to
+# INSTALLED_APPS. The MediaCloudinaryStorage class used below works fine as
+# a plain import without app registration, and cloudinary_storage's app
+# replaces Django's own `collectstatic` command with one that reads the
+# legacy STATICFILES_STORAGE setting — which doesn't exist here since
+# STORAGES (below) is used instead — crashing every deploy's static build.
 
 
 # ============================================================
@@ -304,6 +302,12 @@ STORAGES = {
         ),
     },
     "staticfiles": {
+        # Deploy environments can resolve a slightly different Django/admin
+        # static-file set than what's collected/cached locally. If Django
+        # admin's own base.css references an asset (e.g. sorting-icons.svg)
+        # that isn't present in this build, whitenoise's manifest storage
+        # aborts the entire collectstatic run by default. WHITENOISE_MANIFEST_STRICT
+        # below makes it skip only that one broken reference instead.
         "BACKEND": (
             "whitenoise.storage.CompressedManifestStaticFilesStorage"
             if not DEBUG
@@ -311,6 +315,8 @@ STORAGES = {
         ),
     },
 }
+
+WHITENOISE_MANIFEST_STRICT = False
 
 
 # ============================================================
