@@ -22,8 +22,14 @@ urlpatterns = [
 ]
 
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])
+
+# Media (user-uploaded images: leadership photos, client logos, blog images, etc.)
+# must be served in production too, not just DEBUG — otherwise every image
+# uploaded through the dashboard is a 404 on a host with no separate media
+# server/CDN configured. Static files are unaffected: whitenoise already
+# serves those in production regardless of this block.
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # Custom error handlers
 handler404 = 'core.views.handler404'
