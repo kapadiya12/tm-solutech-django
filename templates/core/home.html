@@ -77,17 +77,18 @@
         <div class="section-header animate-on-scroll">
             <span class="section-badge"><i class="fas fa-cogs"></i> Our Services</span>
             <h2>Comprehensive IT Solutions <span class="highlight">Tailored</span> to Your Needs</h2>
-            <p>From cloud infrastructure to cybersecurity, we deliver end-to-end technology solutions that drive business growth.</p>
+            <p>From AI modernization and cloud to cybersecurity and IT hardware, we deliver end-to-end technology solutions that drive business growth.</p>
         </div>
 
         <div class="grid grid-3">
             {% for category in service_categories %}
-            <div class="service-card animate-on-scroll animate-delay-{{ forloop.counter }}">
+            <div class="service-card animate-on-scroll animate-delay-{% cycle 1 2 3 %}">
                 <div class="service-card-icon">
                     <i class="{{ category.icon }}"></i>
                 </div>
                 <h3>{{ category.name }}</h3>
                 <p>{{ category.short_description|default:category.description|truncatewords:25 }}</p>
+                {% if category.active_service_count %}<span class="service-card-count">{{ category.active_service_count }} service{{ category.active_service_count|pluralize }}</span>{% endif %}
                 <a href="{{ category.get_absolute_url }}" class="service-card-link">
                     Learn More <i class="fas fa-arrow-right"></i>
                 </a>
@@ -254,9 +255,9 @@
             <p>Delivering specialized IT solutions across diverse industry verticals.</p>
         </div>
 
-        <div class="industries-marquee">
-            <div class="industry-grid">
-                {% for i in "12"|make_list %}
+        <div class="industries-marquee" data-industries-marquee>
+            <div class="industry-track">
+                <div class="industry-set">
                 {% for industry in industries %}
                 <a href="{{ industry.get_absolute_url }}" class="industry-card">
                     <div class="industry-icon"><i class="{{ industry.icon }}"></i></div>
@@ -290,7 +291,7 @@
                     <p>Small business solutions</p>
                 </div>
                 {% endfor %}
-                {% endfor %}
+                </div>
             </div>
         </div>
     </div>
@@ -308,33 +309,49 @@
             <p>Experienced professionals driving innovation and excellence at TM Solutech.</p>
         </div>
 
-        <div class="leadership-grid-static">
-            {% for leader in leadership %}
-            <div
-                class="leader-mini-card open-bio-modal animate-on-scroll animate-delay-{{ forloop.counter }}"
-                role="button" tabindex="0"
-                aria-label="View {{ leader.name }}'s bio"
-                style="--leader-photo: url('{% if leader.photo %}{{ leader.photo.url }}{% else %}{% static 'images/general/placeholder-person.jpg' %}{% endif %}');"
-                data-name="{{ leader.name }}"
-                data-designation="{{ leader.designation }}"
-                data-photo="{% if leader.photo %}{{ leader.photo.url }}{% else %}{% static 'images/general/placeholder-person.jpg' %}{% endif %}"
-                data-linkedin="{{ leader.linkedin_url }}"
-                data-email="{{ leader.email }}"
-                data-bio="{{ leader.short_bio|default:'' }}"
-            >
-                <div class="leader-mini-card-bg"></div>
-                <div class="leader-mini-photo">
-                    {% if leader.photo %}
-                    <img src="{{ leader.photo.url }}" alt="{{ leader.name }}" loading="lazy">
-                    {% else %}
-                    <img src="{% static 'images/general/placeholder-person.jpg' %}" alt="{{ leader.name }}" loading="lazy">
-                    {% endif %}
+        <div class="lp" data-leader-carousel aria-roledescription="carousel" aria-label="Leadership team">
+            <div class="lp-viewport">
+                <div class="lp-track">
+                    {% for leader in leadership %}
+                    <article
+                        class="lp-card"
+                        role="button" tabindex="0"
+                        aria-label="View {{ leader.name }}'s bio"
+                        data-name="{{ leader.name }}"
+                        data-designation="{{ leader.designation }}"
+                        data-photo="{% if leader.photo %}{{ leader.photo.url }}{% else %}{% static 'images/general/placeholder-person.jpg' %}{% endif %}"
+                        data-linkedin="{{ leader.linkedin_url }}"
+                        data-email="{{ leader.email }}"
+                        data-bio="{{ leader.short_bio|default:'' }}"
+                    >
+                        <div class="lp-photo">
+                            <img src="{% if leader.photo %}{{ leader.photo.url }}{% else %}{% static 'images/general/placeholder-person.jpg' %}{% endif %}" alt="{{ leader.name }}" loading="lazy" draggable="false">
+                            <span class="lp-view">View Profile <i class="fas fa-arrow-right"></i></span>
+                            {% if leader.linkedin_url %}
+                            <a href="{{ leader.linkedin_url }}" class="lp-linkedin" target="_blank" rel="noopener noreferrer" aria-label="{{ leader.name }} on LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                            {% endif %}
+                        </div>
+                        <div class="lp-body">
+                            <h3>{{ leader.name }}</h3>
+                            <p>{{ leader.designation }}</p>
+                        </div>
+                    </article>
+                    {% endfor %}
                 </div>
-                <h4>{{ leader.name }}</h4>
-                <p>{{ leader.designation }}</p>
-                <span class="view-bio-hint">View Bio <i class="fas fa-arrow-right"></i></span>
             </div>
-            {% endfor %}
+
+            <div class="lp-controls">
+                <div class="lp-progress" role="tablist" aria-label="Choose leader">
+                    {% for leader in leadership %}
+                    <button type="button" class="lp-seg" role="tab" aria-label="Show {{ leader.name }}"><span></span></button>
+                    {% endfor %}
+                </div>
+                <div class="lp-nav">
+                    <span class="lp-counter"><b data-lp-current>01</b> / {{ leadership|length|stringformat:"02d" }}</span>
+                    <button type="button" class="lp-arrow" data-lp-prev aria-label="Previous"><i class="fas fa-arrow-left"></i></button>
+                    <button type="button" class="lp-arrow" data-lp-next aria-label="Next"><i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
         </div>
 
         <div class="text-center" style="margin-top: var(--space-8);">

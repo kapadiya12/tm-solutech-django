@@ -62,8 +62,11 @@ document.addEventListener('DOMContentLoaded', function () {
             const revealObserver = new IntersectionObserver((entries) => {
                 entries.forEach((entry) => {
                     if (entry.isIntersecting) {
-                        entry.target.classList.add('in-view');
-                        revealObserver.unobserve(entry.target);
+                        const el = entry.target;
+                        el.classList.add('in-view');
+                        revealObserver.unobserve(el);
+                        // After the entrance, drop the slow reveal timing so hovers respond instantly
+                        setTimeout(() => el.classList.add('reveal-done'), 1300);
                     }
                 });
             }, { threshold: 0.15, rootMargin: '0px 0px -60px 0px' });
@@ -98,15 +101,30 @@ document.addEventListener('DOMContentLoaded', function () {
             root.style.setProperty('--nav-height', navbar.offsetHeight + 'px');
         }
         if ('ResizeObserver' in window) {
-            new ResizeObserver(syncNavHeight).observe(navbar);
+            // border-box: the bar shrinks by padding when scrolled, which content-box misses
+            new ResizeObserver(syncNavHeight).observe(navbar, { box: 'border-box' });
         }
+        navbar.addEventListener('transitionend', (event) => { if (event.target === navbar) syncNavHeight(); });
         syncNavHeight();
 
         // Scroll state + progress, batched into one rAF per frame
         let ticking = false;
+        let lastScrollY = window.scrollY;
         function onScrollFrame() {
             const y = window.scrollY;
             navbar.classList.toggle('scrolled', y > 24);
+
+            // Smart sticky: tuck on scroll down, return on scroll up / near top.
+            // Never while a menu is open, the drawer is open or the bar has focus.
+            const delta = y - lastScrollY;
+            const busy = navbar.classList.contains('menu-open') || navbar.matches(':hover, :focus-within');
+            if (y < 200 || busy || delta < -6) {
+                navbar.classList.remove('nav-tucked');
+            } else if (delta > 6) {
+                navbar.classList.add('nav-tucked');
+            }
+            root.classList.toggle('nav-is-tucked', navbar.classList.contains('nav-tucked'));
+            if (Math.abs(delta) > 6 || y < 200) lastScrollY = y;
 
             if (progressBar && progressTrack) {
                 const max = root.scrollHeight - window.innerHeight;
@@ -128,6 +146,33 @@ document.addEventListener('DOMContentLoaded', function () {
         window.addEventListener('load', requestScrollFrame);
         onScrollFrame();
 
+        // Mega-menus centre on the viewport, not on the (off-centre) link capsule
+        function syncDropdownShift() {
+            if (isMobile()) { navContainer.style.removeProperty('--dd-shift'); return; }
+            const r = navContainer.getBoundingClientRect();
+            navContainer.style.setProperty('--dd-shift', Math.round(window.innerWidth / 2 - (r.left + r.width / 2)) + 'px');
+        }
+        syncDropdownShift();
+
+        // Pointer notch on each mega-menu aims at the link that opened it
+        dropdownItems.forEach((item) => {
+            const link = item.querySelector(':scope > .nav-link');
+            const panel = item.querySelector('.mega-dropdown');
+            if (!link || !panel) return;
+            const aim = () => {
+                if (isMobile()) return;
+                const l = link.getBoundingClientRect();
+                const pr = panel.getBoundingClientRect();
+                const x = Math.min(Math.max(l.left + l.width / 2 - pr.left, 28), pr.width - 28);
+                panel.style.setProperty('--notch-x', Math.round(x) + 'px');
+            };
+            item.addEventListener('mouseenter', aim);
+            item.addEventListener('focusin', aim);
+        });
+        window.addEventListener('resize', syncDropdownShift, { passive: true });
+        window.addEventListener('load', syncDropdownShift);
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(syncDropdownShift);
+
         // Smooth-scroll same-page anchors, offset by the fixed navbar
         document.addEventListener('click', function (event) {
             const link = event.target.closest('a[href*="#"]');
@@ -146,7 +191,8 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!target) return;
             event.preventDefault();
             closeMobileMenu(false);
-            const top = target.getBoundingClientRect().top + window.scrollY - navbar.offsetHeight - 16;
+            const stickyBar = document.querySelector('.svc-jumpbar');
+            const top = target.getBoundingClientRect().top + window.scrollY - navbar.offsetHeight - (stickyBar ? stickyBar.offsetHeight : 0) - 16;
             if (window.tmLenis) window.tmLenis.scrollTo(Math.max(top, 0), { duration: 1.2 });
             else window.scrollTo({ top: Math.max(top, 0), behavior: reduceMotion.matches ? 'auto' : 'smooth' });
             history.pushState(null, '', hash);
@@ -313,6 +359,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const activateTab = (tab) => {
                 msTabs.forEach((t) => t.classList.toggle('is-active', t === tab));
                 msPanels.forEach((panel) => panel.classList.toggle('is-active', panel.id === tab.dataset.msTab));
+
                 if (msIndicator) {
                     msIndicator.style.height = tab.offsetHeight + 'px';
                     msIndicator.style.transform = 'translateY(' + tab.offsetTop + 'px)';
@@ -336,6 +383,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
             });
 
+            // Lock the panel area to the tallest service area so switching never resizes the menu
+            const msPanelsBox = navContainer.querySelector('.ms-panels');
+            const lockPanelHeight = () => {
+                if (!msPanelsBox || isMobile()) return;
+                msPanelsBox.style.minHeight = '';
+                const tallest = Math.max(...msPanels.map((panel) => panel.scrollHeight));
+                if (tallest > 0) msPanelsBox.style.minHeight = tallest + 'px';
+            };
+            const servicesItem = msTabs[0].closest('.has-dropdown');
+            if (servicesItem) servicesItem.addEventListener('mouseenter', lockPanelHeight, { once: true });
+            window.addEventListener('resize', () => { if (msPanelsBox) msPanelsBox.style.minHeight = ''; servicesItem && servicesItem.addEventListener('mouseenter', lockPanelHeight, { once: true }); }, { passive: true });
+
             activateTab(msInitial);
             const servicesMenuItem = msTabs[0].closest('.has-dropdown');
             if (servicesMenuItem) {
@@ -346,7 +405,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-        // Count-up for numeric stats in the About panel, the first time it opens
+        // Count-up for numeric stats in the Why Us panel, the first time it opens
         const countEls = Array.from(navContainer.querySelectorAll('[data-countup]'));
         if (countEls.length && !reduceMotion.matches) {
             const targets = countEls.map((el) => {
@@ -565,15 +624,29 @@ document.addEventListener('DOMContentLoaded', function () {
         if (window.matchMedia('(pointer: coarse)').matches) return;
         if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
+        // Measure once per hover and write at most once per frame, so moving the
+        // mouse across a grid of cards never forces layout on every event
         const tiltCards = document.querySelectorAll('.service-card, .capability-card, .why-us-card');
         tiltCards.forEach((card) => {
+            let rect = null;
+            let frame = 0;
+            let px = 0;
+            let py = 0;
+            card.addEventListener('mouseenter', () => { rect = card.getBoundingClientRect(); });
             card.addEventListener('mousemove', (e) => {
-                const rect = card.getBoundingClientRect();
-                const x = (e.clientX - rect.left) / rect.width - 0.5;
-                const y = (e.clientY - rect.top) / rect.height - 0.5;
-                card.style.transform = `perspective(1000px) rotateY(${x * 8}deg) rotateX(${-y * 8}deg) translateY(-8px)`;
+                if (!rect) rect = card.getBoundingClientRect();
+                px = (e.clientX - rect.left) / rect.width - 0.5;
+                py = (e.clientY - rect.top) / rect.height - 0.5;
+                if (frame) return;
+                frame = requestAnimationFrame(() => {
+                    frame = 0;
+                    card.style.transform = `perspective(1000px) rotateY(${px * 8}deg) rotateX(${-py * 8}deg) translateY(-8px)`;
+                });
             });
             card.addEventListener('mouseleave', () => {
+                if (frame) cancelAnimationFrame(frame);
+                frame = 0;
+                rect = null;
                 card.style.transform = '';
             });
         });
@@ -665,6 +738,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (!modal) return;
 
+        // Exposed so the homepage leader carousel can open the same modal.
+        window.tmOpenLeaderBio = (data) => openModal(data);
+
         function closeModal() {
             modal.classList.remove('active');
             document.body.style.overflow = '';
@@ -744,6 +820,276 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
     }
+
+    // 10. Industries marquee — fill one set past the viewport width, clone it once, then move
+    //     the track frame-by-frame and wrap its offset by the measured distance to the clone.
+    //     No CSS/WAAPI iterations and no mask-image: both make Safari blank the strip.
+    (function initIndustriesMarquee() {
+        const marquee = document.querySelector('[data-industries-marquee]');
+        if (!marquee) return;
+        const track = marquee.querySelector('.industry-track');
+        const set = track && track.querySelector('.industry-set');
+        if (!set) return;
+        const originals = Array.from(set.children);
+        if (!originals.length) return;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+        const SPEED = 60; // px per second
+
+        const hide = (node) => {
+            node.setAttribute('aria-hidden', 'true');
+            if (node.matches('a')) node.setAttribute('tabindex', '-1');
+            node.querySelectorAll('a').forEach((a) => a.setAttribute('tabindex', '-1'));
+            return node;
+        };
+
+        let shift = 0;      // distance from the set to its clone, in px
+        let offset = 0;     // current scroll position within [0, shift)
+        let lastWidth = 0;
+        let paused = false;
+        let visible = true;
+        let last = 0;
+
+        function build() {
+            const width = marquee.clientWidth;
+            if (!width || width === lastWidth) return;
+            lastWidth = width;
+
+            // Measure in the single-row layout (the no-JS fallback wraps the cards).
+            marquee.classList.add('is-running');
+            track.style.transform = 'translate3d(0, 0, 0)';
+            track.querySelectorAll('.industry-set').forEach((el, i) => { if (i > 0) el.remove(); });
+            set.replaceChildren(...originals);
+            let guard = 0;
+            while (set.getBoundingClientRect().width < width + 40 && guard++ < 30) {
+                originals.forEach((node) => set.appendChild(hide(node.cloneNode(true))));
+            }
+            track.appendChild(hide(set.cloneNode(true)));
+
+            const twin = track.children[1];
+            shift = twin.getBoundingClientRect().left - set.getBoundingClientRect().left;
+            offset = shift > 0 ? offset % shift : 0;
+        }
+
+        function frame(now) {
+            const dt = last ? Math.min(now - last, 100) / 1000 : 0; // clamp after tab switches
+            last = now;
+            if (shift > 0 && !paused && visible) {
+                offset = (offset + SPEED * dt) % shift;
+                track.style.transform = `translate3d(${-offset.toFixed(2)}px, 0, 0)`;
+            }
+            requestAnimationFrame(frame);
+        }
+
+        marquee.addEventListener('mouseenter', () => { paused = true; });
+        marquee.addEventListener('mouseleave', () => { paused = false; });
+        marquee.addEventListener('focusin', () => { paused = true; });
+        marquee.addEventListener('focusout', (e) => { if (!marquee.contains(e.relatedTarget)) paused = false; });
+        if ('IntersectionObserver' in window) {
+            new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; }).observe(marquee);
+        }
+
+        build();
+        requestAnimationFrame(frame);
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(build, 200);
+        });
+    })();
+
+    // 11. Leadership carousel — endless auto-slide (one card per step), segmented progress,
+    //     arrows, swipe. Keeps moving under the cursor; pauses only while off-screen, in a
+    //     background tab, or while a leader's bio modal is open.
+    (function initLeaderCarousel() {
+        const root = document.querySelector('[data-leader-carousel]');
+        if (!root) return;
+        const viewport = root.querySelector('.lp-viewport');
+        const track = root.querySelector('.lp-track');
+        const originals = Array.from(track.children);
+        const segs = Array.from(root.querySelectorAll('.lp-seg'));
+        const counter = root.querySelector('[data-lp-current]');
+        const total = originals.length;
+        if (!total) return;
+
+        const INTERVAL = 4000;
+        const EASE = 'transform 0.85s cubic-bezier(0.65, 0, 0.35, 1)';
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        root.style.setProperty('--lp-interval', INTERVAL + 'ms');
+
+        let pv = 1, index = 0, step = 0, looping = false, moving = false;
+        let timer = null, visible = false;
+        const bioModal = document.getElementById('leaderBioModal');
+
+        const perView = () => {
+            const w = viewport.clientWidth;
+            return w >= 1100 ? 4 : w >= 820 ? 3 : w >= 520 ? 2 : 1;
+        };
+
+        function setPos(animate) {
+            track.style.transition = animate && !reduceMotion ? EASE : 'none';
+            track.style.transform = `translate3d(${-index * step}px, 0, 0)`;
+        }
+
+        function current() { return looping ? ((index - pv) % total + total) % total : 0; }
+
+        function updateUI() {
+            const cur = current();
+            segs.forEach((seg, i) => {
+                seg.classList.toggle('is-done', i < cur);
+                seg.classList.remove('is-active');
+                seg.setAttribute('aria-selected', i === cur ? 'true' : 'false');
+            });
+            const active = segs[cur];
+            if (active) { void active.offsetWidth; active.classList.add('is-active'); }
+            if (counter) counter.textContent = String(cur + 1).padStart(2, '0');
+        }
+
+        function setup() {
+            const keep = current();
+            track.querySelectorAll('.lp-clone').forEach((el) => el.remove());
+            pv = Math.min(perView(), total);
+            root.style.setProperty('--pv', pv);
+            looping = total > pv;
+            root.classList.toggle('is-static', !looping);
+            if (looping) {
+                const mk = (node) => {
+                    const c = node.cloneNode(true);
+                    c.classList.add('lp-clone');
+                    c.setAttribute('aria-hidden', 'true');
+                    c.setAttribute('tabindex', '-1');
+                    c.querySelectorAll('a').forEach((a) => a.setAttribute('tabindex', '-1'));
+                    return c;
+                };
+                originals.slice(-pv).forEach((n) => track.insertBefore(mk(n), track.firstChild));
+                originals.slice(0, pv).forEach((n) => track.appendChild(mk(n)));
+                index = pv + keep;
+            } else {
+                index = 0;
+            }
+            const cards = track.children;
+            step = cards.length > 1 ? cards[1].offsetLeft - cards[0].offsetLeft : 0;
+            setPos(false);
+            updateUI();
+            schedule();
+        }
+
+        function go(target) {
+            if (!looping || moving) return;
+            index = target;
+            moving = !reduceMotion;
+            setPos(true);
+            clearTimeout(go.unlock);
+            go.unlock = setTimeout(settle, 1000); // in case transitionend never fires
+            updateUI();
+            schedule();
+        }
+
+        function settle() {
+            moving = false;
+            // Stepped into the clones at either end: jump silently to the matching real card.
+            if (index >= total + pv) { index -= total; setPos(false); }
+            else if (index < pv) { index += total; setPos(false); }
+        }
+        track.addEventListener('transitionend', (e) => { if (e.target === track) settle(); });
+
+        function shouldPlay() {
+            const bioOpen = bioModal && bioModal.classList.contains('active');
+            return looping && !reduceMotion && visible && !bioOpen && !document.hidden;
+        }
+        function schedule() {
+            clearTimeout(timer);
+            root.classList.toggle('is-paused', !shouldPlay());
+            root.classList.toggle('is-manual', reduceMotion);
+            if (shouldPlay()) timer = setTimeout(() => go(index + 1), INTERVAL);
+        }
+
+        root.querySelector('[data-lp-prev]')?.addEventListener('click', () => go(index - 1));
+        root.querySelector('[data-lp-next]')?.addEventListener('click', () => go(index + 1));
+        segs.forEach((seg, i) => seg.addEventListener('click', () => go(pv + i)));
+
+        // Card click / Enter opens the bio (delegated so clones work too); LinkedIn link passes through.
+        let swiped = false;
+        const openFrom = (card) => { if (card && window.tmOpenLeaderBio) window.tmOpenLeaderBio({ ...card.dataset }); };
+        // Remember the card under the press: if the track slides between press and release,
+        // the browser targets the click at the track instead of the card.
+        let downCard = null;
+        track.addEventListener('click', (e) => {
+            if (swiped || e.target.closest('.lp-linkedin')) return;
+            openFrom(e.target.closest('.lp-card') || downCard);
+        });
+        track.addEventListener('keydown', (e) => {
+            if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('lp-card')) {
+                e.preventDefault();
+                openFrom(e.target);
+            }
+        });
+
+        // Swipe / drag
+        let startX = null, startY = null;
+        viewport.addEventListener('pointerdown', (e) => {
+            startX = e.clientX; startY = e.clientY; swiped = false;
+            downCard = e.target.closest('.lp-card');
+        });
+        window.addEventListener('pointerup', (e) => {
+            if (startX === null) return;
+            const dx = e.clientX - startX, dy = e.clientY - startY;
+            startX = null;
+            if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)) {
+                swiped = true;
+                go(index + (dx < 0 ? 1 : -1));
+                setTimeout(() => { swiped = false; }, 0);
+            }
+        });
+
+        // Resume as soon as the bio modal closes.
+        if (bioModal && 'MutationObserver' in window) {
+            new MutationObserver(schedule).observe(bioModal, { attributes: true, attributeFilter: ['class'] });
+        }
+        document.addEventListener('visibilitychange', schedule);
+        if ('IntersectionObserver' in window) {
+            new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; schedule(); }, { threshold: 0.15 }).observe(root);
+        } else {
+            visible = true;
+        }
+
+        setup();
+        let resizeTimer, lastW = viewport.clientWidth;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                if (viewport.clientWidth === lastW) return;
+                lastW = viewport.clientWidth;
+                moving = false;
+                setup();
+            }, 200);
+        });
+    })();
+
+    // 12. Footer — staggered reveal, cursor spotlight on the wordmark
+    (function initFooter() {
+        const footer = document.querySelector('[data-footer]');
+        if (!footer) return;
+
+        if ('IntersectionObserver' in window) {
+            const io = new IntersectionObserver(([entry]) => {
+                if (entry.isIntersecting) { footer.classList.add('is-visible'); io.disconnect(); }
+            }, { threshold: 0.08 });
+            io.observe(footer);
+        } else {
+            footer.classList.add('is-visible');
+        }
+
+        const mark = footer.querySelector('.sf-wordmark');
+        if (mark && window.matchMedia('(hover: hover)').matches) {
+            mark.addEventListener('pointermove', (e) => {
+                const r = mark.getBoundingClientRect();
+                mark.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100).toFixed(1) + '%');
+                mark.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100).toFixed(1) + '%');
+            });
+        }
+
+    })();
 
     // Initialize New Interactive Modules
     initLeadershipBioModal();
@@ -971,5 +1317,174 @@ document.addEventListener('DOMContentLoaded', function () {
     } catch (err) {
         // Leave the trigger as a plain link to /search/ if anything goes wrong.
         if (window.console) console.error('Site search failed to start:', err);
+    }
+});
+
+
+// Services page: highlight the jump-bar chip for the area in view
+document.addEventListener('DOMContentLoaded', function () {
+    const bar = document.querySelector('.svc-jumpbar');
+    if (!bar || !('IntersectionObserver' in window)) return;
+    const track = bar.querySelector('.svc-jumpbar-track');
+    const chips = new Map();
+    bar.querySelectorAll('[data-svc-jump]').forEach((chip) => chips.set(chip.hash.slice(1), chip));
+    const areas = Array.from(document.querySelectorAll('[data-svc-area]'));
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let current = null;
+
+    function setActive(id) {
+        if (id === current) return;
+        current = id;
+        chips.forEach((chip, key) => chip.classList.toggle('is-active', key === id));
+        const chip = chips.get(id);
+        if (chip && track && track.scrollWidth > track.clientWidth) {
+            const left = chip.offsetLeft - (track.clientWidth - chip.offsetWidth) / 2;
+            track.scrollTo({ left: Math.max(left, 0), behavior: reduceMotion ? 'auto' : 'smooth' });
+        }
+    }
+
+    // A thin band near the top of the viewport decides which area is "current"
+    const visible = new Set();
+    const areaObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) visible.add(entry.target);
+            else visible.delete(entry.target);
+        });
+        const first = areas.find((area) => visible.has(area));
+        if (first) setActive(first.id);
+        else if (areas.length && window.scrollY < areas[0].offsetTop) setActive(null);
+    }, { rootMargin: '-30% 0px -60% 0px' });
+    areas.forEach((area) => areaObserver.observe(area));
+
+    // Edge fade only when the chips don't all fit
+    const syncOverflow = () => track && track.classList.toggle('is-overflowing', track.scrollWidth > track.clientWidth + 1);
+    syncOverflow();
+    window.addEventListener('resize', syncOverflow, { passive: true });
+
+    // Shadow once the bar is pinned under the navbar
+    const sentinel = document.createElement('div');
+    sentinel.setAttribute('aria-hidden', 'true');
+    bar.parentNode.insertBefore(sentinel, bar);
+    new IntersectionObserver(([entry]) => {
+        bar.classList.toggle('is-stuck', !entry.isIntersecting && entry.boundingClientRect.top < 0);
+    }, { rootMargin: '-120px 0px 0px 0px' }).observe(sentinel);
+});
+
+
+// Services mega-menu: cursor glow on service rows + rotating spotlight
+document.addEventListener('DOMContentLoaded', function () {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const finePointer = window.matchMedia('(pointer: fine)').matches;
+
+    // Glow follows the cursor inside each row (one write per frame)
+    if (finePointer && !reduceMotion) {
+        document.querySelectorAll('.ms-cards').forEach((grid) => {
+            let frame = 0;
+            let target = null;
+            let x = 0;
+            let y = 0;
+            grid.addEventListener('mousemove', (event) => {
+                target = event.target.closest('.ms-card');
+                if (!target) return;
+                const rect = target.getBoundingClientRect();
+                x = event.clientX - rect.left;
+                y = event.clientY - rect.top;
+                if (frame) return;
+                frame = requestAnimationFrame(() => {
+                    frame = 0;
+                    if (target) { target.style.setProperty('--mx', x + 'px'); target.style.setProperty('--my', y + 'px'); }
+                });
+            });
+        });
+    }
+
+    // Spotlight: advances every 5s only while the Services menu is open
+    const spot = document.querySelector('[data-ms-spotlight]');
+    if (!spot) return;
+    const slides = Array.from(spot.querySelectorAll('.ms-spot-slide'));
+    const pips = Array.from(spot.querySelectorAll('[data-ms-spot-go]'));
+    const bar = spot.querySelector('.ms-spot-progress span');
+    const menuItem = spot.closest('.has-dropdown');
+    if (slides.length < 2 || !menuItem) { spot.querySelector('.ms-spot-nav')?.remove(); return; }
+
+    let index = 0;
+    let timer = null;
+    let open = false;
+    let hovering = false;
+
+    function show(next) {
+        index = (next + slides.length) % slides.length;
+        slides.forEach((slide, i) => {
+            const on = i === index;
+            slide.classList.toggle('is-active', on);
+            slide.setAttribute('aria-hidden', on ? 'false' : 'true');
+            slide.tabIndex = on ? 0 : -1;
+        });
+        pips.forEach((pip, i) => pip.classList.toggle('is-active', i === index));
+        restartBar();
+    }
+    function restartBar() {
+        if (!bar) return;
+        spot.classList.remove('is-running');
+        void bar.offsetWidth; // restart the CSS timer
+        if (open && !reduceMotion) spot.classList.add('is-running');
+    }
+    function schedule() {
+        clearInterval(timer);
+        timer = null;
+        if (open && !hovering && !reduceMotion) timer = setInterval(() => show(index + 1), 5000);
+    }
+    function setOpen(state) {
+        if (state === open) return;
+        open = state;
+        if (open) restartBar(); else spot.classList.remove('is-running');
+        schedule();
+    }
+
+    menuItem.addEventListener('mouseenter', () => setOpen(true));
+    menuItem.addEventListener('mouseleave', () => setOpen(false));
+    menuItem.addEventListener('focusin', () => setOpen(true));
+    menuItem.addEventListener('focusout', (event) => { if (!menuItem.contains(event.relatedTarget)) setOpen(false); });
+    spot.addEventListener('mouseenter', () => { hovering = true; spot.classList.add('is-paused'); schedule(); });
+    spot.addEventListener('mouseleave', () => { hovering = false; spot.classList.remove('is-paused'); show(index); schedule(); });
+    pips.forEach((pip) => pip.addEventListener('click', (event) => {
+        event.preventDefault();
+        show(Number(pip.dataset.msSpotGo));
+        schedule();
+    }));
+    spot.querySelector('[data-ms-spot-prev]')?.addEventListener('click', (event) => { event.preventDefault(); show(index - 1); schedule(); });
+    spot.querySelector('[data-ms-spot-next]')?.addEventListener('click', (event) => { event.preventDefault(); show(index + 1); schedule(); });
+    spot.addEventListener('keydown', (event) => {
+        if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+        event.preventDefault();
+        show(index + (event.key === 'ArrowRight' ? 1 : -1));
+        schedule();
+    });
+});
+
+// Navbar: magnetic consultation button
+document.addEventListener('DOMContentLoaded', function () {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Magnetic pull: the CTA leans a few px toward the cursor
+    if (!reduceMotion && window.matchMedia('(pointer: fine)').matches) {
+        document.querySelectorAll('[data-magnetic]').forEach((btn) => {
+            let frame = 0;
+            btn.addEventListener('mousemove', (event) => {
+                const rect = btn.getBoundingClientRect();
+                const x = ((event.clientX - rect.left) / rect.width - 0.5) * 8;
+                const y = ((event.clientY - rect.top) / rect.height - 0.5) * 6;
+                if (frame) cancelAnimationFrame(frame);
+                frame = requestAnimationFrame(() => {
+                    btn.style.setProperty('--mag-x', x.toFixed(1) + 'px');
+                    btn.style.setProperty('--mag-y', y.toFixed(1) + 'px');
+                });
+            });
+            btn.addEventListener('mouseleave', () => {
+                if (frame) cancelAnimationFrame(frame);
+                btn.style.setProperty('--mag-x', '0px');
+                btn.style.setProperty('--mag-y', '0px');
+            });
+        });
     }
 });

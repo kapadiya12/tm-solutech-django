@@ -10,7 +10,7 @@ def site_settings(request):
 
 
 def nav_stats(request):
-    """First two trust-bar statistics, shown in the About mega-menu panel."""
+    """First two trust-bar statistics, shown in the Why Us mega-menu panel."""
     try:
         return {'nav_stats': Statistic.objects.filter(is_active=True)[:2]}
     except Exception:

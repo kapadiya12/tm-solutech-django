@@ -12,7 +12,13 @@ def service_categories(request):
         .prefetch_related(Prefetch('services', queryset=nav_services, to_attr='nav_services'))
         .order_by('display_order')
     )
+    spotlight = (
+        Service.objects.filter(is_active=True, is_featured=True, category__is_active=True)
+        .select_related('category')
+        .order_by('category__display_order', 'display_order')[:5]
+    )
     return {
+        'nav_spotlight': spotlight,
         'nav_service_categories': categories,
         'nav_service_total': sum(category.nav_service_count for category in categories),
     }

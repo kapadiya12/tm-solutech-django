@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.urls import reverse
 from urllib.parse import quote
 from .models import (
@@ -14,13 +14,15 @@ from contact.models import ContactInquiry
 def home(request):
     context = {
         'statistics': Statistic.objects.filter(is_active=True),
-        'service_categories': ServiceCategory.objects.filter(is_active=True).prefetch_related('services'),
+        'service_categories': ServiceCategory.objects.filter(is_active=True).annotate(
+            active_service_count=Count('services', filter=Q(services__is_active=True))
+        ).order_by('display_order'),  # explicit: Meta.ordering is dropped on GROUP BY queries
         'featured_services': Service.objects.filter(is_featured=True, is_active=True)[:6],
         'why_us_reasons': WhyUsReason.objects.filter(is_active=True)[:6],
-        'industries': Industry.objects.filter(is_active=True)[:6],
+        'industries': Industry.objects.filter(is_active=True),
         'testimonials': Testimonial.objects.filter(is_active=True)[:5],
-        'leadership': Leadership.objects.filter(is_active=True)[:5],
-        'latest_posts': BlogPost.objects.filter(is_published=True)[:3],
+        'leadership': Leadership.objects.filter(is_active=True),
+        'latest_posts': BlogPost.objects.filter(is_published=True).select_related('category')[:3],
         'capabilities': Capability.objects.filter(is_active=True),
         'client_logos': ClientLogo.objects.filter(is_active=True),
         'hero_tags': HeroTag.objects.filter(is_active=True),

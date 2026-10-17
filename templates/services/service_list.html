@@ -16,27 +16,44 @@
     </div>
 </div>
 
+{% if categories %}
+{# Sticky jump bar: one tap to any service area #}
+<nav class="svc-jumpbar" aria-label="Service areas">
+    <div class="container">
+        <div class="svc-jumpbar-track" data-lenis-prevent>
+            {% for category in categories %}
+            <a href="#{{ category.slug }}" class="svc-jump accent-{% cycle 'blue' 'green' 'orange' %}" data-svc-jump>
+                <i class="{{ category.icon }}" aria-hidden="true"></i>
+                <span>{{ category.name }}</span>
+                <span class="svc-jump-count">{{ category.page_services|length }}</span>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</nav>
+{% endif %}
+
 {% for category in categories %}
-<section class="section {% if forloop.counter|divisibleby:2 %}section-gray{% endif %} services-section">
+<section id="{{ category.slug }}" class="section svc-area {% if forloop.counter|divisibleby:2 %}section-gray{% endif %} services-section" data-svc-area>
     {% if forloop.counter|divisibleby:2 %}<div class="section-glow services-glow"></div>{% endif %}
     <div class="container">
         <div class="section-header animate-on-scroll">
-            <span class="section-badge"><i class="{{ category.icon }}"></i> {{ category.active_services.count }} Service{{ category.active_services.count|pluralize }}</span>
+            <span class="section-badge"><i class="{{ category.icon }}"></i> {{ category.page_services|length }} Service{{ category.page_services|length|pluralize }}</span>
             <h2>{{ category.name }}</h2>
-            <p>{{ category.short_description|default:category.description|truncatewords:20 }}</p>
+            <p>{{ category.short_description|default:category.description|truncatewords:24 }}</p>
         </div>
         <div class="grid grid-3">
-            {% for service in category.active_services %}
-            <div class="service-card animate-on-scroll animate-delay-{{ forloop.counter }}">
+            {% for service in category.page_services %}
+            <div class="service-card animate-on-scroll animate-delay-{% cycle 1 2 3 %}">
                 <div class="service-card-icon"><i class="{{ service.icon }}"></i></div>
                 <h3>{{ service.title }}</h3>
-                <p>{{ service.short_description|truncatewords:20 }}</p>
+                <p>{{ service.short_description|truncatewords:22 }}</p>
                 <a href="{{ service.get_absolute_url }}" class="service-card-link">Learn More <i class="fas fa-arrow-right"></i></a>
             </div>
             {% endfor %}
         </div>
         <div class="text-center" style="margin-top: var(--space-8);">
-            <a href="{{ category.get_absolute_url }}" class="btn btn-secondary">View All {{ category.name }}</a>
+            <a href="{{ category.get_absolute_url }}" class="btn btn-secondary">Explore {{ category.name }} <i class="fas fa-arrow-right"></i></a>
         </div>
     </div>
 </section>

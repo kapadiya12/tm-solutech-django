@@ -26,7 +26,7 @@
         {% endif %}
         <div class="grid grid-3">
             {% for service in services %}
-            <div class="service-card animate-on-scroll animate-delay-{{ forloop.counter }}">
+            <div class="service-card animate-on-scroll animate-delay-{% cycle 1 2 3 %}">
                 <div class="service-card-icon"><i class="{{ service.icon }}"></i></div>
                 <h3>{{ service.title }}</h3>
                 <p>{{ service.short_description|truncatewords:25 }}</p>

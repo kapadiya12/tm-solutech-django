@@ -38,20 +38,19 @@
                         </a>
                     </li>
 
-                    <!-- About -->
-                    {% url 'cms:page_detail' 'careers' as careers_url %}
-                    <li class="nav-item has-dropdown" id="aboutNavItem">
-                        <a href="{% url 'core:about' %}"
-                           class="nav-link {% if request.resolver_match.url_name in 'about leadership clients' and request.resolver_match.app_name == 'core' or request.path == careers_url %}active{% endif %}"
+                    <!-- Why Us (Why Us, Leadership, Clients, FAQs) -->
+                    <li class="nav-item has-dropdown" id="whyUsNavItem">
+                        <a href="{% url 'core:why_us' %}"
+                           class="nav-link {% if request.resolver_match.app_name == 'core' and request.resolver_match.url_name in 'why_us leadership clients faqs' %}active{% endif %}"
                            aria-haspopup="true"
                            aria-expanded="false"
-                           aria-controls="aboutMegaDropdown">
-                            <span class="nav-link-icon" aria-hidden="true"><i class="fas fa-building"></i></span>
-                            <span>About</span>
+                           aria-controls="whyUsMegaDropdown">
+                            <span class="nav-link-icon" aria-hidden="true"><i class="fas fa-award"></i></span>
+                            <span>Why Us</span>
                             <i class="fas fa-chevron-down dropdown-arrow" aria-hidden="true"></i>
                         </a>
 
-                        <div class="mega-dropdown mega-about" id="aboutMegaDropdown">
+                        <div class="mega-dropdown mega-about" id="whyUsMegaDropdown">
                             <div class="mega-dropdown-inner mega-about-inner">
 
                                 <div class="mega-about-feature">
@@ -75,11 +74,11 @@
 
                                     <div class="maf-top">
                                         <span class="maf-emblem"><img src="{% static 'images/logo/emblem.png' %}" alt=""></span>
-                                        <span class="maf-eyebrow"><span class="maf-dot" aria-hidden="true"></span>Since 1985</span>
+                                        <span class="maf-eyebrow"><span class="maf-dot" aria-hidden="true"></span>Why TM Solutech</span>
                                     </div>
 
-                                    <h5 class="maf-title">Growing Together with <span class="maf-title-accent">Innovation</span></h5>
-                                    <p class="maf-desc">Decades of heritage, one philosophy: we build technology around your business, not the other way around.</p>
+                                    <h5 class="maf-title">Your Trusted <span class="maf-title-accent">IT Partner</span></h5>
+                                    <p class="maf-desc">Since 1985, we have built technology around your business, backed by expert support whenever you need it.</p>
 
                                     {% if nav_stats %}
                                     <div class="maf-stats">
@@ -92,19 +91,19 @@
                                     </div>
                                     {% endif %}
 
-                                    <a href="{% url 'core:about' %}" class="maf-cta">
-                                        <span>Discover TM Solutech</span>
+                                    <a href="{% url 'core:why_us' %}" class="maf-cta">
+                                        <span>See what sets us apart</span>
                                         <span class="maf-cta-arrow" aria-hidden="true"><i class="fas fa-arrow-right"></i></span>
                                     </a>
                                 </div>
 
                                 <div class="mega-about-grid">
-                                    {% url 'core:about' as card_url %}
+                                    {% url 'core:why_us' as card_url %}
                                     <a href="{{ card_url }}" class="mega-about-card accent-blue{% if request.path == card_url %} is-current{% endif %}"{% if request.path == card_url %} aria-current="page"{% endif %}>
-                                        <span class="mega-about-card-icon"><i class="fas fa-building"></i></span>
+                                        <span class="mega-about-card-icon"><i class="fas fa-award"></i></span>
                                         <span class="mega-about-card-body">
-                                            <span class="mega-about-card-title">About Us</span>
-                                            <span class="mega-about-card-desc">Driven by innovation, committed to excellence since 1985.</span>
+                                            <span class="mega-about-card-title">Why Us</span>
+                                            <span class="mega-about-card-desc">What sets our people, process and partnerships apart.</span>
                                             <span class="mega-about-card-more">Learn more <i class="fas fa-arrow-right"></i></span>
                                         </span>
                                     </a>
@@ -126,12 +125,12 @@
                                             <span class="mega-about-card-more">Learn more <i class="fas fa-arrow-right"></i></span>
                                         </span>
                                     </a>
-                                    {% url 'cms:page_detail' 'careers' as card_url %}
+                                    {% url 'core:faqs' as card_url %}
                                     <a href="{{ card_url }}" class="mega-about-card accent-orange{% if request.path == card_url %} is-current{% endif %}"{% if request.path == card_url %} aria-current="page"{% endif %}>
-                                        <span class="mega-about-card-icon"><i class="fas fa-briefcase"></i></span>
+                                        <span class="mega-about-card-icon"><i class="fas fa-circle-question"></i></span>
                                         <span class="mega-about-card-body">
-                                            <span class="mega-about-card-title">Careers</span>
-                                            <span class="mega-about-card-desc">Grow your career with a team that builds for impact.</span>
+                                            <span class="mega-about-card-title">FAQs</span>
+                                            <span class="mega-about-card-desc">Quick answers about our services, support and engagement.</span>
                                             <span class="mega-about-card-more">Learn more <i class="fas fa-arrow-right"></i></span>
                                         </span>
                                     </a>
@@ -139,13 +138,6 @@
 
                             </div>
                         </div>
-                    </li>
-
-                    <li class="nav-item">
-                        <a href="{% url 'core:why_us' %}" class="nav-link {% if request.resolver_match.url_name == 'why_us' %}active{% endif %}"{% if request.resolver_match.url_name == 'why_us' %} aria-current="page"{% endif %}>
-                            <span class="nav-link-icon" aria-hidden="true"><i class="fas fa-award"></i></span>
-                            <span>Why Us</span>
-                        </a>
                     </li>
 
                     <!-- Services (dynamic: Dashboard → Navbar → Services Menu) -->
@@ -186,11 +178,7 @@
                                         </div>
 
                                         <div class="ms-rail-head">
-                                            <div class="maf-top">
-                                                <span class="maf-emblem"><img src="{% static 'images/logo/emblem.png' %}" alt=""></span>
-                                                <span class="maf-eyebrow"><span class="maf-dot" aria-hidden="true"></span>Service Areas</span>
-                                            </div>
-                                            <h5 class="ms-rail-title">Solutions Built to <span class="maf-title-accent">Scale</span></h5>
+                                            <span class="maf-eyebrow"><span class="maf-dot" aria-hidden="true"></span>Service Areas</span>
                                         </div>
                                         <div class="ms-tabs" id="msTabs">
                                             <span class="ms-tab-indicator" aria-hidden="true"></span>
@@ -200,26 +188,43 @@
                                                data-ms-tab="msPanel{{ category.pk }}"
                                                {% if category.slug == request.resolver_match.kwargs.category_slug %}data-ms-current{% endif %}>
                                                 <span class="ms-tab-icon"><i class="{{ category.icon }}"></i></span>
-                                                <span class="ms-tab-text">
-                                                    <span class="ms-tab-name">{{ category.menu_label }}</span>
-                                                    <span class="ms-tab-count">{{ category.nav_service_count }} service{{ category.nav_service_count|pluralize }}</span>
-                                                </span>
-                                                <i class="fas fa-chevron-right ms-tab-chevron" aria-hidden="true"></i>
+                                                <span class="ms-tab-name">{{ category.menu_label }}</span>
+                                                <span class="ms-tab-count" title="{{ category.nav_service_count }} service{{ category.nav_service_count|pluralize }}">{{ category.nav_service_count }}</span>
                                             </a>
                                             {% endfor %}
                                         </div>
 
-                                        <a href="{% url 'services:service_list' %}" class="ms-all-link">
-                                            <span><i class="fas fa-grip"></i> View all services</span>
-                                            <i class="fas fa-arrow-right"></i>
-                                        </a>
+                                        {% if nav_spotlight %}
+                                        {# Spotlight: rotates through featured services every 5s, pauses on hover #}
+                                        <section class="ms-spotlight" data-ms-spotlight aria-label="Featured services">
+                                            <div class="ms-spot-head">
+                                                <span class="ms-spot-label"><span class="ms-spot-dot" aria-hidden="true"></span>Spotlight</span>
+                                                <span class="ms-spot-nav">
+                                                    <button type="button" class="ms-spot-btn" data-ms-spot-prev aria-label="Previous featured service"><i class="fas fa-chevron-left" aria-hidden="true"></i></button>
+                                                    <span class="ms-spot-dots">
+                                                        {% for service in nav_spotlight %}<button type="button" class="ms-spot-pip{% if forloop.first %} is-active{% endif %}" data-ms-spot-go="{{ forloop.counter0 }}" aria-label="Show {{ service.title }}"></button>{% endfor %}
+                                                    </span>
+                                                    <button type="button" class="ms-spot-btn" data-ms-spot-next aria-label="Next featured service"><i class="fas fa-chevron-right" aria-hidden="true"></i></button>
+                                                </span>
+                                            </div>
+                                            <div class="ms-spot-stage">
+                                                {% for service in nav_spotlight %}
+                                                <a href="{{ service.get_absolute_url }}" class="ms-spot-slide{% if forloop.first %} is-active{% endif %}"{% if not forloop.first %} tabindex="-1" aria-hidden="true"{% endif %}>
+                                                    <span class="ms-spot-icon"><i class="{{ service.icon }}"></i></span>
+                                                    <span class="ms-spot-body">
+                                                        <span class="ms-spot-cat">{{ service.category.name }}</span>
+                                                        <strong class="ms-spot-title">{{ service.title }}</strong>
+                                                    </span>
+                                                </a>
+                                                {% endfor %}
+                                            </div>
+                                            <span class="ms-spot-progress" aria-hidden="true"><span></span></span>
+                                        </section>
+                                        {% endif %}
 
-                                        <a href="{% url 'contact:contact' %}" class="ms-expert">
-                                            <span class="ms-expert-icon"><i class="fas fa-headset"></i></span>
-                                            <span class="ms-expert-text">
-                                                <strong>Not sure where to start?</strong>
-                                                <span>Talk to a solutions expert <i class="fas fa-arrow-right"></i></span>
-                                            </span>
+                                        <a href="{% url 'services:service_list' %}" class="ms-rail-all">
+                                            <span><i class="fas fa-grip" aria-hidden="true"></i> View all {{ nav_service_total }} services</span>
+                                            <i class="fas fa-arrow-right" aria-hidden="true"></i>
                                         </a>
                                     </aside>
 
@@ -227,11 +232,13 @@
                                         {% for category in nav_service_categories %}
                                         <section class="ms-panel accent-{% cycle 'blue' 'green' 'orange' as panel_accent %}" id="msPanel{{ category.pk }}" aria-label="{{ category.menu_label }} services">
                                             <header class="ms-panel-head">
-                                                <div>
-                                                    <span class="ms-panel-eyebrow">{{ category.nav_service_count }} solution{{ category.nav_service_count|pluralize }}</span>
-                                                    <h5>{{ category.menu_label }}</h5>
-                                                    {% if category.menu_description %}<p>{{ category.menu_description|truncatechars:120 }}</p>{% endif %}
+                                                <div class="ms-panel-heading">
+                                                    <h5>{{ category.menu_label }} <span class="ms-count-pill">{{ category.nav_service_count }} solution{{ category.nav_service_count|pluralize }}</span></h5>
+                                                    {% if category.menu_description %}<p class="ms-panel-summary">{{ category.menu_description }}</p>{% endif %}
                                                 </div>
+                                                <a href="{{ category.get_absolute_url }}" class="ms-explore-btn">
+                                                    {% if category.nav_service_count > 6 %}Explore all {{ category.nav_service_count }}{% else %}Explore{% endif %} <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                                                </a>
                                             </header>
 
                                             <div class="ms-cards">
@@ -254,10 +261,14 @@
                                             </div>
 
                                             <footer class="ms-panel-foot">
-                                                <a href="{{ category.get_absolute_url }}" class="ms-explore">
-                                                    Explore {{ category.menu_label }}
-                                                    {% if category.nav_service_count > 6 %}<span class="ms-more">+{{ category.nav_service_count|add:"-6" }} more</span>{% endif %}
-                                                    <i class="fas fa-arrow-right"></i>
+                                                <a href="{% url 'contact:contact' %}" class="ms-expert-strip">
+                                                    <span class="ms-expert-strip-icon" aria-hidden="true"><i class="fas fa-headset"></i></span>
+                                                    <span class="ms-expert-strip-text"><strong>Not sure where to start?</strong><span>Talk to a solutions expert</span></span>
+                                                    <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                                                </a>
+                                                <a href="tel:{% if site_settings %}{{ site_settings.phone }}{% else %}+917947717070{% endif %}" class="ms-call">
+                                                    <span class="ms-call-icon" aria-hidden="true"><i class="fas fa-phone"></i></span>
+                                                    <span class="ms-call-text"><small>Call us</small><strong>{% if site_settings %}{{ site_settings.phone }}{% else %}+91 79 4771 7070{% endif %}</strong></span>
                                                 </a>
                                             </footer>
                                         </section>
@@ -348,12 +359,81 @@
                         </a>
                     </li>
 
-                    <li class="nav-item">
-                        <a href="{% url 'contact:contact' %}" class="nav-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}"{% if request.resolver_match.url_name == 'contact' %} aria-current="page"{% endif %}>
-                            <span class="nav-link-icon" aria-hidden="true"><i class="fas fa-envelope"></i></span>
-                            <span>Contact</span>
+                    <!-- Join Us (Life at TM Solutech, Careers) -->
+                    {% url 'cms:page_detail' 'life-at-tm-solutech' as life_url %}
+                    {% url 'cms:page_detail' 'careers' as careers_url %}
+                    <li class="nav-item has-dropdown" id="joinUsNavItem">
+                        <a href="{{ careers_url }}"
+                           class="nav-link {% if request.path == life_url or request.path == careers_url %}active{% endif %}"
+                           aria-haspopup="true"
+                           aria-expanded="false"
+                           aria-controls="joinUsMegaDropdown">
+                            <span class="nav-link-icon" aria-hidden="true"><i class="fas fa-people-group"></i></span>
+                            <span>Join Us</span>
+                            <i class="fas fa-chevron-down dropdown-arrow" aria-hidden="true"></i>
                         </a>
+
+                        <div class="mega-dropdown mega-about mega-join" id="joinUsMegaDropdown">
+                            <div class="mega-dropdown-inner mega-about-inner">
+
+                                <div class="mega-about-feature">
+                                    <div class="maf-bg" aria-hidden="true">
+                                        <span class="maf-aurora maf-aurora-blue"></span>
+                                        <span class="maf-aurora maf-aurora-green"></span>
+                                        <span class="maf-aurora maf-aurora-orange"></span>
+                                        <svg class="maf-mosaic" viewBox="0 0 120 90" focusable="false">
+                                            <polygon points="0,0 30,0 15,26" fill="#4FCFFF"/>
+                                            <polygon points="30,0 60,0 45,26" fill="#0AAEE0"/>
+                                            <polygon points="15,26 45,26 30,0" fill="#1E75B0"/>
+                                            <polygon points="60,0 90,0 75,26" fill="#1B2585"/>
+                                            <polygon points="45,26 75,26 60,52" fill="#9BC73B"/>
+                                            <polygon points="75,26 105,26 90,52" fill="#FDC943"/>
+                                            <polygon points="90,0 120,0 105,26" fill="#F4A21E"/>
+                                            <polygon points="90,52 120,52 105,26" fill="#E57E27"/>
+                                            <polygon points="60,52 90,52 75,78" fill="#62822A"/>
+                                        </svg>
+                                        <span class="maf-sheen"></span>
+                                    </div>
+
+                                    <div class="maf-top">
+                                        <span class="maf-emblem"><img src="{% static 'images/logo/emblem.png' %}" alt=""></span>
+                                        <span class="maf-eyebrow"><span class="maf-dot" aria-hidden="true"></span>We're Hiring</span>
+                                    </div>
+
+                                    <h5 class="maf-title">Grow Your Career <span class="maf-title-accent">With Us</span></h5>
+                                    <p class="maf-desc">Join a team of engineers and specialists building reliable technology for businesses that depend on it.</p>
+
+                                    <a href="{{ careers_url }}" class="maf-cta">
+                                        <span>Explore careers</span>
+                                        <span class="maf-cta-arrow" aria-hidden="true"><i class="fas fa-arrow-right"></i></span>
+                                    </a>
+                                </div>
+
+                                <div class="mega-about-grid">
+                                    {% url 'cms:page_detail' 'life-at-tm-solutech' as card_url %}
+                                    <a href="{{ card_url }}" class="mega-about-card accent-green{% if request.path == card_url %} is-current{% endif %}"{% if request.path == card_url %} aria-current="page"{% endif %}>
+                                        <span class="mega-about-card-icon"><i class="fas fa-people-group"></i></span>
+                                        <span class="mega-about-card-body">
+                                            <span class="mega-about-card-title">Life at TM Solutech</span>
+                                            <span class="mega-about-card-desc">Our culture, our people and what a day with the team looks like.</span>
+                                            <span class="mega-about-card-more">Learn more <i class="fas fa-arrow-right"></i></span>
+                                        </span>
+                                    </a>
+                                    {% url 'cms:page_detail' 'careers' as card_url %}
+                                    <a href="{{ card_url }}" class="mega-about-card accent-orange{% if request.path == card_url %} is-current{% endif %}"{% if request.path == card_url %} aria-current="page"{% endif %}>
+                                        <span class="mega-about-card-icon"><i class="fas fa-briefcase"></i></span>
+                                        <span class="mega-about-card-body">
+                                            <span class="mega-about-card-title">Careers</span>
+                                            <span class="mega-about-card-desc">Open roles and how to apply to join the team.</span>
+                                            <span class="mega-about-card-more">Learn more <i class="fas fa-arrow-right"></i></span>
+                                        </span>
+                                    </a>
+                                </div>
+
+                            </div>
+                        </div>
                     </li>
+
                 </ul>
 
                 <!-- Drawer footer (mobile only) -->
@@ -382,7 +462,8 @@
                     <span class="nav-search-text">Search</span>
                     <kbd class="nav-search-kbd" data-search-kbd>Ctrl K</kbd>
                 </a>
-                <a href="{% url 'contact:contact' %}" class="btn-navbar-cta">
+                <a href="{% url 'contact:contact' %}" class="btn-navbar-cta" data-magnetic>
+                    <span class="cta-ring" aria-hidden="true"></span>
                     <span>Get a Consultation</span>
                     <i class="fas fa-arrow-right"></i>
                 </a>

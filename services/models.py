@@ -105,7 +105,7 @@ class Service(models.Model):
     def get_related_services(self):
         return Service.objects.filter(
             category=self.category, is_active=True
-        ).exclude(pk=self.pk)[:3]
+        ).exclude(pk=self.pk).select_related('category').order_by('display_order')[:3]
 
 
 class Industry(models.Model):

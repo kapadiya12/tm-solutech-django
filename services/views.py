@@ -1,11 +1,17 @@
+from django.db.models import Prefetch
 from django.shortcuts import render, get_object_or_404
 from .models import ServiceCategory, Service, Industry
 
 
 def service_list(request):
-    categories = ServiceCategory.objects.filter(
-        is_active=True
-    ).prefetch_related('services')
+    # One query for categories + one for all their active services, however
+    # many categories exist (the template used to re-query each category 3x).
+    active_services = Service.objects.filter(is_active=True).select_related('category').order_by('display_order')
+    categories = (
+        ServiceCategory.objects.filter(is_active=True)
+        .prefetch_related(Prefetch('services', queryset=active_services, to_attr='page_services'))
+        .order_by('display_order')
+    )
     context = {
         'categories': categories,
         'page_title': 'Our Services',
@@ -16,7 +22,7 @@ def service_list(request):
 
 def category_detail(request, category_slug):
     category = get_object_or_404(ServiceCategory, slug=category_slug, is_active=True)
-    services = category.active_services()
+    services = category.active_services().select_related('category')
     context = {
         'category': category,
         'services': services,
