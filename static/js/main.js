@@ -154,6 +154,55 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         syncDropdownShift();
 
+        // Seamless switching: if another menu was open moments ago, the next one
+        // cross-fades in place instead of replaying its drop-in animation
+        const navUl = document.getElementById('navbarNavList');
+        let lastMenuClose = 0;
+        let switchTimer = null;
+        dropdownItems.forEach((item) => {
+            item.addEventListener('mouseenter', () => {
+                if (!navUl || isMobile()) return;
+                if (performance.now() - lastMenuClose < 350) {
+                    navUl.classList.add('is-switching');
+                    clearTimeout(switchTimer);
+                    switchTimer = setTimeout(() => navUl.classList.remove('is-switching'), 700);
+                }
+            });
+            item.addEventListener('mouseleave', () => {
+                lastMenuClose = performance.now();
+                item.classList.remove('is-dismissed');
+            });
+            item.addEventListener('focusout', (event) => {
+                if (!item.contains(event.relatedTarget)) item.classList.remove('is-dismissed');
+            });
+        });
+
+        // Keyboard: ←/→ between top-level links, ↓ into a menu, Esc closes it
+        const topLinks = Array.from(document.querySelectorAll('#navbarNavList > .nav-item > .nav-link'));
+        topLinks.forEach((link, i) => {
+            link.addEventListener('keydown', (event) => {
+                if (isMobile()) return;
+                const item = link.parentElement;
+                if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+                    event.preventDefault();
+                    topLinks[(i + (event.key === 'ArrowRight' ? 1 : -1) + topLinks.length) % topLinks.length].focus();
+                } else if (event.key === 'ArrowDown' && item.classList.contains('has-dropdown')) {
+                    event.preventDefault();
+                    item.classList.remove('is-dismissed');
+                    const first = item.querySelector('.ms-tab, .mega-about-card, .mega-dropdown a[href]');
+                    if (first) first.focus();
+                }
+            });
+        });
+        document.addEventListener('keydown', (event) => {
+            if (event.key !== 'Escape' || isMobile()) return;
+            const item = document.activeElement && document.activeElement.closest('#navbarNavList > .has-dropdown');
+            if (!item) return;
+            item.classList.add('is-dismissed');
+            const trigger = item.querySelector(':scope > .nav-link');
+            if (trigger) trigger.focus();
+        });
+
         // Pointer notch on each mega-menu aims at the link that opened it
         dropdownItems.forEach((item) => {
             const link = item.querySelector(':scope > .nav-link');
@@ -1487,4 +1536,23 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     }
+});
+
+// Navbar: click ripple at the pointer on links and the CTA
+document.addEventListener('DOMContentLoaded', function () {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    document.querySelectorAll('.navbar .nav-link, .navbar-right > .btn-navbar-cta').forEach((el) => {
+        el.addEventListener('pointerdown', (event) => {
+            if (event.button !== 0) return;
+            const rect = el.getBoundingClientRect();
+            const dot = document.createElement('span');
+            dot.className = 'nav-ripple';
+            dot.style.left = (event.clientX - rect.left) + 'px';
+            dot.style.top = (event.clientY - rect.top) + 'px';
+            if (getComputedStyle(el).position === 'static') el.style.position = 'relative';
+            if (getComputedStyle(el).overflow !== 'hidden') el.style.overflow = 'hidden';
+            el.appendChild(dot);
+            dot.addEventListener('animationend', () => dot.remove(), { once: true });
+        });
+    });
 });

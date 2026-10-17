@@ -2817,3 +2817,184 @@ html.search-locked body { overflow: hidden; }
     .ms-panels { display: flex; flex-direction: column; }
     .ms-panel.is-active { flex: 1 0 auto; min-height: 0; }
 }
+
+/* ==========================================================================
+   CAPSULE BORDER v2: full TM spectrum, clearly visible, rotating + halo
+   ========================================================================== */
+@media (min-width: 1025px) {
+    .navbar-nav-container {
+        --cap-spectrum: conic-gradient(from var(--cap-angle),
+            #4FCFFF 0deg,
+            #0AAEE0 50deg,
+            #1E75B0 95deg,
+            #1B2585 140deg,
+            #9BC73B 195deg,
+            #FDC943 245deg,
+            #F4A21E 285deg,
+            #E57E27 320deg,
+            #4FCFFF 360deg);
+        border: 1.5px solid transparent;
+        background:
+            linear-gradient(180deg, #FCFDFF, #F4F6FC) padding-box,
+            var(--cap-spectrum) border-box;
+        box-shadow: inset 0 1px 0 #ffffff, 0 10px 26px -18px rgba(17, 26, 94, 0.4);
+        animation: capGlint 6s linear infinite;
+    }
+    /* Soft coloured halo that rotates with the border */
+    .navbar-nav-container::after {
+        content: '';
+        position: absolute;
+        inset: -2px;
+        z-index: -1;
+        border-radius: inherit;
+        background: var(--cap-spectrum);
+        filter: blur(10px);
+        opacity: 0.32;
+        pointer-events: none;
+        animation: capGlint 6s linear infinite;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .navbar-nav-container, .navbar-nav-container::after { animation: none; }
+}
+
+/* ==========================================================================
+   BUTTER LAYER: compositor-only animation, seamless menu switching
+   ========================================================================== */
+.cap-ring, .cap-halo { display: none; }
+
+@media (min-width: 1025px) {
+    /* --- Capsule spectrum: rotate a pre-painted wheel (transform only) --- */
+    .navbar-nav-container {
+        animation: none;
+        border: 1.5px solid transparent;
+        background: linear-gradient(180deg, #FCFDFF, #F4F6FC) padding-box;
+    }
+    .navbar-nav-container::after { content: none; }
+
+    .cap-ring, .cap-halo {
+        display: block;
+        position: absolute;
+        border-radius: 999px;
+        pointer-events: none;
+        overflow: hidden;
+    }
+    .cap-ring {
+        inset: -1.5px;
+        z-index: 0;
+        padding: 1.5px;
+        -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+        -webkit-mask-composite: xor;
+                mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+    }
+    .cap-halo {
+        inset: -3px;
+        z-index: -1;
+        opacity: 0.3;
+        filter: blur(10px);
+    }
+    .cap-ring::before, .cap-halo::before {
+        content: '';
+        position: absolute;
+        left: 50%; top: 50%;
+        width: 115%;
+        aspect-ratio: 1;
+        background: conic-gradient(#4FCFFF 0deg, #0AAEE0 50deg, #1E75B0 95deg, #1B2585 140deg, #9BC73B 195deg, #FDC943 245deg, #F4A21E 285deg, #E57E27 320deg, #4FCFFF 360deg);
+        transform: translate(-50%, -50%) rotate(0deg);
+        animation: capWheel 6s linear infinite;
+        will-change: transform;
+    }
+    @keyframes capWheel { to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+    /* --- CTA ring: same technique --- */
+    .cta-ring { background: none; animation: none; overflow: hidden; }
+    .cta-ring::before {
+        content: '';
+        position: absolute;
+        left: 50%; top: 50%;
+        width: 130%;
+        aspect-ratio: 1;
+        background: conic-gradient(transparent 0deg, #4FCFFF 60deg, #9BC73B 120deg, #FDC943 170deg, transparent 220deg, transparent 360deg);
+        transform: translate(-50%, -50%) rotate(0deg);
+        animation: capWheel 4.5s linear infinite;
+        will-change: transform;
+    }
+
+    /* --- Dim behind menus: no full-page blur (expensive), longer grace on hide --- */
+    .navbar::after {
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+        background: rgba(8, 12, 40, 0.34);
+        transition: opacity 0.35s ease 0.18s, visibility 0s linear 0.53s;
+    }
+
+    /* --- Hover intent: a breath before opening so sweeps don't flash menus --- */
+    .has-dropdown:hover .mega-dropdown {
+        transition: opacity 0.3s var(--ease-premium) 0.06s, transform 0.4s var(--ease-premium) 0.06s, visibility 0s 0.06s;
+    }
+    /* Switching from one open menu to another: instant cross-fade, no re-drop */
+    .navbar-nav.is-switching .has-dropdown:hover .mega-dropdown {
+        transform: translateX(-50%) translateY(0) scale(1);
+        transition: opacity 0.18s ease, visibility 0s;
+    }
+    .navbar-nav.is-switching .has-dropdown:hover .mega-dropdown * { animation-duration: 0s !important; animation-delay: 0s !important; }
+
+    /* Keyboard dismiss (Escape) */
+    .navbar-nav-container .has-dropdown.is-dismissed .mega-dropdown { opacity: 0 !important; visibility: hidden !important; transition: none !important; }
+
+    /* GPU hints for the moving parts */
+    .nav-indicator, .mega-dropdown, .ms-tab-indicator { will-change: transform, opacity; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cap-ring::before, .cap-halo::before, .cta-ring::before { animation: none !important; }
+}
+
+/* ==========================================================================
+   MICRO-INTERACTIONS: ripple · text lift · logo glow · compact capsule
+   ========================================================================== */
+@media (min-width: 1025px) {
+    .nav-link > span:not(.nav-link-icon) { display: inline-block; transition: transform 0.3s var(--ease-premium); }
+    .nav-link:hover > span:not(.nav-link-icon) { transform: translateY(-1px); }
+
+    .navbar-brand .brand-logo-img { transition: height 0.35s var(--ease-premium), filter 0.4s ease; }
+    .navbar-brand:hover .brand-logo-img { filter: drop-shadow(0 4px 10px rgba(10, 174, 224, 0.28)) drop-shadow(0 2px 6px rgba(244, 162, 30, 0.18)); }
+
+    .navbar.scrolled .navbar-nav-container { padding: 0.22rem; }
+    .navbar.scrolled .nav-indicator { top: 0.22rem; height: calc(100% - 0.44rem); }
+    .navbar-nav-container { transition: padding 0.35s var(--ease-premium); }
+}
+
+/* Click ripple (spawned by JS at the pointer) */
+.nav-ripple {
+    position: absolute;
+    width: 12px; height: 12px;
+    margin: -6px 0 0 -6px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(10, 174, 224, 0.35), rgba(10, 174, 224, 0) 70%);
+    pointer-events: none;
+    transform: scale(0);
+    animation: navRipple 0.6s var(--ease-premium) forwards;
+    z-index: 0;
+}
+.btn-navbar-cta .nav-ripple { background: radial-gradient(circle, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 70%); }
+@keyframes navRipple { to { transform: scale(14); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .nav-ripple { display: none; } }
+
+/* Mobile drawer: a closed Why Us / Join Us section collapses completely
+   (its padding/border used to peek out as a thin empty strip) */
+@media (max-width: 1024px) {
+    .mega-about-inner { transition: padding 0.35s var(--ease-premium), margin 0.35s var(--ease-premium), border-width 0.35s ease; }
+    .has-dropdown:not(.dropdown-open) .mega-about-inner {
+        padding-top: 0; padding-bottom: 0;
+        margin-top: 0; margin-bottom: 0;
+        border-width: 0;
+    }
+}
+@media (max-width: 1024px) {
+    /* the desktop 232px column width must not become a height in the stacked drawer */
+    .mega-join .mega-about-feature { flex: none; }
+}
+@media (max-width: 1024px) {
+    .mega-join .mega-about-grid { padding: 0; }
+}
