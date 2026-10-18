@@ -169,13 +169,13 @@
         type: 'line',
         data: { labels: data.labels, datasets: [{
             label: 'Inquiries', data: data.data, fill: true, backgroundColor: grad,
-            borderColor: '#1E75B0', borderWidth: 2.5, tension: 0.4,
-            pointRadius: 3, pointHoverRadius: 6, pointBackgroundColor: '#ffffff', pointBorderColor: '#1E75B0', pointBorderWidth: 2,
+            borderColor: '#2A303C', borderWidth: 2.5, tension: 0.4,
+            pointRadius: 3, pointHoverRadius: 6, pointBackgroundColor: '#ffffff', pointBorderColor: '#2A303C', pointBorderWidth: 2,
         }] },
         options: {
             responsive: true, maintainAspectRatio: false, animation: reduce ? false : { duration: 900 },
             interaction: { mode: 'index', intersect: false },
-            plugins: { legend: { display: false }, tooltip: { backgroundColor: '#0B1247', padding: 10, cornerRadius: 10, displayColors: false,
+            plugins: { legend: { display: false }, tooltip: { backgroundColor: '#12151C', padding: 10, cornerRadius: 10, displayColors: false,
                 callbacks: { label: (c) => c.parsed.y + ' inquir' + (c.parsed.y === 1 ? 'y' : 'ies') } } },
             scales: {
                 x: { grid: { display: false }, border: { display: false }, ticks: { maxRotation: 0, autoSkip: true, autoSkipPadding: 12 } },
@@ -189,10 +189,10 @@
         type: 'doughnut',
         data: { labels: data.status_labels, datasets: [{
             data: total ? data.status : [1], borderWidth: 0, hoverOffset: 6,
-            backgroundColor: total ? ['#0AAEE0', '#9BC73B', '#F4A21E', '#1B2585'] : ['#E7ECF4'],
+            backgroundColor: total ? ['#0AAEE0', '#9BC73B', '#F4A21E', '#1F2430'] : ['#E7ECF4'],
         }] },
         options: { responsive: true, maintainAspectRatio: false, cutout: '72%', animation: reduce ? false : undefined,
-            plugins: { legend: { display: false }, tooltip: { enabled: !!total, backgroundColor: '#0B1247', cornerRadius: 10 } } },
+            plugins: { legend: { display: false }, tooltip: { enabled: !!total, backgroundColor: '#12151C', cornerRadius: 10 } } },
     });
 })();
 </script>

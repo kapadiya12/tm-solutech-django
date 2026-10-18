@@ -40,19 +40,35 @@
 })();
 
 document.addEventListener('DOMContentLoaded', function () {
-    // 00. Smooth inertial scrolling (Lenis) — public site only, desktop pointers only,
-    //     never when the visitor prefers reduced motion. Touch devices keep native scrolling.
+    // 00. Smooth scrolling (Lenis), tuned to stay responsive:
+    //     higher lerp = follows the wheel/trackpad closely (no "floaty" lag),
+    //     the frame loop only runs while a scroll is in progress,
+    //     public site + mouse/trackpad only, never for reduced-motion users.
     (function initSmoothScroll() {
         if (!window.Lenis || !document.getElementById('mainNavbar')) return;
         if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
         if (!window.matchMedia('(pointer: fine)').matches) return;
-        const lenis = new window.Lenis({ lerp: 0.1, wheelMultiplier: 1, smoothWheel: true });
+        const lenis = new window.Lenis({
+            lerp: 0.16,
+            wheelMultiplier: 1,
+            smoothWheel: true,
+            syncTouch: false,
+            autoRaf: false,
+        });
         window.tmLenis = lenis;
+        if (!location.hash) lenis.scrollTo(0, { immediate: true, force: true });
+        let frame = 0;
+        let idleFrames = 0;
         function raf(time) {
             lenis.raf(time);
-            requestAnimationFrame(raf);
+            idleFrames = lenis.isScrolling ? 0 : idleFrames + 1;
+            frame = idleFrames > 30 ? 0 : requestAnimationFrame(raf);   // sleep when still
         }
-        requestAnimationFrame(raf);
+        const wake = () => { idleFrames = 0; if (!frame) frame = requestAnimationFrame(raf); };
+        ['wheel', 'keydown', 'pointerdown', 'scroll'].forEach((ev) => window.addEventListener(ev, wake, { passive: true }));
+        const origScrollTo = lenis.scrollTo.bind(lenis);
+        lenis.scrollTo = (...args) => { wake(); return origScrollTo(...args); };
+        wake();
     })();
 
     // 0. Scroll-Reveal System
@@ -1556,3 +1572,14 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 });
+
+// Pause decorative animations in sections that are off-screen (saves GPU on long pages)
+document.addEventListener('DOMContentLoaded', function () {
+    if (!('IntersectionObserver' in window)) return;
+    const io = new IntersectionObserver((entries) => {
+        entries.forEach((e) => e.target.classList.toggle('anim-paused', !e.isIntersecting));
+    }, { rootMargin: '100px 0px' });
+    document.querySelectorAll('.hc, .hero-carousel, .page-hero, .sf, .cta-section, .industries-section, .hero').forEach((el) => io.observe(el));
+});
+// Refresh: make sure we land at the top once everything has loaded
+window.addEventListener('load', function () { if (!location.hash) window.scrollTo(0, 0); });

@@ -5,6 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>/* Refresh / reopen starts at the top (except #section links) */if('scrollRestoration' in history)history.scrollRestoration='manual';if(!location.hash)window.scrollTo(0,0);</script>
     <script>/* Navbar entrance plays once per visit */try{if(sessionStorage.getItem('tmNavIntro'))document.documentElement.classList.add('nav-seen');else sessionStorage.setItem('tmNavIntro','1');}catch(e){document.documentElement.classList.add('nav-seen');}</script>
     <title>{% block title %}{% if page_title %}{{ page_title }} | {% endif %}{% if site_settings %}{{ site_settings.company_name }}{% else %}TM Solutech{% endif %}{% endblock %}</title>
     <meta name="description" content="{% block meta_description %}{% if site_settings %}{{ site_settings.meta_description }}{% else %}TM Solutech - Smart IT Solutions for Modern Businesses{% endif %}{% endblock %}">
@@ -79,7 +80,6 @@
             <button class="btn btn-sm btn-primary cookie-accept">Accept</button>
         </div>
     </div>
-
     <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.20/dist/lenis.min.js"></script>
     <script src="{% static_v 'js/main.js' %}"></script>
     {% block extra_js %}{% endblock %}

@@ -4,13 +4,13 @@
    ========================================================================== */
 .sf {
     position: relative; overflow: hidden; isolation: isolate;
-    background: #050826; color: #A9B4D0;
+    background: #0A0C10; color: #A3A9B6;
     padding-top: 5.5rem;
 }
 /* Flowing spectrum rule along the top edge */
 .sf::before {
     content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; z-index: 3;
-    background: linear-gradient(90deg, #4FCFFF, #0AAEE0, #1B2585, #9BC73B, #FDC943, #E57E27, #4FCFFF);
+    background: linear-gradient(90deg, #4FCFFF, #0AAEE0, #1F2430, #9BC73B, #FDC943, #E57E27, #4FCFFF);
     background-size: 200% 100%;
     animation: sf-flow 8s linear infinite;
 }
@@ -24,7 +24,7 @@
 }
 .sf-aurora span:nth-child(1) {
     width: 520px; height: 520px; top: -220px; left: -120px;
-    background: radial-gradient(circle, rgba(10, 174, 224, 0.55), transparent 65%);
+    background: radial-gradient(circle, rgba(10, 12, 16, 0.5), transparent 65%);
     animation: sf-drift-1 22s ease-in-out infinite alternate;
 }
 .sf-aurora span:nth-child(2) {
@@ -69,7 +69,7 @@
     display: inline-flex; align-items: center; gap: 0.6rem;
     font-size: 0.78rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
     color: #9FE3FF; padding: 0.45rem 0.9rem; border-radius: 999px;
-    background: rgba(10, 174, 224, 0.08); border: 1px solid rgba(79, 207, 255, 0.22);
+    background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.12);
 }
 .sf-pulse { position: relative; width: 8px; height: 8px; border-radius: 50%; background: #9BC73B; }
 .sf-pulse::after {
@@ -98,7 +98,7 @@
     position: relative; overflow: hidden;
     padding: 0.5rem 0.5rem 0.5rem 1.5rem; color: #ffffff;
     background: var(--gradient-primary);
-    box-shadow: 0 18px 40px -18px rgba(10, 174, 224, 0.75);
+    box-shadow: 0 18px 40px -18px rgba(10, 12, 16, 0.5);
 }
 /* Light sweep across the primary button on hover */
 .sf-btn-primary::before {
@@ -109,13 +109,13 @@
 .sf-btn-primary:hover::before { left: 120%; }
 .sf-btn-primary:hover { transform: translateY(-3px); box-shadow: 0 24px 50px -18px rgba(10, 174, 224, 0.9); color: #ffffff; }
 .sf-btn-icon {
-    width: 40px; height: 40px; border-radius: 50%; background: #ffffff; color: #1B2585;
+    width: 40px; height: 40px; border-radius: 50%; background: #ffffff; color: #1F2430;
     display: inline-flex; align-items: center; justify-content: center;
     transition: transform 0.4s var(--ease-premium);
 }
 .sf-btn-primary:hover .sf-btn-icon { transform: rotate(-45deg); }
 .sf-btn-ghost {
-    padding: 0.95rem 1.4rem; color: #E2E8FF;
+    padding: 0.95rem 1.4rem; color: #E6E8EE;
     border: 1px solid rgba(255, 255, 255, 0.16); background: rgba(255, 255, 255, 0.03);
     backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
 }
@@ -134,9 +134,9 @@
     box-shadow: 0 14px 30px -14px rgba(0, 0, 0, 0.6);
     transition: transform 0.4s var(--ease-premium), box-shadow 0.4s ease;
 }
-.sf-logo:hover { transform: translateY(-3px); box-shadow: 0 18px 36px -14px rgba(10, 174, 224, 0.55); }
+.sf-logo:hover { transform: translateY(-3px); box-shadow: 0 18px 36px -14px rgba(10, 12, 16, 0.5); }
 .sf-logo img { height: 38px; width: auto; display: block; }
-.sf-brand p { margin: 1.4rem 0 1.6rem; font-size: 0.92rem; line-height: 1.75; color: #A9B4D0; max-width: 330px; }
+.sf-brand p { margin: 1.4rem 0 1.6rem; font-size: 0.92rem; line-height: 1.75; color: #A3A9B6; max-width: 330px; }
 
 .sf-social { display: flex; flex-wrap: wrap; gap: 0.65rem; }
 .sf-social a {
@@ -163,7 +163,7 @@
 }
 .sf-col ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.85rem; }
 .sf-col ul a {
-    color: #A9B4D0; font-size: 0.93rem; line-height: 1.6; text-decoration: none;
+    color: #A3A9B6; font-size: 0.93rem; line-height: 1.6; text-decoration: none;
     background-image: linear-gradient(90deg, #4FCFFF, #9BC73B);
     background-repeat: no-repeat; background-position: 0 100%; background-size: 0% 1px;
     -webkit-box-decoration-break: clone; box-decoration-break: clone;
@@ -177,14 +177,14 @@
 .sf-contact h4 { margin-bottom: 0.65rem; }
 .sf-contact-card {
     display: flex; align-items: flex-start; gap: 0.85rem; padding: 0.85rem 1rem;
-    border-radius: 14px; text-decoration: none; color: #E2E8FF; font-size: 0.9rem; line-height: 1.5;
+    border-radius: 14px; text-decoration: none; color: #E6E8EE; font-size: 0.9rem; line-height: 1.5;
     border: 1px solid rgba(255, 255, 255, 0.08); background: rgba(255, 255, 255, 0.025);
     transition: border-color 0.3s ease, background 0.3s ease, transform 0.4s var(--ease-premium);
     word-break: break-word;
 }
 .sf-contact-card small {
     display: block; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
-    color: #7C89AD; margin-bottom: 0.15rem;
+    color: #7D8493; margin-bottom: 0.15rem;
 }
 .sf-contact-icon {
     flex-shrink: 0; width: 36px; height: 36px; border-radius: 10px;
@@ -221,7 +221,7 @@
     position: relative; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
     padding: 1.5rem 0 1.75rem; border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
-.sf-bottom p { margin: 0; font-size: 0.85rem; color: #7C89AD; }
+.sf-bottom p { margin: 0; font-size: 0.85rem; color: #7D8493; }
 
 /* ---- Responsive ---- */
 @media (max-width: 1199px) {
