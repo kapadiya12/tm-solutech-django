@@ -19,7 +19,7 @@
                     <td>
                         <div class="flex gap-2">
                             <a href="{% url 'dashboard:page_edit' page.pk %}" class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></a>
-                            <form method="post" action="{% url 'dashboard:page_delete' page.pk %}" onsubmit="return confirm('Delete this page?');">
+                            <form method="post" action="{% url 'dashboard:page_delete' page.pk %}" data-confirm="Delete this page?">
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-sm" style="color: var(--danger);"><i class="fas fa-trash"></i></button>
                             </form>

@@ -8,14 +8,15 @@
 
 {# ---------- Stats ---------- #}
 <div class="iq-stats">
-    <a href="?" class="iq-stat {% if not read_filter and not status_filter %}is-active{% endif %}"><span class="iq-stat-icon"><i class="fas fa-inbox"></i></span><span><strong>{{ stats.total }}</strong>All inquiries</span></a>
-    <a href="?read=unread" class="iq-stat iq-stat-unread {% if read_filter == 'unread' %}is-active{% endif %}"><span class="iq-stat-icon"><i class="fas fa-envelope"></i></span><span><strong>{{ stats.unread }}</strong>Unread</span></a>
-    <a href="?status=new" class="iq-stat iq-stat-open {% if status_filter == 'new' %}is-active{% endif %}"><span class="iq-stat-icon"><i class="fas fa-hourglass-half"></i></span><span><strong>{{ stats.open }}</strong>Open (not closed)</span></a>
-    <div class="iq-stat iq-stat-week"><span class="iq-stat-icon"><i class="fas fa-calendar-week"></i></span><span><strong>{{ stats.week }}</strong>Last 7 days</span></div>
+    <a href="?" class="iq-stat {% if not read_filter and not status_filter %}is-active{% endif %}" data-tip="Every enquiry ever received"><span class="iq-stat-icon"><i class="fas fa-inbox"></i></span><span><strong>{{ stats.total }}</strong>All inquiries</span></a>
+    <a href="?read=unread" class="iq-stat iq-stat-unread {% if read_filter == 'unread' %}is-active{% endif %}" data-tip="Not opened yet. Opening one marks it read"><span class="iq-stat-icon"><i class="fas fa-envelope"></i></span><span><strong>{{ stats.unread }}</strong>Unread</span></a>
+    <a href="?status=new" class="iq-stat iq-stat-open {% if status_filter == 'new' %}is-active{% endif %}" data-tip="Status New, Contacted or In Progress"><span class="iq-stat-icon"><i class="fas fa-hourglass-half"></i></span><span><strong>{{ stats.open }}</strong>Open (not closed)</span></a>
+    <div class="iq-stat iq-stat-week" data-tip="Received in the last 7 days"><span class="iq-stat-icon"><i class="fas fa-calendar-week"></i></span><span><strong>{{ stats.week }}</strong>Last 7 days</span></div>
 </div>
 
 {# ---------- Toolbar ---------- #}
 <form method="get" class="iq-toolbar">
+    {% if inquiries %}<label class="iq-select-all" data-tip="Select all on this page"><input type="checkbox" data-select-all aria-label="Select all on this page"></label>{% endif %}
     <div class="iq-tabs" role="tablist">
         <a href="?{% if status_filter %}status={{ status_filter }}&{% endif %}{% if search %}q={{ search|urlencode }}{% endif %}" class="{% if not read_filter %}is-active{% endif %}">All</a>
         <a href="?read=unread{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search %}&q={{ search|urlencode }}{% endif %}" class="{% if read_filter == 'unread' %}is-active{% endif %}">Unread{% if stats.unread %} <span>{{ stats.unread }}</span>{% endif %}</a>
@@ -44,19 +45,16 @@
         <option value="">Set status…</option>
         {% for value, label in status_choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
     </select>
-    <button type="submit" name="action" value="delete" class="btn btn-sm iq-bulk-delete" onclick="return confirm('Delete the selected inquiries permanently?');"><i class="fas fa-trash"></i> Delete</button>
+    <button type="submit" name="action" value="delete" class="btn btn-sm iq-bulk-delete" data-confirm="All selected enquiries, with their notes, are deleted." data-confirm-title="Delete selected inquiries?" data-confirm-bulk><i class="fas fa-trash"></i> Delete</button>
     <button type="button" class="iq-bulk-cancel" data-bulk-cancel aria-label="Clear selection"><i class="fas fa-xmark"></i></button>
 </form>
 
 {# ---------- List ---------- #}
 <div class="iq-list">
-    {% if inquiries %}
-    <label class="iq-select-all"><input type="checkbox" data-select-all> Select all on this page</label>
-    {% endif %}
     {% for inq in inquiries %}
     <article class="iq-row{% if not inq.is_read %} is-unread{% endif %}" data-id="{{ inq.pk }}" tabindex="0" aria-label="Inquiry from {{ inq.name }}{% if not inq.is_read %}, unread{% endif %}">
         <label class="iq-check" onclick="event.stopPropagation()"><input type="checkbox" name="ids" value="{{ inq.pk }}" form="iqBulk" aria-label="Select inquiry from {{ inq.name }}"></label>
-        <span class="iq-dot" aria-hidden="true"></span>
+        <span class="iq-dot" aria-hidden="true"{% if not inq.is_read %} data-tip="Unread"{% endif %}></span>
         <span class="iq-avatar" aria-hidden="true">{{ inq.name|slice:":1"|upper }}</span>
         <div class="iq-main">
             <div class="iq-line1">
@@ -72,20 +70,20 @@
             <p class="iq-preview">{{ inq.message|truncatechars:160 }}</p>
         </div>
         <div class="iq-side">
-            <time datetime="{{ inq.created_at|date:'c' }}" title="{{ inq.created_at|date:'M d, Y · H:i' }}">{{ inq.created_at|short_ago }}</time>
+            <time datetime="{{ inq.created_at|date:'c' }}" data-tip="{{ inq.created_at|date:'D, M d, Y · H:i' }}">{{ inq.created_at|short_ago }}</time>
             <div class="iq-actions" onclick="event.stopPropagation()">
-                <button type="button" class="iq-act" data-quickview="{{ inq.pk }}" title="Quick view" aria-label="Quick view"><i class="fas fa-eye"></i></button>
+                <button type="button" class="iq-act" data-quickview="{{ inq.pk }}" data-tip="Quick view" aria-label="Quick view"><i class="fas fa-eye"></i></button>
                 <form method="post" action="{% url 'dashboard:inquiry_toggle_read' inq.pk %}" data-toggle-read>
                     {% csrf_token %}
                     <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                    <button type="submit" class="iq-act" title="{% if inq.is_read %}Mark as unread{% else %}Mark as read{% endif %}" aria-label="{% if inq.is_read %}Mark as unread{% else %}Mark as read{% endif %}">
+                    <button type="submit" class="iq-act" data-tip="{% if inq.is_read %}Mark as unread{% else %}Mark as read{% endif %}" aria-label="{% if inq.is_read %}Mark as unread{% else %}Mark as read{% endif %}">
                         <i class="fas {% if inq.is_read %}fa-envelope{% else %}fa-envelope-open{% endif %}"></i>
                     </button>
                 </form>
-                <a href="{% url 'dashboard:inquiry_detail' inq.pk %}" class="iq-act" title="Open full details" aria-label="Open full details"><i class="fas fa-arrow-up-right-from-square"></i></a>
-                <form method="post" action="{% url 'dashboard:inquiry_delete' inq.pk %}" onsubmit="return confirm('Delete this inquiry permanently?');">
+                <a href="{% url 'dashboard:inquiry_detail' inq.pk %}" class="iq-act" data-tip="Open full details" aria-label="Open full details"><i class="fas fa-arrow-up-right-from-square"></i></a>
+                <form method="post" action="{% url 'dashboard:inquiry_delete' inq.pk %}" data-confirm="The enquiry, its notes and status are deleted." data-confirm-name="{{ inq.name }}{% if inq.company %} · {{ inq.company }}{% endif %}" data-confirm-title="Delete this inquiry?">
                     {% csrf_token %}
-                    <button type="submit" class="iq-act iq-act-danger" title="Delete" aria-label="Delete"><i class="fas fa-trash"></i></button>
+                    <button type="submit" class="iq-act iq-act-danger" data-tip="Delete" aria-label="Delete"><i class="fas fa-trash"></i></button>
                 </form>
             </div>
         </div>

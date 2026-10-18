@@ -46,7 +46,8 @@ urlpatterns = [
     path('inquiries/<int:pk>/toggle-read/', views.inquiry_toggle_read, name='inquiry_toggle_read'),
     path('inquiries/bulk/', views.inquiry_bulk, name='inquiry_bulk'),
     # Contact page + social links
-    path('contact-page/', views.contact_page_edit, name='contact_page'),
+    path('contact-page/', views.contact_page_view, name='contact_page'),
+    path('contact-page/edit/', views.contact_page_edit, name='contact_page_edit'),
     path('social-links/', views.social_list, name='social_list'),
     path('social-links/create/', views.social_create, name='social_create'),
     path('social-links/<int:pk>/edit/', views.social_edit, name='social_edit'),

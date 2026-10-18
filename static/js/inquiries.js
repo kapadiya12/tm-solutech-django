@@ -43,7 +43,7 @@
         row.classList.toggle('is-unread', !read);
         const btn = row.querySelector('[data-toggle-read] button');
         if (btn) {
-            btn.title = btn.ariaLabel = read ? 'Mark as unread' : 'Mark as read';
+            btn.dataset.tip = btn.ariaLabel = read ? 'Mark as unread' : 'Mark as read';
             btn.innerHTML = '<i class="fas ' + (read ? 'fa-envelope' : 'fa-envelope-open') + '"></i>';
         }
         if (byId[id]) byId[id].is_read = read;

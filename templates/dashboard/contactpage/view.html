@@ -1,0 +1,209 @@
+{% extends 'dashboard/base.html' %}
+{% load static dash_tags %}
+{% block dashboard_content %}
+
+<div class="cpv-head">
+    <div>
+        <p class="cpv-sub">What visitors see on <a href="{% url 'contact:contact' %}" target="_blank" rel="noopener">/contact/</a>. Last changed {{ cp.updated_at|short_ago }}.</p>
+    </div>
+    <div class="cpv-head-actions">
+        <a href="{% url 'contact:contact' %}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-up-right-from-square"></i> View live page</a>
+        <a href="{% url 'dashboard:contact_page_edit' %}" class="btn btn-primary btn-sm"><i class="fas fa-pen"></i> Edit page</a>
+    </div>
+</div>
+
+{# Status at a glance #}
+<div class="cpv-stats">
+    <a href="{% url 'contact:contact' %}" target="_blank" rel="noopener" class="cpv-stat" data-tip="Open the live Contact page">
+        <span class="cpv-stat-ic"><i class="fas fa-circle-check"></i></span>
+        <span><strong>Live</strong>Page status</span>
+    </a>
+    <div class="cpv-stat cpv-stat-sec" data-tip="Details card, social card and map">
+        <span class="cpv-stat-ic"><i class="fas fa-layer-group"></i></span>
+        <span><strong>{{ sections_visible }} / 5</strong>Sections visible</span>
+    </div>
+    <a href="{% url 'dashboard:social_list' %}" class="cpv-stat cpv-stat-soc" data-tip="Icons shown in the Follow card">
+        <span class="cpv-stat-ic"><i class="fas fa-share-nodes"></i></span>
+        <span><strong>{{ socials|length }}</strong>Social icons</span>
+    </a>
+    <a href="{% url 'dashboard:inquiry_list' %}" class="cpv-stat cpv-stat-inq" data-tip="{{ awaiting }} still awaiting a reply">
+        <span class="cpv-stat-ic"><i class="fas fa-envelope-open-text"></i></span>
+        <span><strong>{{ month_enquiries }}</strong>Enquiries · 30 days</span>
+    </a>
+</div>
+
+<div class="cpv-grid">
+
+    {# 1 · Form #}
+    <section class="cpv-card">
+        <header class="cpv-card-head">
+            <span class="cpv-num">1</span>
+            <div><h3>Form</h3><p>Heading and wording around the enquiry form</p></div>
+            <a href="{% url 'dashboard:contact_page_edit' %}#sec-form" class="cpv-edit" data-tip="Edit form wording"><i class="fas fa-pen"></i> Edit</a>
+        </header>
+        <div class="cpv-preview cpv-form-preview">
+            <span class="cpv-eyebrow"><i class="fas fa-paper-plane"></i> Get in touch</span>
+            <h4>{{ cp.form_heading }} <span class="cpv-grad">{{ cp.form_heading_highlight }}</span></h4>
+            <p class="cpv-muted">Page subtitle: “{{ cp.page_subtitle }}”</p>
+        </div>
+        <dl class="cpv-list">
+            <div><dt>Message label</dt><dd>{{ cp.message_placeholder }}</dd></div>
+            <div><dt>Button</dt><dd><span class="cpv-btn-chip"><i class="fas fa-paper-plane"></i> {{ cp.submit_label }}</span></dd></div>
+            <div><dt>Default phone country</dt><dd data-country="{{ cp.default_country }}">{{ cp.default_country }}</dd></div>
+            <div><dt>Consent text</dt><dd>{{ cp.consent_text }} <u>privacy policy</u>.</dd></div>
+            <div><dt>Privacy note</dt><dd>{{ cp.privacy_note|default:"—" }}</dd></div>
+            <div><dt>After sending</dt><dd><strong>{{ cp.success_title }}</strong> · {{ cp.success_message }}</dd></div>
+        </dl>
+    </section>
+
+    {# 2 · Reply card #}
+    <section class="cpv-card">
+        <header class="cpv-card-head">
+            <span class="cpv-num">2</span>
+            <div><h3>Reply card</h3><p>The dark card at the top right of the page</p></div>
+            <a href="{% url 'dashboard:contact_page_edit' %}#sec-reply" class="cpv-edit" data-tip="Edit reply card"><i class="fas fa-pen"></i> Edit</a>
+        </header>
+        <div class="cpv-reply">
+            <span class="cpv-reply-icon"><i class="fas fa-reply"></i></span>
+            <h4>{{ cp.reply_title }} <span>{{ cp.reply_time }}</span></h4>
+            {% if cp.reply_text %}<p>{{ cp.reply_text }}</p>{% endif %}
+            {% if cp.reply_steps %}
+            <ol>
+                {% for step in cp.reply_steps %}<li><span>{{ forloop.counter }}</span><div><strong>{{ step.title }}</strong> {{ step.text }}</div></li>{% endfor %}
+            </ol>
+            {% else %}<p class="cpv-empty">No steps added.</p>{% endif %}
+        </div>
+    </section>
+
+    {# 3 · Details & hours #}
+    <section class="cpv-card">
+        <header class="cpv-card-head">
+            <span class="cpv-num">3</span>
+            <div><h3>Details &amp; office hours</h3><p>Phone, email and address come from <a href="{% url 'dashboard:site_settings' %}">Site Settings</a></p></div>
+            <a href="{% url 'dashboard:contact_page_edit' %}#sec-hours" class="cpv-edit" data-tip="Edit hours"><i class="fas fa-pen"></i> Edit</a>
+        </header>
+        <div class="cpv-chips">
+            <span class="cpv-chip {% if cp.show_details %}is-on{% else %}is-off{% endif %}"><i class="fas {% if cp.show_details %}fa-eye{% else %}fa-eye-slash{% endif %}"></i> Details card {% if cp.show_details %}shown{% else %}hidden{% endif %}</span>
+            <span class="cpv-chip {% if cp.show_open_status %}is-on{% else %}is-off{% endif %}"><i class="fas fa-circle"></i> “Open now” badge {% if cp.show_open_status %}on{% else %}off{% endif %}</span>
+        </div>
+        <ul class="cpv-details">
+            <li><span class="cpv-ic"><i class="fas fa-phone"></i></span><div><small>Call us</small>{{ site.phone }}</div></li>
+            <li><span class="cpv-ic"><i class="fas fa-envelope"></i></span><div><small>Email us</small>{{ site.email }}</div></li>
+            <li><span class="cpv-ic"><i class="fas fa-clock"></i></span><div><small>Office hours</small>{{ cp.office_hours_label }}</div></li>
+            <li><span class="cpv-ic"><i class="fas fa-location-dot"></i></span><div><small>Visit us</small>{{ site.address }}</div></li>
+        </ul>
+    </section>
+
+    {# 4 · Socials & map #}
+    <section class="cpv-card">
+        <header class="cpv-card-head">
+            <span class="cpv-num">4</span>
+            <div><h3>Socials &amp; map</h3><p>Icons are managed in <a href="{% url 'dashboard:social_list' %}">Social Links</a></p></div>
+            <a href="{% url 'dashboard:contact_page_edit' %}#sec-social" class="cpv-edit" data-tip="Edit socials &amp; map"><i class="fas fa-pen"></i> Edit</a>
+        </header>
+        <div class="cpv-chips">
+            <span class="cpv-chip {% if cp.show_socials %}is-on{% else %}is-off{% endif %}"><i class="fas {% if cp.show_socials %}fa-eye{% else %}fa-eye-slash{% endif %}"></i> Social card {% if cp.show_socials %}shown{% else %}hidden{% endif %}</span>
+            <span class="cpv-chip {% if cp.show_map %}is-on{% else %}is-off{% endif %}"><i class="fas {% if cp.show_map %}fa-map{% else %}fa-eye-slash{% endif %}"></i> Map {% if cp.show_map %}shown{% else %}hidden{% endif %}</span>
+        </div>
+        <dl class="cpv-list">
+            <div><dt>Social card title</dt><dd>{{ cp.socials_title }}</dd></div>
+            <div><dt>Social icons</dt><dd>
+                {% if socials %}<span class="cpv-socials">{% for s in socials %}<span class="cpv-soc" style="--soc: {{ s.brand_color }}" data-tip="{{ s.display_label }}"><i class="{{ s.icon_class }}"></i></span>{% endfor %}</span>
+                {% else %}<span class="cpv-empty">None on the Contact page. <a href="{% url 'dashboard:social_create' %}">Add one</a></span>{% endif %}
+            </dd></div>
+            <div><dt>Map heading</dt><dd>{{ cp.map_heading }} <span class="cpv-grad">{{ cp.map_heading_highlight }}</span></dd></div>
+        </dl>
+    </section>
+
+    {# 5 · Email #}
+    <section class="cpv-card cpv-card-wide">
+        <header class="cpv-card-head">
+            <span class="cpv-num">5</span>
+            <div><h3>Email</h3><p>What happens when someone sends the form</p></div>
+            <a href="{% url 'dashboard:contact_page_edit' %}#sec-email" class="cpv-edit" data-tip="Edit email settings"><i class="fas fa-pen"></i> Edit</a>
+        </header>
+        <div class="cpv-flow">
+            <div class="cpv-flow-step"><span class="cpv-ic"><i class="fas fa-inbox"></i></span><div><small>Saved to</small><a href="{% url 'dashboard:inquiry_list' %}">Inquiries</a></div></div>
+            <i class="fas fa-arrow-right cpv-flow-arrow" aria-hidden="true"></i>
+            <div class="cpv-flow-step"><span class="cpv-ic"><i class="fas fa-bell"></i></span><div><small>Team email sent to</small>{{ cp.notify_email|default:default_inbox }}{% if not cp.notify_email %} <em>(site default)</em>{% endif %}</div></div>
+            <i class="fas fa-arrow-right cpv-flow-arrow" aria-hidden="true"></i>
+            <div class="cpv-flow-step"><span class="cpv-ic {% if not cp.send_acknowledgement %}is-off{% endif %}"><i class="fas fa-envelope-circle-check"></i></span><div><small>Visitor confirmation</small>{% if cp.send_acknowledgement %}Sent automatically{% else %}Off{% endif %}</div></div>
+        </div>
+    </section>
+</div>
+
+<link rel="stylesheet" href="{% static 'css/inquiries.css' %}">
+<style>
+.cpv-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+.cpv-sub { margin: 0; color: var(--gray-500); font-size: 0.9rem; }
+.cpv-head-actions { display: flex; gap: 0.5rem; }
+.cpv-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.8rem; margin-bottom: 1.25rem; }
+.cpv-stat { display: flex; align-items: center; gap: 0.8rem; padding: 0.95rem 1rem; border-radius: 16px; background: #fff; border: 1px solid var(--gray-200); font-size: 0.8rem; color: var(--gray-600); transition: border-color .2s, transform .2s, box-shadow .2s; }
+a.cpv-stat:hover { transform: translateY(-1px); border-color: rgba(27,37,133,.2); box-shadow: 0 12px 24px -20px rgba(17,26,94,.5); color: var(--gray-700); }
+.cpv-stat strong { display: block; font-family: var(--font-heading); font-size: 1.3rem; line-height: 1.15; color: var(--gray-900); }
+.cpv-stat-ic { width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; color: #1C7A52; background: rgba(34,160,107,.12); }
+.cpv-stat-sec .cpv-stat-ic { color: #1E75B0; background: rgba(30,117,176,.1); }
+.cpv-stat-soc .cpv-stat-ic { color: #1B2585; background: rgba(27,37,133,.08); }
+.cpv-stat-inq .cpv-stat-ic { color: #B45F10; background: rgba(244,162,30,.15); }
+@media (max-width: 1100px) { .cpv-stats { grid-template-columns: repeat(2, 1fr); } }
+.cpv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; align-items: start; }
+.cpv-card { padding: 1.3rem 1.4rem; border-radius: 18px; background: #fff; border: 1px solid var(--gray-200); box-shadow: 0 12px 30px -26px rgba(17,26,94,.45); }
+.cpv-card-wide { grid-column: 1 / -1; }
+.cpv-card-head { display: flex; align-items: flex-start; gap: 0.8rem; padding-bottom: 0.9rem; margin-bottom: 1rem; border-bottom: 1px solid var(--gray-100); }
+.cpv-card-head > div { flex: 1; min-width: 0; }
+.cpv-card-head h3 { margin: 0 0 0.15rem; font-size: 1.02rem; }
+.cpv-card-head p { margin: 0; font-size: 0.8rem; color: var(--gray-500); }
+.cpv-num { width: 32px; height: 32px; border-radius: 10px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; color: #fff; background: linear-gradient(135deg, #0AAEE0, #1B2585); }
+.cpv-card:nth-child(3n+2) .cpv-num { background: linear-gradient(135deg, #9BC73B, #4E6A1F); }
+.cpv-card:nth-child(3n) .cpv-num { background: linear-gradient(135deg, #FDC943, #E57E27); }
+.cpv-edit { flex-shrink: 0; display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.75rem; border-radius: 9px; font-size: 0.8rem; font-weight: 700; color: #1B2585; background: #EEF2FA; transition: background .2s, color .2s; }
+.cpv-edit:hover { color: #fff; background: #1B2585; }
+.cpv-preview { padding: 1rem 1.1rem; margin-bottom: 1rem; border-radius: 14px; background: #F7F9FC; border: 1px dashed var(--gray-200); }
+.cpv-eyebrow { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.25rem 0.6rem; border-radius: 999px; font-size: 0.66rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #1B2585; background: #E8EEFA; }
+.cpv-preview h4 { margin: 0.5rem 0 0.3rem; font-size: 1.35rem; }
+.cpv-grad { background: linear-gradient(90deg, #0AAEE0, #9BC73B, #E57E27); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.cpv-muted { margin: 0; font-size: 0.8rem; color: var(--gray-500); }
+.cpv-list { margin: 0; display: flex; flex-direction: column; }
+.cpv-list > div { display: grid; grid-template-columns: 150px 1fr; gap: 0.75rem; padding: 0.55rem 0; border-bottom: 1px solid var(--gray-100); }
+.cpv-list > div:last-child { border-bottom: 0; }
+.cpv-list dt { font-size: 0.78rem; font-weight: 600; color: var(--gray-500); }
+.cpv-list dd { margin: 0; font-size: 0.88rem; color: var(--gray-900); word-break: break-word; }
+.cpv-btn-chip { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.8rem; border-radius: 999px; font-size: 0.8rem; font-weight: 700; color: #fff; background: linear-gradient(135deg, #0AAEE0, #1B2585); }
+.cpv-reply { padding: 1.2rem 1.25rem; border-radius: 16px; color: rgba(226,232,255,.88); background: linear-gradient(150deg, #111A5E, #1B2585 55%, #1E75B0); }
+.cpv-reply-icon { width: 38px; height: 38px; border-radius: 11px; display: inline-flex; align-items: center; justify-content: center; color: #FDC943; background: rgba(255,255,255,.1); }
+.cpv-reply h4 { margin: 0.75rem 0 0.3rem; color: #fff; font-size: 1.15rem; }
+.cpv-reply h4 span { background: linear-gradient(90deg, #4FCFFF, #9BC73B, #FDC943); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.cpv-reply > p { margin: 0 0 0.8rem; font-size: 0.84rem; color: rgba(226,232,255,.88); }
+.cpv-reply ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.55rem; }
+.cpv-reply li { display: flex; gap: 0.65rem; font-size: 0.82rem; }
+.cpv-reply li > span { width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: #111A5E; background: #fff; }
+.cpv-reply strong { color: #fff; }
+.cpv-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.9rem; }
+.cpv-chip { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.7rem; border-radius: 999px; font-size: 0.76rem; font-weight: 700; }
+.cpv-chip.is-on { color: #1C7A52; background: rgba(34,160,107,.12); }
+.cpv-chip.is-off { color: #6B7280; background: #F1F3F8; }
+.cpv-chip .fa-circle { font-size: 0.45rem; }
+.cpv-details { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+.cpv-details li, .cpv-flow-step { display: flex; align-items: center; gap: 0.75rem; font-size: 0.88rem; color: var(--gray-900); }
+.cpv-details small, .cpv-flow-step small { display: block; font-size: 0.66rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--gray-500); }
+.cpv-ic { width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; font-size: 0.82rem; color: #1E75B0; background: rgba(30,117,176,.09); }
+.cpv-ic.is-off { color: #9CA3AF; background: #F1F3F8; }
+.cpv-socials { display: inline-flex; gap: 0.4rem; }
+.cpv-soc { width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: #fff; background: var(--soc); font-size: 0.8rem; }
+.cpv-empty { color: var(--gray-500); font-size: 0.84rem; }
+.cpv-flow { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.cpv-flow-step { flex: 1; min-width: 220px; padding: 0.8rem 0.9rem; border-radius: 14px; background: #F7F9FC; }
+.cpv-flow-step em { color: var(--gray-500); font-style: normal; font-size: 0.78rem; }
+.cpv-flow-arrow { color: var(--gray-400); }
+@media (max-width: 1100px) { .cpv-grid { grid-template-columns: 1fr; } }
+@media (max-width: 640px) { .cpv-list > div { grid-template-columns: 1fr; gap: 0.2rem; } .cpv-flow-arrow { display: none; } }
+</style>
+<script>
+/* Country code → full name */
+(function () {
+    if (!window.Intl || !Intl.DisplayNames) return;
+    const names = new Intl.DisplayNames(['en'], { type: 'region' });
+    document.querySelectorAll('[data-country]').forEach((el) => { try { el.textContent = names.of(el.dataset.country) + ' (' + el.dataset.country + ')'; } catch (e) {} });
+})();
+</script>
+{% endblock %}

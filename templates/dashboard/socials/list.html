@@ -1,79 +1,196 @@
 {% extends 'dashboard/base.html' %}
+{% load static %}
 {% block dashboard_content %}
-<div class="flex-between mb-8">
-    <div>
-        <h2>{{ page_title }}</h2>
-        <p style="margin:0.25rem 0 0;color:var(--gray-500);font-size:0.88rem;">Shown in the site footer and on the Contact page. Drag <i class="fas fa-grip-vertical"></i> to reorder.</p>
-    </div>
+
+<div class="sl-head">
+    <p>Your profiles shown in the website footer and on the Contact page.</p>
     <a href="{% url 'dashboard:social_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add social link</a>
 </div>
 
-<div class="dashboard-card">
-    {% if links %}
-    <ul class="sl-list" id="slList">
-        {% for link in links %}
-        <li class="sl-row" draggable="true" data-id="{{ link.pk }}">
-            <span class="sl-grip" aria-hidden="true"><i class="fas fa-grip-vertical"></i></span>
-            <span class="sl-icon" style="--soc: {{ link.brand_color }}"><i class="{{ link.icon_class }}"></i></span>
-            <div class="sl-body">
-                <strong>{{ link.display_label }}</strong>
-                <a href="{{ link.url }}" target="_blank" rel="noopener">{{ link.url|truncatechars:60 }}</a>
-            </div>
-            <div class="sl-tags">
-                {% if not link.is_active %}<span class="status-badge status-draft">Hidden</span>{% else %}
-                {% if link.show_in_footer %}<span class="status-badge status-active">Footer</span>{% endif %}
-                {% if link.show_on_contact %}<span class="status-badge status-active">Contact</span>{% endif %}
-                {% endif %}
-            </div>
-            <div class="flex gap-2">
-                <a href="{% url 'dashboard:social_edit' link.pk %}" class="btn btn-sm btn-secondary" aria-label="Edit {{ link.display_label }}"><i class="fas fa-edit"></i></a>
-                <form method="post" action="{% url 'dashboard:social_delete' link.pk %}" onsubmit="return confirm('Remove {{ link.display_label|escapejs }}?');">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-sm" style="color: var(--danger);" aria-label="Remove {{ link.display_label }}"><i class="fas fa-trash"></i></button>
-                </form>
-            </div>
-        </li>
-        {% endfor %}
-    </ul>
-    <form method="post" id="slOrderForm" hidden>{% csrf_token %}<input type="hidden" name="order" id="slOrder"></form>
-    {% else %}
-    <div class="text-center" style="padding:2.5rem 1rem;">
-        <p style="color:var(--gray-500);">No social links yet.</p>
-        <a href="{% url 'dashboard:social_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add your first link</a>
-    </div>
-    {% endif %}
+{# ---------- Stats ---------- #}
+<div class="sl-stats">
+    <div class="sl-stat" data-tip="Every link, including hidden ones"><span class="sl-stat-ic"><i class="fas fa-share-nodes"></i></span><span><strong>{{ stats.total }}</strong>Total links</span></div>
+    <div class="sl-stat sl-stat-live" data-tip="Active links visible on the site"><span class="sl-stat-ic"><i class="fas fa-signal"></i></span><span><strong>{{ stats.live }}</strong>Live</span></div>
+    <div class="sl-stat sl-stat-footer" data-tip="Shown in the footer of every page"><span class="sl-stat-ic"><i class="fas fa-table-columns"></i></span><span><strong>{{ stats.footer }}</strong>In footer</span></div>
+    <div class="sl-stat sl-stat-contact" data-tip="Shown in the Follow card on /contact/"><span class="sl-stat-ic"><i class="fas fa-address-card"></i></span><span><strong>{{ stats.contact }}</strong>On Contact page</span></div>
 </div>
 
+{# ---------- Live previews ---------- #}
+<div class="sl-previews">
+    <section class="sl-prev sl-prev-footer">
+        <header><span><i class="fas fa-table-columns"></i> Footer preview</span><small>Every page</small></header>
+        <div class="sl-prev-stage sl-prev-dark">
+            <div class="sl-prev-brand">{{ site.company_name|default:"TM Solutech" }}</div>
+            <div class="sl-prev-footer-icons">
+                {% for s in footer_links %}<span class="sl-fi" style="--soc: {{ s.brand_color }}" data-tip="{{ s.display_label }}"><i class="{{ s.icon_class }}"></i></span>
+                {% empty %}<span class="sl-prev-empty">No icons in the footer</span>{% endfor %}
+            </div>
+        </div>
+    </section>
+    <section class="sl-prev">
+        <header><span><i class="fas fa-address-card"></i> Contact page preview</span><a href="{% url 'contact:contact' %}" target="_blank" rel="noopener">Open <i class="fas fa-arrow-up-right-from-square"></i></a></header>
+        <div class="sl-prev-stage">
+            <strong class="sl-prev-title">{{ socials_title }}</strong>
+            <div class="sl-prev-pills">
+                {% for s in contact_links %}<span class="sl-pill" style="--soc: {{ s.brand_color }}"><i class="{{ s.icon_class }}"></i>{{ s.display_label }}</span>
+                {% empty %}<span class="sl-prev-empty">No icons on the Contact page</span>{% endfor %}
+            </div>
+        </div>
+    </section>
+</div>
+
+{# ---------- Cards ---------- #}
+{% if links %}
+<div class="sl-bar">
+    <h3>All links</h3>
+    <span class="sl-hint"><i class="fas fa-grip-vertical"></i> Drag cards to change the order</span>
+</div>
+<ul class="sl-grid" id="slList">
+    {% for link in links %}
+    <li class="sl-card{% if not link.is_active %} is-hidden{% endif %}" draggable="true" data-id="{{ link.pk }}" style="--soc: {{ link.brand_color }}">
+        <div class="sl-card-top">
+            <span class="sl-order" data-tip="Position {{ forloop.counter }}">{{ forloop.counter }}</span>
+            <span class="sl-grip" aria-hidden="true" data-tip="Drag to reorder"><i class="fas fa-grip-vertical"></i></span>
+            <span class="sl-big-icon"><i class="{{ link.icon_class }}"></i></span>
+            {% if not link.is_active %}<span class="sl-ribbon">Hidden</span>{% endif %}
+        </div>
+        <div class="sl-card-body">
+            <h4>{{ link.display_label }}</h4>
+            <p class="sl-platform">{% if link.label and link.label != link.get_platform_display %}{{ link.get_platform_display }} profile · custom label{% else %}{{ link.get_platform_display }} profile{% endif %}</p>
+            <div class="sl-url">
+                <i class="fas fa-link" aria-hidden="true"></i>
+                <span title="{{ link.url }}">{{ link.url|cut:"https://"|cut:"http://"|cut:"www." }}</span>
+                <button type="button" class="sl-mini" data-copy="{{ link.url }}" data-tip="Copy link" aria-label="Copy link"><i class="far fa-copy"></i></button>
+                <a href="{{ link.url }}" target="_blank" rel="noopener" class="sl-mini" data-tip="Open profile" aria-label="Open profile"><i class="fas fa-arrow-up-right-from-square"></i></a>
+            </div>
+            <div class="sl-places">
+                <span class="sl-place {% if link.is_active and link.show_in_footer %}is-on{% endif %}"><i class="fas {% if link.is_active and link.show_in_footer %}fa-check{% else %}fa-xmark{% endif %}"></i> Footer</span>
+                <span class="sl-place {% if link.is_active and link.show_on_contact %}is-on{% endif %}"><i class="fas {% if link.is_active and link.show_on_contact %}fa-check{% else %}fa-xmark{% endif %}"></i> Contact page</span>
+            </div>
+        </div>
+        <div class="sl-card-actions">
+            <a href="{% url 'dashboard:social_edit' link.pk %}" class="sl-act" aria-label="Edit {{ link.display_label }}"><i class="fas fa-pen"></i> Edit</a>
+            <form method="post" action="{% url 'dashboard:social_delete' link.pk %}" data-confirm="The icon disappears from the footer and Contact page." data-confirm-name="{{ link.display_label }}" data-confirm-title="Remove social link?" data-confirm-action="Remove">
+                {% csrf_token %}
+                <button type="submit" class="sl-act sl-act-danger" aria-label="Remove {{ link.display_label }}"><i class="fas fa-trash-can"></i></button>
+            </form>
+        </div>
+    </li>
+    {% endfor %}
+    <li class="sl-card sl-add">
+        <a href="{% url 'dashboard:social_create' %}"><span><i class="fas fa-plus"></i></span>Add another link<small>LinkedIn, Instagram, X, YouTube, WhatsApp…</small></a>
+    </li>
+</ul>
+<form method="post" id="slOrderForm" hidden>{% csrf_token %}<input type="hidden" name="order" id="slOrder"></form>
+{% else %}
+<div class="sl-empty-state">
+    <span class="sl-empty-icon"><i class="fas fa-share-nodes"></i></span>
+    <h3>No social links yet</h3>
+    <p>Add LinkedIn, Instagram, YouTube or WhatsApp and they appear in the footer and on the Contact page.</p>
+    <a href="{% url 'dashboard:social_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add your first link</a>
+</div>
+{% endif %}
+
+<link rel="stylesheet" href="{% static 'css/inquiries.css' %}">
 <style>
-.sl-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
-.sl-row { display: flex; align-items: center; gap: 0.9rem; padding: 0.75rem 0.9rem; border-radius: 14px; border: 1px solid var(--gray-200); background: #fff; transition: box-shadow .2s, border-color .2s, opacity .2s; }
-.sl-row:hover { border-color: rgba(27,37,133,.18); box-shadow: 0 10px 24px -18px rgba(17,26,94,.45); }
-.sl-row.is-dragging { opacity: .45; }
-.sl-grip { color: var(--gray-400); cursor: grab; padding: 0 .2rem; }
-.sl-icon { width: 40px; height: 40px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; color: #fff; background: var(--soc); flex-shrink: 0; }
-.sl-body { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-.sl-body a { font-size: .82rem; color: var(--gray-500); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.sl-tags { display: flex; gap: .35rem; flex-wrap: wrap; }
-@media (max-width: 640px) { .sl-tags { display: none; } }
+.sl-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+.sl-head p { margin: 0; color: var(--gray-500); font-size: 0.9rem; }
+.sl-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.8rem; margin-bottom: 1.25rem; }
+.sl-stat { display: flex; align-items: center; gap: 0.8rem; padding: 0.95rem 1rem; border-radius: 16px; background: #fff; border: 1px solid var(--gray-200); font-size: 0.8rem; color: var(--gray-600); }
+.sl-stat strong { display: block; font-family: var(--font-heading); font-size: 1.4rem; line-height: 1.1; color: var(--gray-900); }
+.sl-stat-ic { width: 40px; height: 40px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; color: #1E75B0; background: rgba(30,117,176,.1); flex-shrink: 0; }
+.sl-stat-live .sl-stat-ic { color: #1C7A52; background: rgba(34,160,107,.12); }
+.sl-stat-footer .sl-stat-ic { color: #1B2585; background: rgba(27,37,133,.08); }
+.sl-stat-contact .sl-stat-ic { color: #B45F10; background: rgba(244,162,30,.15); }
+
+.sl-previews { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+.sl-prev { border-radius: 18px; background: #fff; border: 1px solid var(--gray-200); overflow: hidden; }
+.sl-prev header { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; font-size: 0.8rem; font-weight: 700; color: var(--gray-700); border-bottom: 1px solid var(--gray-100); }
+.sl-prev header i { margin-right: 0.35rem; color: #1E75B0; }
+.sl-prev header small, .sl-prev header a { font-weight: 600; color: var(--gray-500); }
+.sl-prev header a:hover { color: #1B2585; }
+.sl-prev-stage { min-height: 112px; display: flex; flex-direction: column; justify-content: center; gap: 0.7rem; padding: 1.1rem 1.2rem; background: #F7F9FC; }
+.sl-prev-dark { background: linear-gradient(135deg, #070B2E, #111A5E); }
+.sl-prev-brand { font-family: var(--font-heading); font-weight: 700; color: #fff; font-size: 0.95rem; }
+.sl-prev-footer-icons, .sl-prev-pills { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.sl-fi { width: 36px; height: 36px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: #fff; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14); transition: background .2s; }
+.sl-fi:hover { background: var(--soc); }
+.sl-prev-title { font-family: var(--font-heading); font-size: 0.95rem; color: var(--gray-900); }
+.sl-pill { display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.3rem 0.75rem 0.3rem 0.35rem; border-radius: 999px; border: 1px solid var(--gray-200); background: #fff; font-size: 0.8rem; font-weight: 600; }
+.sl-pill i { width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: #fff; background: var(--soc); font-size: 0.72rem; }
+.sl-prev-empty { font-size: 0.82rem; color: var(--gray-500); }
+.sl-prev-dark .sl-prev-empty { color: rgba(226,232,255,.6); }
+
+.sl-bar { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.75rem; }
+.sl-bar h3 { margin: 0; font-size: 1rem; }
+.sl-hint { font-size: 0.78rem; color: var(--gray-500); }
+.sl-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+.sl-card { position: relative; display: flex; flex-direction: column; border-radius: 18px; background: #fff; border: 1px solid var(--gray-200); overflow: hidden; transition: transform .25s cubic-bezier(.16,1,.3,1), box-shadow .25s, opacity .2s; }
+.sl-card:hover { transform: translateY(-2px); box-shadow: 0 20px 36px -26px rgba(17,26,94,.55); }
+.sl-card.is-dragging { opacity: .4; }
+.sl-card.is-hidden { opacity: .7; }
+.sl-card.is-hidden .sl-card-top { filter: grayscale(.8); }
+.sl-card-top { position: relative; height: 92px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--soc), color-mix(in srgb, var(--soc) 55%, #0B1040)); }
+.sl-card-top::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 80% 0%, rgba(255,255,255,.28), transparent 55%); }
+.sl-big-icon { position: relative; z-index: 1; width: 56px; height: 56px; border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #fff; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.28); backdrop-filter: blur(4px); }
+.sl-order { position: absolute; left: 12px; top: 12px; z-index: 2; min-width: 24px; height: 24px; padding: 0 0.35rem; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 800; color: #fff; background: rgba(0,0,0,.22); }
+.sl-grip { position: absolute; right: 12px; top: 12px; z-index: 2; color: rgba(255,255,255,.85); cursor: grab; }
+.sl-ribbon { position: absolute; right: 12px; bottom: 10px; z-index: 2; padding: 0.15rem 0.55rem; border-radius: 999px; font-size: 0.68rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #fff; background: rgba(0,0,0,.4); }
+.sl-card-body { flex: 1; padding: 1rem 1.1rem 0.6rem; }
+.sl-card-body h4 { margin: 0; font-size: 1.02rem; }
+.sl-platform { margin: 0.1rem 0 0.75rem; font-size: 0.78rem; color: var(--gray-500); }
+.sl-url { display: flex; align-items: center; gap: 0.4rem; padding: 0.45rem 0.45rem 0.45rem 0.7rem; border-radius: 10px; background: #F7F9FC; font-size: 0.8rem; color: var(--gray-700); }
+.sl-url > i { color: var(--gray-400); font-size: 0.72rem; }
+.sl-url span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sl-mini { width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--gray-200); background: #fff; color: var(--gray-500); font-size: 0.72rem; cursor: pointer; }
+.sl-mini:hover { color: #1B2585; border-color: rgba(27,37,133,.3); }
+.sl-places { display: flex; gap: 0.4rem; margin-top: 0.75rem; }
+.sl-place { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.25rem 0.6rem; border-radius: 999px; font-size: 0.72rem; font-weight: 700; color: #9CA3AF; background: #F3F4F6; }
+.sl-place.is-on { color: #1C7A52; background: rgba(34,160,107,.12); }
+.sl-card-actions { display: flex; gap: 0.5rem; padding: 0.6rem 1.1rem 1rem; }
+.sl-card-actions form { margin: 0; }
+.sl-act { height: 36px; display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; padding: 0 0.9rem; border-radius: 10px; border: 1px solid var(--gray-200); background: #fff; font: inherit; font-size: 0.82rem; font-weight: 700; color: #1B2585; cursor: pointer; transition: all .2s; }
+.sl-card-actions > a.sl-act { flex: 1; }
+.sl-act:hover { color: #fff; background: #1B2585; border-color: #1B2585; }
+.sl-act-danger { width: 36px; padding: 0; color: #D1343A; }
+.sl-act-danger:hover { background: #E5484D; border-color: #E5484D; }
+.sl-add { border-style: dashed; background: transparent; }
+.sl-add a { flex: 1; min-height: 260px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.4rem; font-weight: 700; color: #1B2585; }
+.sl-add a span { width: 48px; height: 48px; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; color: #fff; background: linear-gradient(135deg, #0AAEE0, #1B2585); margin-bottom: 0.3rem; }
+.sl-add a small { font-weight: 500; font-size: 0.76rem; color: var(--gray-500); }
+.sl-add:hover { border-color: #1B2585; }
+.sl-empty-state { padding: 3rem 1rem; text-align: center; border-radius: 18px; background: #fff; border: 1px dashed var(--gray-200); }
+.sl-empty-icon { width: 60px; height: 60px; margin: 0 auto 0.8rem; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: #fff; background: linear-gradient(135deg, #0AAEE0, #1B2585); }
+.sl-empty-state h3 { margin: 0 0 0.3rem; }
+.sl-empty-state p { margin: 0 auto 1rem; max-width: 420px; color: var(--gray-500); }
+@media (max-width: 1100px) { .sl-stats { grid-template-columns: repeat(2, 1fr); } .sl-previews { grid-template-columns: 1fr; } }
 </style>
 <script>
 (function () {
     const list = document.getElementById('slList');
-    if (!list) return;
-    let dragging = null;
-    list.addEventListener('dragstart', (e) => { dragging = e.target.closest('.sl-row'); dragging.classList.add('is-dragging'); e.dataTransfer.effectAllowed = 'move'; });
-    list.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        const over = e.target.closest('.sl-row');
-        if (!over || over === dragging) return;
-        const r = over.getBoundingClientRect();
-        over.parentNode.insertBefore(dragging, e.clientY > r.top + r.height / 2 ? over.nextSibling : over);
-    });
-    list.addEventListener('dragend', () => {
-        dragging.classList.remove('is-dragging');
-        document.getElementById('slOrder').value = Array.from(list.children).map((li) => li.dataset.id).join(',');
-        document.getElementById('slOrderForm').submit();
-    });
+    if (list) {
+        let dragging = null;
+        list.addEventListener('dragstart', (e) => { dragging = e.target.closest('.sl-card:not(.sl-add)'); if (!dragging) return e.preventDefault(); dragging.classList.add('is-dragging'); e.dataTransfer.effectAllowed = 'move'; });
+        list.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            const over = e.target.closest('.sl-card:not(.sl-add)');
+            if (!dragging || !over || over === dragging) return;
+            const r = over.getBoundingClientRect();
+            const after = (e.clientX - r.left) > r.width / 2;
+            over.parentNode.insertBefore(dragging, after ? over.nextSibling : over);
+        });
+        list.addEventListener('dragend', () => {
+            if (!dragging) return;
+            dragging.classList.remove('is-dragging');
+            dragging = null;
+            document.getElementById('slOrder').value = Array.from(list.querySelectorAll('.sl-card[data-id]')).map((li) => li.dataset.id).join(',');
+            document.getElementById('slOrderForm').submit();
+        });
+    }
+    document.querySelectorAll('[data-copy]').forEach((btn) => btn.addEventListener('click', async () => {
+        try { await navigator.clipboard.writeText(btn.dataset.copy); window.duiToast && window.duiToast('Link copied'); }
+        catch (e) { window.duiToast && window.duiToast('Press Ctrl+C to copy', 'info'); }
+    }));
 })();
 </script>
 {% endblock %}

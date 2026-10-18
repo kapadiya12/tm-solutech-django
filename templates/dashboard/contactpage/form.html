@@ -3,7 +3,8 @@
 
 <div class="ed-head">
     <div class="ed-head-text">
-        <h2>Contact Page</h2>
+        <a href="{% url 'dashboard:contact_page' %}" class="ed-back"><i class="fas fa-arrow-left"></i> Back to overview</a>
+        <h2>Edit Contact Page</h2>
         <p class="ed-url">Everything on <a href="{% url 'contact:contact' %}" target="_blank" rel="noopener">/contact/</a>. Phone, email and address come from <a href="{% url 'dashboard:site_settings' %}">Site Settings</a>; social icons from <a href="{% url 'dashboard:social_list' %}">Social Links</a>.</p>
     </div>
     <div class="ed-head-actions">
@@ -92,6 +93,7 @@
         <div class="ed-savebar">
             <span class="ed-savebar-hint"><i class="fas fa-circle-info"></i> Changes appear on the live page as soon as you save.</span>
             <div class="ed-savebar-actions">
+                <a href="{% url 'dashboard:contact_page' %}" class="btn btn-secondary">Cancel</a>
                 <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> Save changes</button>
             </div>
         </div>

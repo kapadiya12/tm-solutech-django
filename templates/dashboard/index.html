@@ -43,11 +43,11 @@
                 {% else %}{{ total_inquiries }} all time{% endif %}
             </span>
         </a>
-        <a href="{% url 'dashboard:inquiry_list' %}" class="db-kpi c-red{% if new_inquiries %} is-alert{% endif %}">
+        <a href="{% url 'dashboard:inquiry_list' %}?status=new" class="db-kpi c-red{% if new_inquiries %} is-alert{% endif %}" title="Inquiries still marked New: nobody has contacted them yet">
             <span class="db-kpi-icon"><i class="fas fa-bell"></i></span>
             <span class="db-kpi-label">Awaiting reply</span>
             <strong class="db-kpi-value" data-count="{{ new_inquiries }}">{{ new_inquiries }}</strong>
-            <span class="db-kpi-foot">{% if new_inquiries %}Respond soon <i class="fas fa-arrow-right"></i>{% else %}You're all caught up{% endif %}</span>
+            <span class="db-kpi-foot">{% if new_inquiries %}Status still “New” · reply <i class="fas fa-arrow-right"></i>{% else %}You're all caught up{% endif %}</span>
         </a>
     </section>
 

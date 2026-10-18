@@ -17,7 +17,7 @@
                     <td>
                         <div class="flex gap-2">
                             <a href="{% url 'dashboard:blogcategory_edit' category.pk %}" class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></a>
-                            <form method="post" action="{% url 'dashboard:blogcategory_delete' category.pk %}" onsubmit="return confirm('Delete this item?');">
+                            <form method="post" action="{% url 'dashboard:blogcategory_delete' category.pk %}" data-confirm="Delete this item?">
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-sm" style="color: var(--danger);"><i class="fas fa-trash"></i></button>
                             </form>

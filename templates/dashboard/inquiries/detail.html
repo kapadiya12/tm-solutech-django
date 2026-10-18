@@ -117,10 +117,19 @@
         </section>
         {% endif %}
 
-        <form method="post" action="{% url 'dashboard:inquiry_delete' inquiry.pk %}" onsubmit="return confirm('Delete this inquiry permanently?');" class="iqd-delete">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-sm"><i class="fas fa-trash"></i> Delete inquiry</button>
-        </form>
+        <section class="iqd-danger">
+            <div class="iqd-danger-head">
+                <span class="iqd-danger-icon" aria-hidden="true"><i class="fas fa-triangle-exclamation"></i></span>
+                <div>
+                    <h3>Danger zone</h3>
+                    <p>Permanently delete this inquiry, its status and internal notes. This cannot be undone.</p>
+                </div>
+            </div>
+            <form method="post" action="{% url 'dashboard:inquiry_delete' inquiry.pk %}" data-confirm="The enquiry, its notes and status are deleted." data-confirm-name="{{ inquiry.name }}{% if inquiry.company %} · {{ inquiry.company }}{% endif %}" data-confirm-title="Delete this inquiry?">
+                {% csrf_token %}
+                <button type="submit" class="iqd-danger-btn"><i class="fas fa-trash-can"></i> Delete inquiry</button>
+            </form>
+        </section>
     </aside>
 </div>
 

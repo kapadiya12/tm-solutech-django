@@ -101,7 +101,7 @@
 </form>
 
 {% if service %}
-<form id="deleteServiceForm" method="post" action="{% url 'dashboard:service_delete' service.pk %}" onsubmit="return confirm('Delete “{{ service.title|escapejs }}” permanently?');">{% csrf_token %}</form>
+<form id="deleteServiceForm" method="post" action="{% url 'dashboard:service_delete' service.pk %}" data-confirm="This removes the service page and its content." data-confirm-name="{{ service.title }}" data-confirm-title="Delete this service?">{% csrf_token %}</form>
 {% endif %}
 {% endblock %}
 

@@ -7,12 +7,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{{ page_title|default:'Dashboard' }} | TM Solutech Admin{% endblock %}</title>
     <link rel="icon" href="{% static_v 'images/logo/favicon.png' %}" type="image/png">
+    <link rel="apple-touch-icon" href="{% static_v 'images/logo/favicon.png' %}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="{% static_v 'css/style.css' %}">
     <link rel="stylesheet" href="{% static_v 'css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static_v 'css/dashboard-ui.css' %}">
     {% block extra_css %}{% endblock %}
 </head>
 <body class="dashboard-body">
@@ -69,7 +71,7 @@
                     <a href="{% url 'dashboard:faq_list' %}" class="sidebar-link {% if 'faq' in request.resolver_match.url_name %}active{% endif %}">
                         <i class="fas fa-question-circle"></i> FAQs
                     </a>
-                    <a href="{% url 'dashboard:page_list' %}" class="sidebar-link {% if 'page' in request.resolver_match.url_name %}active{% endif %}">
+                    <a href="{% url 'dashboard:page_list' %}" class="sidebar-link {% if request.resolver_match.url_name in 'page_list page_create page_edit page_delete' %}active{% endif %}">
                         <i class="fas fa-file-alt"></i> Pages
                     </a>
                 </div>
@@ -105,7 +107,7 @@
                         <i class="fas fa-envelope"></i> Inquiries
                         <span class="sidebar-badge"{% if not new_inquiry_count %} hidden{% endif %}>{{ new_inquiry_count|default:0 }}</span>
                     </a>
-                    <a href="{% url 'dashboard:contact_page' %}" class="sidebar-link {% if request.resolver_match.url_name == 'contact_page' %}active{% endif %}">
+                    <a href="{% url 'dashboard:contact_page' %}" class="sidebar-link {% if request.resolver_match.url_name in 'contact_page contact_page_edit' %}active{% endif %}">
                         <i class="fas fa-address-card"></i> Contact Page
                     </a>
                     <a href="{% url 'dashboard:social_list' %}" class="sidebar-link {% if 'social' in request.resolver_match.url_name %}active{% endif %}">
@@ -144,6 +146,29 @@
                 </div>
             </div>
         </aside>
+        <script>
+        /* Keep the sidebar where it was when moving between modules (runs before paint: no jump) */
+        (function () {
+            var side = document.getElementById('dashboardSidebar');
+            if (!side) return;
+            var KEY = 'tmDashSidebarY';
+            var saved = null;
+            try { saved = sessionStorage.getItem(KEY); } catch (e) {}
+            if (saved !== null) side.scrollTop = parseInt(saved, 10) || 0;
+            var active = side.querySelector('.sidebar-link.active');
+            if (active) {
+                var a = active.getBoundingClientRect(), b = side.getBoundingClientRect();
+                if (saved === null || a.top < b.top + 60 || a.bottom > b.bottom - 120) {
+                    side.scrollTop += (a.top - b.top) - (side.clientHeight / 2 - a.height / 2);
+                }
+            }
+            var save = function () { try { sessionStorage.setItem(KEY, String(side.scrollTop)); } catch (e) {} };
+            var t = null;
+            side.addEventListener('scroll', function () { clearTimeout(t); t = setTimeout(save, 120); }, { passive: true });
+            side.addEventListener('click', function (e) { if (e.target.closest('a')) save(); });
+            window.addEventListener('pagehide', save);
+        })();
+        </script>
 
         {# Main Content #}
         <div class="dashboard-main">
@@ -157,17 +182,17 @@
                 </div>
             </header>
 
-            {# Messages #}
-            {% if messages %}
-            <div style="padding: 0 var(--space-6); margin-top: var(--space-4);">
+            {# Messages → toasts (dashboard-ui.js animates and auto-dismisses them) #}
+            <div class="dui-toasts" id="duiToasts" aria-live="polite">
                 {% for message in messages %}
-                <div style="background: {% if message.tags == 'success' %}rgba(16,185,129,0.1){% elif message.tags == 'error' %}rgba(239,68,68,0.1){% else %}rgba(59,130,246,0.1){% endif %}; border: 1px solid {% if message.tags == 'success' %}var(--success){% elif message.tags == 'error' %}var(--danger){% else %}var(--info){% endif %}; border-radius: var(--radius-lg); padding: var(--space-3) var(--space-4); margin-bottom: var(--space-3); font-size: var(--text-sm);">
-                    <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %}"></i>
-                    {{ message }}
+                <div class="dui-toast dui-toast-{% if message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% elif message.tags == 'success' %}success{% else %}info{% endif %}" role="{% if message.tags == 'error' %}alert{% else %}status{% endif %}">
+                    <span class="dui-toast-icon"><i class="fas {% if message.tags == 'success' %}fa-circle-check{% elif message.tags == 'error' %}fa-circle-exclamation{% elif message.tags == 'warning' %}fa-triangle-exclamation{% else %}fa-circle-info{% endif %}"></i></span>
+                    <p>{{ message }}</p>
+                    <button type="button" class="dui-toast-close" aria-label="Dismiss"><i class="fas fa-xmark"></i></button>
+                    <span class="dui-toast-bar"></span>
                 </div>
                 {% endfor %}
             </div>
-            {% endif %}
 
             <div class="dashboard-content">
                 {% block dashboard_content %}{% endblock %}
@@ -177,6 +202,7 @@
 
     <script src="{% static_v 'js/main.js' %}"></script>
     <script src="{% static_v 'js/dashboard-editor.js' %}"></script>
+    <script src="{% static_v 'js/dashboard-ui.js' %}"></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

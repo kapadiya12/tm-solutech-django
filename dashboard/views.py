@@ -1195,6 +1195,26 @@ def navbar_services_update(request):
 # ---- Contact page settings ----
 @login_required
 @staff_required
+def contact_page_view(request):
+    """Read-only overview of everything on the public Contact page."""
+    from django.conf import settings as dj_settings
+    from contact.models import ContactPageSettings
+    from core.models import SocialLink
+    cp = ContactPageSettings.get()
+    return render(request, 'dashboard/contactpage/view.html', {
+        'cp': cp,
+        'sections_visible': 2 + sum([cp.show_details, cp.show_socials, cp.show_map]),
+        'site': SiteSettings.get_settings(),
+        'socials': SocialLink.objects.filter(is_active=True, show_on_contact=True),
+        'default_inbox': dj_settings.ADMIN_EMAIL,
+        'month_enquiries': ContactInquiry.objects.filter(created_at__gte=timezone.now() - timedelta(days=30)).count(),
+        'awaiting': ContactInquiry.objects.filter(status='new').count(),
+        'page_title': 'Contact Page',
+    })
+
+
+@login_required
+@staff_required
 def contact_page_edit(request):
     from contact.models import ContactPageSettings
     from dashboard.forms import ContactPageSettingsForm
@@ -1215,6 +1235,7 @@ def contact_page_edit(request):
 @login_required
 @staff_required
 def social_list(request):
+    from contact.models import ContactPageSettings
     from core.models import SocialLink
     if request.method == 'POST' and request.POST.get('order'):
         # Drag-to-reorder: "3,1,2"
@@ -1223,7 +1244,22 @@ def social_list(request):
             SocialLink.objects.filter(pk=pk).update(display_order=position)
         messages.success(request, 'Order saved.')
         return redirect('dashboard:social_list')
-    return render(request, 'dashboard/socials/list.html', {'links': SocialLink.objects.all(), 'page_title': 'Social Links'})
+    links = list(SocialLink.objects.all())
+    live = [l for l in links if l.is_active]
+    return render(request, 'dashboard/socials/list.html', {
+        'links': links,
+        'footer_links': [l for l in live if l.show_in_footer],
+        'contact_links': [l for l in live if l.show_on_contact],
+        'stats': {
+            'total': len(links),
+            'live': len(live),
+            'footer': sum(1 for l in live if l.show_in_footer),
+            'contact': sum(1 for l in live if l.show_on_contact),
+        },
+        'site': SiteSettings.get_settings(),
+        'socials_title': ContactPageSettings.get().socials_title,
+        'page_title': 'Social Links',
+    })
 
 
 @login_required

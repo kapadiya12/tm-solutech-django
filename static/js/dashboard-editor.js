@@ -270,7 +270,7 @@
         sections.forEach((s) => io.observe(s));
         // Flag sections that contain errors
         sections.forEach((s) => {
-            if (s.querySelector('.form-error')) nav.querySelector('a[href="#' + s.id + '"]')?.classList.add('has-error');
+            if (s.querySelector('.form-error:not([hidden])')) nav.querySelector('a[href="#' + s.id + '"]')?.classList.add('has-error');
         });
     }
 

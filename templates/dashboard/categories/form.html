@@ -89,6 +89,6 @@
     </div>
 </form>
 {% if category %}
-<form id="deleteCategoryForm" method="post" action="{% url 'dashboard:category_delete' category.pk %}" onsubmit="return confirm('Delete this category permanently?');">{% csrf_token %}</form>
+<form id="deleteCategoryForm" method="post" action="{% url 'dashboard:category_delete' category.pk %}" data-confirm="This removes the service area. Services inside it are deleted too." data-confirm-name="{{ category.name }}" data-confirm-title="Delete this service area?">{% csrf_token %}</form>
 {% endif %}
 {% endblock %}

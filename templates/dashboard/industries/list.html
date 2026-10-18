@@ -19,7 +19,7 @@
                     <td>
                         <div class="flex gap-2">
                             <a href="{% url 'dashboard:industry_edit' industry.pk %}" class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></a>
-                            <form method="post" action="{% url 'dashboard:industry_delete' industry.pk %}" onsubmit="return confirm('Delete this industry?');">
+                            <form method="post" action="{% url 'dashboard:industry_delete' industry.pk %}" data-confirm="Delete this industry?">
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-sm" style="color: var(--danger);"><i class="fas fa-trash"></i></button>
                             </form>

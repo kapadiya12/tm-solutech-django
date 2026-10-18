@@ -15,8 +15,10 @@
     {# Favicon #}
     {% if site_settings and site_settings.favicon %}
     <link rel="icon" href="{{ site_settings.favicon.url }}?v=tm2" type="image/png">
+    <link rel="apple-touch-icon" href="{{ site_settings.favicon.url }}?v=tm2">
     {% else %}
     <link rel="icon" href="{% static_v 'images/logo/favicon.png' %}" type="image/png">
+    <link rel="apple-touch-icon" href="{% static_v 'images/logo/favicon.png' %}">
     {% endif %}
 
     {# Google Fonts & Font Awesome #}
