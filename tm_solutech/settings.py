@@ -164,6 +164,7 @@ TEMPLATES = [
 
                 "core.context_processors.nav_stats",
                 "core.context_processors.social_links",
+                "dashboard.context_processors.dashboard_counts",
 
                 "services.context_processors.service_categories",
             ],

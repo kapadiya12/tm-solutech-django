@@ -785,3 +785,4 @@
 }
 .dashboard-main { min-width: 0; }
 .db-chart canvas, .db-donut-chart canvas { max-width: 100%; }
+.sidebar-badge[hidden] { display: none !important; }

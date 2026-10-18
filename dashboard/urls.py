@@ -43,6 +43,8 @@ urlpatterns = [
     path('inquiries/', views.inquiry_list, name='inquiry_list'),
     path('inquiries/<int:pk>/', views.inquiry_detail, name='inquiry_detail'),
     path('inquiries/<int:pk>/delete/', views.inquiry_delete, name='inquiry_delete'),
+    path('inquiries/<int:pk>/toggle-read/', views.inquiry_toggle_read, name='inquiry_toggle_read'),
+    path('inquiries/bulk/', views.inquiry_bulk, name='inquiry_bulk'),
     # Contact page + social links
     path('contact-page/', views.contact_page_edit, name='contact_page'),
     path('social-links/', views.social_list, name='social_list'),

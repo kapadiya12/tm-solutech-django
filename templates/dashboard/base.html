@@ -103,7 +103,7 @@
                     <div class="sidebar-section-title">Communication</div>
                     <a href="{% url 'dashboard:inquiry_list' %}" class="sidebar-link {% if 'inquiry' in request.resolver_match.url_name %}active{% endif %}">
                         <i class="fas fa-envelope"></i> Inquiries
-                        {% if new_inquiry_count %}<span class="sidebar-badge">{{ new_inquiry_count }}</span>{% endif %}
+                        <span class="sidebar-badge"{% if not new_inquiry_count %} hidden{% endif %}>{{ new_inquiry_count|default:0 }}</span>
                     </a>
                     <a href="{% url 'dashboard:contact_page' %}" class="sidebar-link {% if request.resolver_match.url_name == 'contact_page' %}active{% endif %}">
                         <i class="fas fa-address-card"></i> Contact Page

@@ -521,40 +521,122 @@ def faq_delete(request, pk):
 @login_required
 @staff_required
 def inquiry_list(request):
-    inquiries = ContactInquiry.objects.all()
+    from django.core.paginator import Paginator
+    base = ContactInquiry.objects.all()
     status_filter = request.GET.get('status', '')
-    search = request.GET.get('q', '')
-    if status_filter:
+    read_filter = request.GET.get('read', '')
+    search = request.GET.get('q', '').strip()
+    inquiries = base
+    if status_filter in dict(ContactInquiry.STATUS_CHOICES):
         inquiries = inquiries.filter(status=status_filter)
+    if read_filter == 'unread':
+        inquiries = inquiries.filter(is_read=False)
+    elif read_filter == 'read':
+        inquiries = inquiries.filter(is_read=True)
     if search:
         inquiries = inquiries.filter(
             Q(name__icontains=search) | Q(email__icontains=search) | Q(company__icontains=search)
+            | Q(phone__icontains=search) | Q(service__icontains=search) | Q(message__icontains=search)
         )
+    week_ago = timezone.now() - timedelta(days=7)
+    stats = base.aggregate(
+        total=Count('id'),
+        unread=Count('id', filter=Q(is_read=False)),
+        open=Count('id', filter=Q(status__in=['new', 'contacted', 'in_progress'])),
+        week=Count('id', filter=Q(created_at__gte=week_ago)),
+    )
+    page = Paginator(inquiries, 20).get_page(request.GET.get('page'))
+    query = request.GET.copy()
+    query.pop('page', None)
     return render(request, 'dashboard/inquiries/list.html', {
-        'inquiries': inquiries,
+        'page_obj': page,
+        'inquiries': page.object_list,
+        'stats': stats,
         'page_title': 'Contact Inquiries',
         'status_filter': status_filter,
+        'read_filter': read_filter,
         'search': search,
+        'status_choices': ContactInquiry.STATUS_CHOICES,
+        'query_string': query.urlencode(),
     })
+
+
+def _wants_json(request):
+    return request.headers.get('x-requested-with') == 'fetch'
 
 
 @login_required
 @staff_required
 def inquiry_detail(request, pk):
     inquiry = get_object_or_404(ContactInquiry, pk=pk)
-    if not inquiry.is_read:
-        inquiry.is_read = True
-        inquiry.save()
     if request.method == 'POST':
         new_status = request.POST.get('status')
-        notes = request.POST.get('admin_notes', '')
-        if new_status:
+        if new_status in dict(ContactInquiry.STATUS_CHOICES):
             inquiry.status = new_status
-        inquiry.admin_notes = notes
+        inquiry.admin_notes = request.POST.get('admin_notes', '')[:5000]
         inquiry.save()
         messages.success(request, 'Inquiry updated.')
         return redirect('dashboard:inquiry_detail', pk=pk)
-    return render(request, 'dashboard/inquiries/detail.html', {'inquiry': inquiry, 'page_title': 'Inquiry Detail'})
+    # Opening the full page marks it read (unless the admin just marked it unread)
+    if not inquiry.is_read and request.GET.get('keep') != 'unread':
+        inquiry.is_read = True
+        inquiry.save(update_fields=['is_read', 'updated_at'])
+    newer = ContactInquiry.objects.filter(created_at__gt=inquiry.created_at).order_by('created_at').first()
+    older = ContactInquiry.objects.filter(created_at__lt=inquiry.created_at).order_by('-created_at').first()
+    others = ContactInquiry.objects.filter(email__iexact=inquiry.email).exclude(pk=inquiry.pk)[:5]
+    return render(request, 'dashboard/inquiries/detail.html', {
+        'inquiry': inquiry,
+        'newer': newer,
+        'older': older,
+        'others': others,
+        'status_choices': ContactInquiry.STATUS_CHOICES,
+        'page_title': f'Inquiry from {inquiry.name}',
+    })
+
+
+@login_required
+@staff_required
+def inquiry_toggle_read(request, pk):
+    inquiry = get_object_or_404(ContactInquiry, pk=pk)
+    if request.method == 'POST':
+        state = request.POST.get('read')
+        inquiry.is_read = (state == '1') if state in ('0', '1') else not inquiry.is_read
+        inquiry.save(update_fields=['is_read', 'updated_at'])
+    unread = ContactInquiry.objects.filter(is_read=False).count()
+    if _wants_json(request):
+        return JsonResponse({'ok': True, 'is_read': inquiry.is_read, 'unread': unread})
+    messages.success(request, 'Marked as read.' if inquiry.is_read else 'Marked as unread.')
+    nxt = request.POST.get('next') or ''
+    if nxt.startswith('/admin-dashboard/'):
+        return redirect(nxt)
+    return redirect('dashboard:inquiry_list')
+
+
+@login_required
+@staff_required
+def inquiry_bulk(request):
+    if request.method != 'POST':
+        return redirect('dashboard:inquiry_list')
+    ids = [int(x) for x in request.POST.getlist('ids') if x.isdigit()]
+    action = request.POST.get('action')
+    qs = ContactInquiry.objects.filter(pk__in=ids)
+    n = qs.count()
+    if not n:
+        messages.error(request, 'Select at least one inquiry.')
+    elif action == 'read':
+        qs.update(is_read=True)
+        messages.success(request, f'{n} marked as read.')
+    elif action == 'unread':
+        qs.update(is_read=False)
+        messages.success(request, f'{n} marked as unread.')
+    elif action == 'delete':
+        qs.delete()
+        messages.success(request, f'{n} deleted.')
+    elif action in dict(ContactInquiry.STATUS_CHOICES):
+        qs.update(status=action)
+        messages.success(request, f'{n} set to {dict(ContactInquiry.STATUS_CHOICES)[action]}.')
+    nxt = request.POST.get('next') or ''
+    return redirect(nxt if nxt.startswith('/admin-dashboard/') else 'dashboard:inquiry_list')
 
 
 @login_required

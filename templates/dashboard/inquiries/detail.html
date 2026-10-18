@@ -1,46 +1,130 @@
 {% extends 'dashboard/base.html' %}
+{% load static dash_tags %}
 {% block dashboard_content %}
-<div class="flex-between mb-8">
-    <h2>Inquiry from {{ inquiry.name }}</h2>
-    <a href="{% url 'dashboard:inquiry_list' %}" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Back</a>
+
+<div class="iqd-top">
+    <a href="{% url 'dashboard:inquiry_list' %}" class="ed-back"><i class="fas fa-arrow-left"></i> All inquiries</a>
+    <div class="iqd-pager">
+        {% if newer %}<a href="{% url 'dashboard:inquiry_detail' newer.pk %}" class="btn btn-sm btn-secondary" title="Newer inquiry"><i class="fas fa-chevron-left"></i> Newer</a>{% endif %}
+        {% if older %}<a href="{% url 'dashboard:inquiry_detail' older.pk %}" class="btn btn-sm btn-secondary" title="Older inquiry">Older <i class="fas fa-chevron-right"></i></a>{% endif %}
+    </div>
 </div>
-<div class="grid grid-2" style="gap: var(--space-8); align-items: start;">
-    <div class="dashboard-card">
-        <h3 class="dashboard-card-title">Inquiry Details</h3>
-        <div style="display: grid; gap: var(--space-4); margin-top: var(--space-4);">
-            <div><strong>Name:</strong> {{ inquiry.name }}</div>
-            <div><strong>Company:</strong> {{ inquiry.company }}</div>
-            <div><strong>Email:</strong> <a href="mailto:{{ inquiry.email }}">{{ inquiry.email }}</a></div>
-            <div><strong>Phone:</strong> {% if inquiry.phone %}<a href="tel:{{ inquiry.phone }}">{{ inquiry.phone }}</a>{% else %}Not provided{% endif %}</div>
-            <div><strong>Subject:</strong> {{ inquiry.subject|default:'Not specified' }}</div>
-            <div><strong>Service:</strong> {{ inquiry.service|default:'Not specified' }}</div>
-            <div><strong>Date:</strong> {{ inquiry.created_at|date:"F d, Y H:i" }}</div>
-            <div><strong>Status:</strong> <span class="status-badge status-{{ inquiry.status }}">{{ inquiry.get_status_display }}</span></div>
-        </div>
-        <div style="margin-top: var(--space-6); padding-top: var(--space-4); border-top: 1px solid var(--gray-200);">
-            <strong>Message:</strong>
-            <p style="margin-top: var(--space-2); white-space: pre-wrap;">{{ inquiry.message }}</p>
+
+<header class="iqd-hero">
+    <span class="iq-avatar iq-avatar-xl" aria-hidden="true">{{ inquiry.name|slice:":1"|upper }}</span>
+    <div class="iqd-hero-text">
+        <h2>{{ inquiry.name }}</h2>
+        <p>
+            {% if inquiry.company %}<span><i class="fas fa-building"></i> {{ inquiry.company }}</span>{% endif %}
+            <span><i class="fas fa-clock"></i> {{ inquiry.created_at|date:"D, M d, Y · H:i" }} ({{ inquiry.created_at|short_ago }})</span>
+        </p>
+        <div class="iqd-badges">
+            <span class="status-badge status-{{ inquiry.status }}">{{ inquiry.get_status_display }}</span>
+            <span class="status-badge {% if inquiry.is_read %}iqd-read{% else %}iqd-unread{% endif %}"><i class="fas {% if inquiry.is_read %}fa-envelope-open{% else %}fa-envelope{% endif %}"></i>&nbsp;{% if inquiry.is_read %}Read{% else %}Unread{% endif %}</span>
         </div>
     </div>
-    <div class="dashboard-card">
-        <h3 class="dashboard-card-title">Update Status</h3>
-        <form method="post" style="margin-top: var(--space-4);">
+    <div class="iqd-hero-actions">
+        <a href="mailto:{{ inquiry.email }}?subject={{ 'Re: your enquiry to TM Solutech'|urlencode }}" class="btn btn-primary btn-sm"><i class="fas fa-reply"></i> Reply by email</a>
+        <form method="post" action="{% url 'dashboard:inquiry_toggle_read' inquiry.pk %}">
             {% csrf_token %}
-            <div class="form-group">
-                <label class="form-label">Status</label>
-                <select name="status" class="form-control">
-                    <option value="new" {% if inquiry.status == 'new' %}selected{% endif %}>New</option>
-                    <option value="contacted" {% if inquiry.status == 'contacted' %}selected{% endif %}>Contacted</option>
-                    <option value="in_progress" {% if inquiry.status == 'in_progress' %}selected{% endif %}>In Progress</option>
-                    <option value="closed" {% if inquiry.status == 'closed' %}selected{% endif %}>Closed</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Admin Notes</label>
-                <textarea name="admin_notes" class="form-control" rows="4">{{ inquiry.admin_notes }}</textarea>
-            </div>
-            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Update</button>
+            <input type="hidden" name="read" value="{% if inquiry.is_read %}0{% else %}1{% endif %}">
+            <input type="hidden" name="next" value="{% if inquiry.is_read %}{% url 'dashboard:inquiry_detail' inquiry.pk %}?keep=unread{% else %}{% url 'dashboard:inquiry_detail' inquiry.pk %}{% endif %}">
+            <button type="submit" class="btn btn-secondary btn-sm"><i class="fas {% if inquiry.is_read %}fa-envelope{% else %}fa-envelope-open{% endif %}"></i> {% if inquiry.is_read %}Mark as unread{% else %}Mark as read{% endif %}</button>
         </form>
     </div>
+</header>
+
+<div class="iqd-grid">
+    <div class="iqd-main">
+        <section class="dashboard-card iqd-card">
+            <h3 class="iqd-card-title"><i class="fas fa-message"></i> Message</h3>
+            {% if inquiry.service %}<p class="iqd-service"><i class="fas fa-layer-group"></i> Interested in <strong>{{ inquiry.service }}</strong></p>{% endif %}
+            <div class="iqd-message">{{ inquiry.message|linebreaksbr }}</div>
+            <button type="button" class="btn btn-sm btn-secondary iqd-copy-msg" data-copy-text="{{ inquiry.message }}"><i class="far fa-copy"></i> Copy message</button>
+        </section>
+
+        <section class="dashboard-card iqd-card">
+            <h3 class="iqd-card-title"><i class="fas fa-address-card"></i> Contact details</h3>
+            <ul class="iqd-contact">
+                <li>
+                    <span class="iqd-ic"><i class="fas fa-user"></i></span>
+                    <div><small>Name</small><strong>{{ inquiry.name }}</strong></div>
+                </li>
+                <li>
+                    <span class="iqd-ic"><i class="fas fa-building"></i></span>
+                    <div><small>Company</small><strong>{{ inquiry.company|default:"Not provided" }}</strong></div>
+                </li>
+                <li>
+                    <span class="iqd-ic"><i class="fas fa-envelope"></i></span>
+                    <div><small>Email</small><a href="mailto:{{ inquiry.email }}">{{ inquiry.email }}</a></div>
+                    <button type="button" class="iqd-copy" data-copy-text="{{ inquiry.email }}" aria-label="Copy email"><i class="far fa-copy"></i></button>
+                </li>
+                <li>
+                    <span class="iqd-ic"><i class="fas fa-phone"></i></span>
+                    <div><small>Phone</small>{% if inquiry.phone %}<a href="tel:{{ inquiry.phone|cut:' ' }}">{{ inquiry.phone }}</a>{% else %}<strong>Not provided</strong>{% endif %}</div>
+                    {% if inquiry.phone %}
+                    <a class="iqd-copy iqd-wa" href="https://wa.me/{{ inquiry.phone|cut:' '|cut:'+'|cut:'-' }}" target="_blank" rel="noopener" aria-label="Message on WhatsApp" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                    <button type="button" class="iqd-copy" data-copy-text="{{ inquiry.phone }}" aria-label="Copy phone"><i class="far fa-copy"></i></button>
+                    {% endif %}
+                </li>
+                <li>
+                    <span class="iqd-ic"><i class="fas fa-layer-group"></i></span>
+                    <div><small>Service</small><strong>{{ inquiry.service|default:"Not specified" }}</strong></div>
+                </li>
+            </ul>
+        </section>
+    </div>
+
+    <aside class="iqd-side">
+        <section class="dashboard-card iqd-card">
+            <h3 class="iqd-card-title"><i class="fas fa-list-check"></i> Status &amp; notes</h3>
+            <form method="post" data-guard>
+                {% csrf_token %}
+                <div class="iqd-status-pick" role="radiogroup" aria-label="Status">
+                    {% for value, label in status_choices %}
+                    <label class="iqd-status-opt status-{{ value }}">
+                        <input type="radio" name="status" value="{{ value }}" {% if inquiry.status == value %}checked{% endif %}>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="id_admin_notes">Internal notes</label>
+                    <textarea name="admin_notes" id="id_admin_notes" class="form-control" rows="5" maxlength="5000" placeholder="Only visible to the team, e.g. called on Monday, sent quote…">{{ inquiry.admin_notes }}</textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-check"></i> Save</button>
+            </form>
+        </section>
+
+        <section class="dashboard-card iqd-card">
+            <h3 class="iqd-card-title"><i class="fas fa-timeline"></i> Activity</h3>
+            <ol class="iqd-timeline">
+                <li><span></span><div><strong>Enquiry received</strong><small>{{ inquiry.created_at|date:"M d, Y · H:i" }}</small></div></li>
+                {% if inquiry.updated_at|date:"U" != inquiry.created_at|date:"U" %}
+                <li><span></span><div><strong>Last updated</strong><small>{{ inquiry.updated_at|date:"M d, Y · H:i" }} · {{ inquiry.get_status_display }}</small></div></li>
+                {% endif %}
+            </ol>
+        </section>
+
+        {% if others %}
+        <section class="dashboard-card iqd-card">
+            <h3 class="iqd-card-title"><i class="fas fa-clock-rotate-left"></i> Earlier from this email</h3>
+            <ul class="iqd-others">
+                {% for o in others %}
+                <li><a href="{% url 'dashboard:inquiry_detail' o.pk %}"><span>{{ o.message|truncatechars:60 }}</span><small>{{ o.created_at|date:"M d, Y" }} · {{ o.get_status_display }}</small></a></li>
+                {% endfor %}
+            </ul>
+        </section>
+        {% endif %}
+
+        <form method="post" action="{% url 'dashboard:inquiry_delete' inquiry.pk %}" onsubmit="return confirm('Delete this inquiry permanently?');" class="iqd-delete">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm"><i class="fas fa-trash"></i> Delete inquiry</button>
+        </form>
+    </aside>
 </div>
+
+<div class="iq-toast" id="iqToast" role="status" aria-live="polite" hidden></div>
+<link rel="stylesheet" href="{% static 'css/inquiries.css' %}">
+<script src="{% static 'js/inquiries.js' %}" defer></script>
 {% endblock %}
