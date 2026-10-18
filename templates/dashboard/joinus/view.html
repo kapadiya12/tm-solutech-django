@@ -1,0 +1,134 @@
+{% extends 'dashboard/base.html' %}
+{% load static dash_tags %}
+{% block dashboard_content %}
+
+{% if page %}
+<div class="ju-head">
+    <p>{{ meta.blurb }} Shown on the website under <strong>Join Us</strong>.</p>
+    <div class="ju-actions">
+        <a href="{{ page.get_absolute_url }}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-up-right-from-square"></i> View live page</a>
+        <a href="{% url 'dashboard:page_edit' page.pk %}?next={{ request.path|urlencode }}" class="btn btn-primary btn-sm"><i class="fas fa-pen"></i> Edit page</a>
+    </div>
+</div>
+
+<div class="ju-stats">
+    <div class="ju-stat {% if page.is_published %}is-live{% else %}is-draft{% endif %}" data-tip="{% if page.is_published %}Visible to visitors{% else %}Hidden from visitors{% endif %}">
+        <span class="ju-ic"><i class="fas {% if page.is_published %}fa-circle-check{% else %}fa-eye-slash{% endif %}"></i></span>
+        <span><strong>{% if page.is_published %}Live{% else %}Draft{% endif %}</strong>Status</span>
+    </div>
+    <div class="ju-stat" data-tip="Words in the page content">
+        <span class="ju-ic"><i class="fas fa-align-left"></i></span>
+        <span><strong>{{ words }}</strong>Words · {{ read_minutes }} min read</span>
+    </div>
+    <div class="ju-stat" data-tip="{{ page.updated_at|date:'D, M d, Y · H:i' }}">
+        <span class="ju-ic"><i class="fas fa-clock-rotate-left"></i></span>
+        <span><strong>{{ page.updated_at|short_ago }}</strong>Last updated</span>
+    </div>
+    <div class="ju-stat" data-tip="Address of the page">
+        <span class="ju-ic"><i class="fas fa-link"></i></span>
+        <span><strong class="ju-url">/{{ page.slug }}/</strong>Web address</span>
+    </div>
+</div>
+
+<div class="ju-grid">
+    <section class="ju-card ju-preview">
+        <header class="ju-card-head">
+            <span class="ju-num"><i class="{{ meta.icon }}"></i></span>
+            <div><h3>Page preview</h3><p>How the content reads on the website</p></div>
+            <a href="{% url 'dashboard:page_edit' page.pk %}?next={{ request.path|urlencode }}" class="ju-edit"><i class="fas fa-pen"></i> Edit</a>
+        </header>
+        <div class="ju-browser">
+            <div class="ju-browser-bar"><span></span><span></span><span></span><em>tmsolutech.com/{{ page.slug }}/</em></div>
+            <div class="ju-hero"><small>Home › {{ page.title }}</small><h2>{{ page.title }}</h2></div>
+            {% if page.featured_image %}<img class="ju-img" src="{{ page.featured_image.url }}" alt="">{% endif %}
+            <article class="ju-content">{% if page.content %}{{ page.content|safe }}{% else %}<p class="ju-empty">This page has no content yet. <a href="{% url 'dashboard:page_edit' page.pk %}?next={{ request.path|urlencode }}">Add content</a></p>{% endif %}</article>
+        </div>
+    </section>
+
+    <aside class="ju-side">
+        <section class="ju-card">
+            <header class="ju-card-head"><div><h3>Search &amp; sharing</h3><p>Title and description in Google and link previews</p></div></header>
+            <div class="ju-serp">
+                <span class="ju-serp-url">tmsolutech.com › {{ page.slug }}</span>
+                <strong>{{ page.meta_title|default:page.title }} | TM Solutech</strong>
+                <p>{{ page.meta_description|default:"No description set. Google will pick text from the page."|truncatechars:160 }}</p>
+            </div>
+        </section>
+        <section class="ju-card">
+            <header class="ju-card-head"><div><h3>Settings</h3></div></header>
+            <ul class="ju-flags">
+                <li><span>Published</span><b class="{% if page.is_published %}on{% endif %}">{{ page.is_published|yesno:"Yes,No" }}</b></li>
+                <li><span>Shown in footer</span><b class="{% if page.show_in_footer %}on{% endif %}">{{ page.show_in_footer|yesno:"Yes,No" }}</b></li>
+                <li><span>In navbar (Join Us menu)</span><b class="on">Yes</b></li>
+                <li><span>Featured image</span><b class="{% if page.featured_image %}on{% endif %}">{% if page.featured_image %}Set{% else %}None{% endif %}</b></li>
+                <li><span>Created</span><b>{{ page.created_at|date:"M d, Y" }}</b></li>
+            </ul>
+        </section>
+        {% for oslug, o in other %}
+        <a href="{% url 'dashboard:joinus_page' oslug %}" class="ju-switch"><span class="ju-ic"><i class="{{ o.icon }}"></i></span><span><small>Also in Join Us</small>{{ o.title }}</span><i class="fas fa-arrow-right"></i></a>
+        {% endfor %}
+    </aside>
+</div>
+{% else %}
+<div class="ju-missing">
+    <span class="ju-ic"><i class="{{ meta.icon }}"></i></span>
+    <h3>{{ meta.title }} page doesn't exist yet</h3>
+    <p>Create a page with the address <code>{{ slug }}</code> and it will appear here and in the website's Join Us menu.</p>
+    <a href="{% url 'dashboard:page_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Create page</a>
+</div>
+{% endif %}
+
+<link rel="stylesheet" href="{% static 'css/inquiries.css' %}">
+<style>
+.ju-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+.ju-head p { margin: 0; color: var(--gray-500); font-size: .9rem; }
+.ju-actions { display: flex; gap: .5rem; }
+.ju-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: .8rem; margin-bottom: 1.25rem; }
+.ju-stat { display: flex; align-items: center; gap: .8rem; padding: .95rem 1rem; border-radius: 16px; background: #fff; border: 1px solid var(--gray-200); font-size: .8rem; color: var(--gray-600); }
+.ju-stat strong { display: block; font-family: var(--font-heading); font-size: 1.25rem; line-height: 1.15; color: var(--gray-900); }
+.ju-url { font-size: .95rem !important; }
+.ju-ic { width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; color: #2A303C; background: rgba(42,48,60,.08); }
+.ju-stat.is-live .ju-ic { color: #1C7A52; background: rgba(34,160,107,.12); }
+.ju-stat.is-draft .ju-ic { color: #B45F10; background: rgba(244,162,30,.15); }
+.ju-grid { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 1.25rem; align-items: start; }
+.ju-side { display: flex; flex-direction: column; gap: 1.25rem; }
+.ju-card { padding: 1.3rem 1.4rem; border-radius: 18px; background: #fff; border: 1px solid var(--gray-200); box-shadow: 0 12px 30px -26px rgba(10,12,16,.45); }
+.ju-card-head { display: flex; align-items: flex-start; gap: .8rem; padding-bottom: .9rem; margin-bottom: 1rem; border-bottom: 1px solid var(--gray-100); }
+.ju-card-head > div { flex: 1; }
+.ju-card-head h3 { margin: 0 0 .15rem; font-size: 1.02rem; }
+.ju-card-head p { margin: 0; font-size: .8rem; color: var(--gray-500); }
+.ju-num { width: 34px; height: 34px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; color: #fff; background: linear-gradient(135deg, #343B4A, #0F1218); }
+.ju-edit { display: inline-flex; align-items: center; gap: .4rem; padding: .4rem .75rem; border-radius: 9px; font-size: .8rem; font-weight: 700; color: #1F2430; background: #EEF0F4; }
+.ju-edit:hover { color: #fff; background: #1F2430; }
+.ju-browser { border-radius: 14px; border: 1px solid var(--gray-200); overflow: hidden; }
+.ju-browser-bar { display: flex; align-items: center; gap: 6px; padding: .55rem .8rem; background: #F3F4F6; border-bottom: 1px solid var(--gray-200); }
+.ju-browser-bar span { width: 9px; height: 9px; border-radius: 50%; background: #D1D5DB; }
+.ju-browser-bar em { margin-left: .6rem; font-style: normal; font-size: .74rem; color: var(--gray-500); }
+.ju-hero { padding: 1.4rem 1.5rem; color: #fff; background: linear-gradient(145deg, #0B0D12, #1F2430 80%, #2A303C); }
+.ju-hero small { color: rgba(255,255,255,.6); font-size: .74rem; }
+.ju-hero h2 { margin: .3rem 0 0; color: #fff; font-size: 1.5rem; }
+.ju-img { display: block; width: 100%; max-height: 260px; object-fit: cover; }
+.ju-content { max-height: 560px; overflow-y: auto; padding: 1.3rem 1.5rem; font-size: .92rem; line-height: 1.7; color: var(--gray-700); }
+.ju-content h2 { font-size: 1.25rem; margin: 0 0 .6rem; }
+.ju-content h3 { font-size: 1.05rem; margin: 1.2rem 0 .5rem; }
+.ju-content ul { padding-left: 1.2rem; }
+.ju-empty { color: var(--gray-500); }
+.ju-serp { padding: .9rem 1rem; border-radius: 12px; background: #F9FAFB; }
+.ju-serp-url { display: block; font-size: .74rem; color: #3C7A3C; }
+.ju-serp strong { display: block; margin: .15rem 0 .25rem; font-size: .98rem; color: #1A0DAB; font-weight: 500; }
+.ju-serp p { margin: 0; font-size: .8rem; color: #4D5156; line-height: 1.45; }
+.ju-flags { list-style: none; margin: 0; padding: 0; }
+.ju-flags li { display: flex; justify-content: space-between; padding: .55rem 0; border-bottom: 1px solid var(--gray-100); font-size: .86rem; }
+.ju-flags li:last-child { border-bottom: 0; }
+.ju-flags span { color: var(--gray-500); }
+.ju-flags b { font-weight: 700; color: var(--gray-700); }
+.ju-flags b.on { color: #1C7A52; }
+.ju-switch { display: flex; align-items: center; gap: .8rem; padding: .9rem 1rem; border-radius: 16px; background: #fff; border: 1px solid var(--gray-200); color: var(--gray-900); font-weight: 700; transition: border-color .2s, transform .2s; }
+.ju-switch:hover { border-color: #1F2430; transform: translateY(-1px); color: var(--gray-900); }
+.ju-switch > span:nth-child(2) { flex: 1; display: flex; flex-direction: column; }
+.ju-switch small { font-size: .7rem; font-weight: 600; color: var(--gray-500); }
+.ju-missing { padding: 3rem 1rem; text-align: center; border-radius: 18px; background: #fff; border: 1px dashed var(--gray-200); }
+.ju-missing .ju-ic { width: 56px; height: 56px; margin-bottom: .8rem; font-size: 1.3rem; }
+@media (max-width: 1100px) { .ju-stats { grid-template-columns: repeat(2, 1fr); } .ju-grid { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}

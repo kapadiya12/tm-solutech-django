@@ -54,6 +54,8 @@ urlpatterns = [
     path('social-links/<int:pk>/delete/', views.social_delete, name='social_delete'),
     # Settings
     path('settings/', views.site_settings_edit, name='site_settings'),
+    # Join Us pages (view-only, edit via page_edit)
+    path('join-us/<slug:slug>/', views.joinus_page, name='joinus_page'),
     # Pages
     path('pages/', views.page_list, name='page_list'),
     path('pages/create/', views.page_create, name='page_create'),

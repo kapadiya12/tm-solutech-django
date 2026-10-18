@@ -699,10 +699,40 @@ def page_edit(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, 'Page updated.')
-            return redirect('dashboard:page_list')
+            nxt = request.POST.get('next') or request.GET.get('next') or ''
+            return redirect(nxt if nxt.startswith('/admin-dashboard/') else 'dashboard:page_list')
     else:
         form = PageForm(instance=page)
-    return render(request, 'dashboard/pages/form.html', {'form': form, 'page_title': 'Edit Page', 'page_obj': page})
+    nxt = request.GET.get('next', '')
+    return render(request, 'dashboard/pages/form.html', {
+        'form': form, 'page_title': f'Edit {page.title}', 'page_obj': page,
+        'next': nxt if nxt.startswith('/admin-dashboard/') else '',
+    })
+
+
+JOIN_US_PAGES = {
+    'life-at-tm-solutech': {'title': 'Life at TM Solutech', 'icon': 'fas fa-people-group', 'blurb': 'Culture, people and what working here is like.'},
+    'careers': {'title': 'Careers', 'icon': 'fas fa-briefcase', 'blurb': 'Open roles and how to apply.'},
+}
+
+
+@login_required
+@staff_required
+def joinus_page(request, slug):
+    """Read-only view of a Join Us page (Life at TM Solutech / Careers)."""
+    from django.utils.html import strip_tags
+    if slug not in JOIN_US_PAGES:
+        from django.http import Http404
+        raise Http404
+    meta = JOIN_US_PAGES[slug]
+    page = Page.objects.filter(slug=slug).first()
+    words = len(strip_tags(page.content or '').split()) if page else 0
+    return render(request, 'dashboard/joinus/view.html', {
+        'page': page, 'slug': slug, 'meta': meta, 'words': words,
+        'read_minutes': max(1, round(words / 200)) if words else 0,
+        'other': [(k, v) for k, v in JOIN_US_PAGES.items() if k != slug],
+        'page_title': meta['title'],
+    })
 
 
 @login_required

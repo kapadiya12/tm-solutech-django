@@ -63,16 +63,10 @@
                     <a href="{% url 'dashboard:leadership_list' %}" class="sidebar-link {% if 'leadership' in request.resolver_match.url_name %}active{% endif %}">
                         <i class="fas fa-user-tie"></i> Leadership
                     </a>
-                    <a href="{% url 'dashboard:blog_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'blog_list' or request.resolver_match.url_name == 'blog_create' or request.resolver_match.url_name == 'blog_edit' %}active{% endif %}">
-                        <i class="fas fa-newspaper"></i> Blog Posts
-                    </a>
-                    <a href="{% url 'dashboard:blogcategory_list' %}" class="sidebar-link {% if 'blogcategory' in request.resolver_match.url_name %}active{% endif %}">
-                        <i class="fas fa-tags"></i> Blog Categories
-                    </a>
                     <a href="{% url 'dashboard:faq_list' %}" class="sidebar-link {% if 'faq' in request.resolver_match.url_name %}active{% endif %}">
                         <i class="fas fa-question-circle"></i> FAQs
                     </a>
-                    <a href="{% url 'dashboard:page_list' %}" class="sidebar-link {% if request.resolver_match.url_name in 'page_list page_create page_edit page_delete' %}active{% endif %}">
+                    <a href="{% url 'dashboard:page_list' %}" class="sidebar-link {% if request.resolver_match.url_name in 'page_list page_create page_edit page_delete' and page_obj.slug != 'careers' and page_obj.slug != 'life-at-tm-solutech' %}active{% endif %}">
                         <i class="fas fa-file-alt"></i> Pages
                     </a>
                 </div>
@@ -103,12 +97,32 @@
                 </div>
 
                 <div class="sidebar-section">
+                    <div class="sidebar-section-title">Blogs</div>
+                    <a href="{% url 'dashboard:blog_list' %}" class="sidebar-link {% if request.resolver_match.url_name in 'blog_list blog_create blog_edit' %}active{% endif %}">
+                        <i class="fas fa-newspaper"></i> Blog Posts
+                    </a>
+                    <a href="{% url 'dashboard:blogcategory_list' %}" class="sidebar-link {% if 'blogcategory' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-tags"></i> Blog Categories
+                    </a>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Join Us</div>
+                    <a href="{% url 'dashboard:joinus_page' 'life-at-tm-solutech' %}" class="sidebar-link {% if request.resolver_match.kwargs.slug == 'life-at-tm-solutech' or page_obj.slug == 'life-at-tm-solutech' %}active{% endif %}">
+                        <i class="fas fa-people-group"></i> Life at TM Solutech
+                    </a>
+                    <a href="{% url 'dashboard:joinus_page' 'careers' %}" class="sidebar-link {% if request.resolver_match.kwargs.slug == 'careers' or page_obj.slug == 'careers' %}active{% endif %}">
+                        <i class="fas fa-briefcase"></i> Careers
+                    </a>
+                </div>
+
+                <div class="sidebar-section">
                     <div class="sidebar-section-title">Communication</div>
                     <a href="{% url 'dashboard:inquiry_list' %}" class="sidebar-link {% if 'inquiry' in request.resolver_match.url_name %}active{% endif %}">
                         <i class="fas fa-envelope"></i> Inquiries
                         <span class="sidebar-badge"{% if not new_inquiry_count %} hidden{% endif %}>{{ new_inquiry_count|default:0 }}</span>
                     </a>
-                    <a href="{% url 'dashboard:contact_page' %}" class="sidebar-link {% if request.resolver_match.url_name in 'contact_page contact_page_edit' %}active{% endif %}">
+                    <a href="{% url 'dashboard:contact_page' %}" class="sidebar-link {% if request.resolver_match.url_name == 'contact_page' or request.resolver_match.url_name == 'contact_page_edit' %}active{% endif %}">
                         <i class="fas fa-address-card"></i> Contact Page
                     </a>
                     <a href="{% url 'dashboard:social_list' %}" class="sidebar-link {% if 'social' in request.resolver_match.url_name %}active{% endif %}">
