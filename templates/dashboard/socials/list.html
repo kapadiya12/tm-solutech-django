@@ -1,0 +1,79 @@
+{% extends 'dashboard/base.html' %}
+{% block dashboard_content %}
+<div class="flex-between mb-8">
+    <div>
+        <h2>{{ page_title }}</h2>
+        <p style="margin:0.25rem 0 0;color:var(--gray-500);font-size:0.88rem;">Shown in the site footer and on the Contact page. Drag <i class="fas fa-grip-vertical"></i> to reorder.</p>
+    </div>
+    <a href="{% url 'dashboard:social_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add social link</a>
+</div>
+
+<div class="dashboard-card">
+    {% if links %}
+    <ul class="sl-list" id="slList">
+        {% for link in links %}
+        <li class="sl-row" draggable="true" data-id="{{ link.pk }}">
+            <span class="sl-grip" aria-hidden="true"><i class="fas fa-grip-vertical"></i></span>
+            <span class="sl-icon" style="--soc: {{ link.brand_color }}"><i class="{{ link.icon_class }}"></i></span>
+            <div class="sl-body">
+                <strong>{{ link.display_label }}</strong>
+                <a href="{{ link.url }}" target="_blank" rel="noopener">{{ link.url|truncatechars:60 }}</a>
+            </div>
+            <div class="sl-tags">
+                {% if not link.is_active %}<span class="status-badge status-draft">Hidden</span>{% else %}
+                {% if link.show_in_footer %}<span class="status-badge status-active">Footer</span>{% endif %}
+                {% if link.show_on_contact %}<span class="status-badge status-active">Contact</span>{% endif %}
+                {% endif %}
+            </div>
+            <div class="flex gap-2">
+                <a href="{% url 'dashboard:social_edit' link.pk %}" class="btn btn-sm btn-secondary" aria-label="Edit {{ link.display_label }}"><i class="fas fa-edit"></i></a>
+                <form method="post" action="{% url 'dashboard:social_delete' link.pk %}" onsubmit="return confirm('Remove {{ link.display_label|escapejs }}?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm" style="color: var(--danger);" aria-label="Remove {{ link.display_label }}"><i class="fas fa-trash"></i></button>
+                </form>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+    <form method="post" id="slOrderForm" hidden>{% csrf_token %}<input type="hidden" name="order" id="slOrder"></form>
+    {% else %}
+    <div class="text-center" style="padding:2.5rem 1rem;">
+        <p style="color:var(--gray-500);">No social links yet.</p>
+        <a href="{% url 'dashboard:social_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add your first link</a>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.sl-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+.sl-row { display: flex; align-items: center; gap: 0.9rem; padding: 0.75rem 0.9rem; border-radius: 14px; border: 1px solid var(--gray-200); background: #fff; transition: box-shadow .2s, border-color .2s, opacity .2s; }
+.sl-row:hover { border-color: rgba(27,37,133,.18); box-shadow: 0 10px 24px -18px rgba(17,26,94,.45); }
+.sl-row.is-dragging { opacity: .45; }
+.sl-grip { color: var(--gray-400); cursor: grab; padding: 0 .2rem; }
+.sl-icon { width: 40px; height: 40px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; color: #fff; background: var(--soc); flex-shrink: 0; }
+.sl-body { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.sl-body a { font-size: .82rem; color: var(--gray-500); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sl-tags { display: flex; gap: .35rem; flex-wrap: wrap; }
+@media (max-width: 640px) { .sl-tags { display: none; } }
+</style>
+<script>
+(function () {
+    const list = document.getElementById('slList');
+    if (!list) return;
+    let dragging = null;
+    list.addEventListener('dragstart', (e) => { dragging = e.target.closest('.sl-row'); dragging.classList.add('is-dragging'); e.dataTransfer.effectAllowed = 'move'; });
+    list.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        const over = e.target.closest('.sl-row');
+        if (!over || over === dragging) return;
+        const r = over.getBoundingClientRect();
+        over.parentNode.insertBefore(dragging, e.clientY > r.top + r.height / 2 ? over.nextSibling : over);
+    });
+    list.addEventListener('dragend', () => {
+        dragging.classList.remove('is-dragging');
+        document.getElementById('slOrder').value = Array.from(list.children).map((li) => li.dataset.id).join(',');
+        document.getElementById('slOrderForm').submit();
+    });
+})();
+</script>
+{% endblock %}

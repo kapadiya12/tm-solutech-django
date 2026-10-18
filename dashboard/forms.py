@@ -1,8 +1,9 @@
 from django import forms
 from core.models import (
     SiteSettings, WhyUsReason, Testimonial, Leadership, FAQ, Statistic, Gallery, SEOSettings,
-    Capability, ClientLogo, HeroTag, HeroStat, HeroSlide,
+    Capability, ClientLogo, HeroTag, HeroStat, HeroSlide, SocialLink,
 )
+from contact.models import ContactPageSettings
 from services.models import ServiceCategory, Service, Industry
 from insights.models import BlogPost, BlogCategory
 from cms.models import Page
@@ -284,7 +285,61 @@ class FAQForm(FormStyleMixin, forms.ModelForm):
 class SiteSettingsForm(FormStyleMixin, forms.ModelForm):
     class Meta:
         model = SiteSettings
-        fields = '__all__'
+        # Social profiles are managed in Dashboard → Social Links
+        exclude = ['linkedin_url', 'instagram_url', 'facebook_url', 'youtube_url', 'whatsapp_number']
+
+
+class SocialLinkForm(FormStyleMixin, forms.ModelForm):
+    class Meta:
+        model = SocialLink
+        fields = ['platform', 'url', 'label', 'icon', 'show_in_footer', 'show_on_contact', 'is_active', 'display_order']
+        widgets = {'icon': IconInput()}
+
+    def clean(self):
+        cleaned = super().clean()
+        platform = cleaned.get('platform')
+        icon = (cleaned.get('icon') or '').strip()
+        if platform == 'other' and not icon:
+            self.add_error('icon', 'Choose an icon for a custom link.')
+        if icon and not ICON_RE.match(icon):
+            self.add_error('icon', 'Use "Choose icon" to pick a valid icon.')
+        url = cleaned.get('url') or ''
+        if platform == 'whatsapp' and url and 'wa.me/' not in url and 'whatsapp.com' not in url:
+            self.add_error('url', 'For WhatsApp use a link like https://wa.me/917947717070.')
+        return cleaned
+
+
+class ContactPageSettingsForm(FormStyleMixin, forms.ModelForm):
+    reply_steps = ItemsField(keys=['title', 'text'], min_items=0, max_items=5, noun='step')
+    default_country = forms.ChoiceField(label='Default phone country')
+
+    class Meta:
+        model = ContactPageSettings
+        exclude = ['updated_at']
+        widgets = {
+            'office_open': forms.TimeInput(attrs={'type': 'time'}, format='%H:%M'),
+            'office_close': forms.TimeInput(attrs={'type': 'time'}, format='%H:%M'),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        from contact.phone import countries
+        try:
+            from babel import Locale  # optional, not required
+            names = Locale('en').territories
+        except Exception:
+            names = {}
+        self.fields['default_country'].choices = [
+            (c['iso'], f"{names.get(c['iso'], c['iso'])} (+{c['dial']})") for c in countries()
+        ]
+        self.fields['default_country'].widget.attrs['class'] = 'form-control'
+
+    def clean(self):
+        cleaned = super().clean()
+        o, c = cleaned.get('office_open'), cleaned.get('office_close')
+        if o and c and o >= c:
+            self.add_error('office_close', 'Closing time must be after opening time.')
+        return cleaned
 
 
 class PageForm(FormStyleMixin, forms.ModelForm):

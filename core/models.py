@@ -286,3 +286,57 @@ class HeroSlide(models.Model):
     @property
     def image_available(self):
         return file_available(self.image)
+
+
+class SocialLink(models.Model):
+    """Social profiles shown in the footer and on the Contact page (managed in the dashboard)."""
+    PLATFORMS = {
+        # key: (label, icon, brand colour)
+        'linkedin': ('LinkedIn', 'fab fa-linkedin-in', '#0A66C2'),
+        'facebook': ('Facebook', 'fab fa-facebook-f', '#1877F2'),
+        'instagram': ('Instagram', 'fab fa-instagram', '#D6249F'),
+        'x': ('X (Twitter)', 'fab fa-x-twitter', '#000000'),
+        'youtube': ('YouTube', 'fab fa-youtube', '#FF0000'),
+        'whatsapp': ('WhatsApp', 'fab fa-whatsapp', '#25D366'),
+        'threads': ('Threads', 'fab fa-threads', '#000000'),
+        'telegram': ('Telegram', 'fab fa-telegram', '#229ED9'),
+        'github': ('GitHub', 'fab fa-github', '#181717'),
+        'pinterest': ('Pinterest', 'fab fa-pinterest-p', '#E60023'),
+        'medium': ('Medium', 'fab fa-medium', '#000000'),
+        'behance': ('Behance', 'fab fa-behance', '#1769FF'),
+        'dribbble': ('Dribbble', 'fab fa-dribbble', '#EA4C89'),
+        'website': ('Website', 'fas fa-globe', '#1E75B0'),
+        'other': ('Other', 'fas fa-link', '#1B2585'),
+    }
+    PLATFORM_CHOICES = [(k, v[0]) for k, v in PLATFORMS.items()]
+
+    platform = models.CharField(max_length=20, choices=PLATFORM_CHOICES, default='linkedin')
+    url = models.URLField('Profile link', max_length=500, help_text='Full link, e.g. https://www.linkedin.com/company/tmsolutech. For WhatsApp use https://wa.me/917947717070.')
+    label = models.CharField(max_length=40, blank=True, help_text='Optional. Defaults to the platform name.')
+    icon = models.CharField(max_length=50, blank=True, help_text='Only for "Other": a Font Awesome class, e.g. fas fa-link.')
+    show_in_footer = models.BooleanField(default=True)
+    show_on_contact = models.BooleanField('Show on Contact page', default=True)
+    is_active = models.BooleanField(default=True)
+    display_order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ['display_order', 'id']
+        verbose_name = 'Social Link'
+        verbose_name_plural = 'Social Links'
+
+    def __str__(self):
+        return f'{self.display_label}: {self.url}'
+
+    @property
+    def display_label(self):
+        return self.label or self.PLATFORMS.get(self.platform, self.PLATFORMS['other'])[0]
+
+    @property
+    def icon_class(self):
+        if self.platform == 'other' and self.icon:
+            return self.icon
+        return self.PLATFORMS.get(self.platform, self.PLATFORMS['other'])[1]
+
+    @property
+    def brand_color(self):
+        return self.PLATFORMS.get(self.platform, self.PLATFORMS['other'])[2]

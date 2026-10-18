@@ -20,18 +20,18 @@
 
 <section class="cf-section">
     <div class="container">
-        <div class="cf-layout">
+        <div class="cf-layout{% if not cp.show_details and not cp.show_socials and not cp.reply_title %} cf-layout-single{% endif %}">
 
             {# ================= FORM ================= #}
             <div class="cf-form-card animate-on-scroll" id="contactFormCard">
                 <div class="cf-form-head">
                     <span class="section-badge"><i class="fas fa-paper-plane"></i> Get in touch</span>
-                    <h2>Send us a <span class="highlight">message</span></h2>
+                    <h2>{{ cp.form_heading }} {% if cp.form_heading_highlight %}<span class="highlight">{{ cp.form_heading_highlight }}</span>{% endif %}</h2>
                     <p>Fields marked <span class="cf-req" aria-hidden="true">*</span><span class="sr-only">with an asterisk</span> are required.</p>
                 </div>
 
                 <form method="post" action="{% url 'contact:contact' %}" class="cf-form" id="contactForm" novalidate
-                      data-message-min="{{ message_min }}" data-message-max="{{ message_max }}">
+                      data-message-min="{{ message_min }}" data-message-max="{{ message_max }}" data-submit-label="{{ cp.submit_label }}">
                     {% csrf_token %}
                     <input type="hidden" name="form_token" value="{{ form_token }}">
                     <div class="cf-hp" aria-hidden="true">
@@ -47,30 +47,41 @@
                         </div>
                     </div>
 
-                    {# Topic chips #}
-                    <fieldset class="cf-topics">
-                        <legend>What can we help with?</legend>
-                        <div class="cf-chip-row">
-                            {% for radio in form.topic %}
-                            <label class="cf-chip">
-                                {{ radio.tag }}
-                                <span>{{ radio.choice_label }}</span>
-                            </label>
-                            {% endfor %}
-                        </div>
-                    </fieldset>
-
                     <div class="cf-grid">
                         {% include 'contact/_field.html' with field=form.name icon='fa-user' label='Full name' required=True hint='' %}
-                        {% include 'contact/_field.html' with field=form.company icon='fa-building' label='Company' required=True hint='' %}
+                        {% include 'contact/_field.html' with field=form.company icon='fa-building' label='Company' required=False hint='' %}
                         {% include 'contact/_field.html' with field=form.email icon='fa-envelope' label='Work email' required=True hint='' %}
-                        {% include 'contact/_field.html' with field=form.phone icon='fa-phone' label='Phone' required=False hint='Optional. Include your country code, e.g. +91.' %}
+
+                        {# Phone: country picker + number #}
+                        <div class="cf-field cf-field-phone{% if form.phone.value %} has-value{% endif %}{% if form.phone.errors %} is-invalid{% endif %}" data-field="phone">
+                            <div class="cf-phone">
+                                <select name="phone_country" id="id_phone_country" class="cf-phone-native" aria-label="Country code" data-country-select>
+                                    {% for c in phone_countries %}<option value="{{ c.iso }}"{% if c.iso == form.phone_country.value|default:cp.default_country %} selected{% endif %}>{{ c.iso }} +{{ c.dial }}</option>{% endfor %}
+                                </select>
+                                <input type="tel" name="phone" id="id_phone" class="cf-input" value="{{ form.phone.value|default:'' }}" placeholder=" "
+                                       autocomplete="tel-national" inputmode="tel" maxlength="20" aria-describedby="err_phone hint_phone"{% if form.phone.errors %} aria-invalid="true"{% endif %}>
+                                <label for="id_phone" class="cf-label">Phone</label>
+                                <span class="cf-state" aria-hidden="true"><i class="fas fa-check"></i></span>
+                            </div>
+                            <p class="cf-hint" id="hint_phone">Optional</p>
+                            <p class="cf-error" id="err_phone">{{ form.phone.errors.0 }}</p>
+                        </div>
                     </div>
 
-                    {# Service select #}
-                    <div class="cf-field cf-field-select{% if form.service.value %} has-value{% endif %}{% if form.service.errors %} is-invalid{% endif %}" data-field="service">
+                    {# Service: native select, enhanced into a searchable pop-up #}
+                    <div class="cf-field cf-field-select{% if form.service.errors %} is-invalid{% endif %}" data-field="service">
                         <i class="fas fa-layer-group cf-icon" aria-hidden="true"></i>
-                        {{ form.service }}
+                        <select name="service" id="id_service" class="cf-input" aria-describedby="err_service" data-combo data-combo-search="Search services">
+                            {% for group, options in form.service.field.choices %}
+                                {% if options|stringformat:'s'|slice:':1' == '[' %}
+                                <optgroup label="{{ group }}">
+                                    {% for value, text in options %}<option value="{{ value }}"{% if form.service.value == value %} selected{% endif %}>{{ text }}</option>{% endfor %}
+                                </optgroup>
+                                {% else %}
+                                <option value="{{ group }}"{% if not form.service.value %} selected{% endif %}>{{ options }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
                         <label for="id_service" class="cf-label">Service of interest</label>
                         <i class="fas fa-chevron-down cf-select-caret" aria-hidden="true"></i>
                         <p class="cf-error" id="err_service">{{ form.service.errors.0 }}</p>
@@ -80,7 +91,7 @@
                     <div class="cf-field cf-field-textarea{% if form.message.value %} has-value{% endif %}{% if form.message.errors %} is-invalid{% endif %}" data-field="message">
                         <textarea name="message" id="id_message" class="cf-input" rows="5" maxlength="{{ message_max }}" placeholder=" " required
                                   aria-required="true" aria-describedby="err_message cf_counter">{{ form.message.value|default:'' }}</textarea>
-                        <label for="id_message" class="cf-label">How can we help? <span class="cf-req" aria-hidden="true">*</span></label>
+                        <label for="id_message" class="cf-label">{{ cp.message_placeholder }} <span class="cf-req" aria-hidden="true">*</span></label>
                         <div class="cf-meta">
                             <p class="cf-error" id="err_message">{{ form.message.errors.0 }}</p>
                             <span class="cf-counter" id="cf_counter" aria-live="polite"><span data-count>0</span> / {{ message_max }}</span>
@@ -92,18 +103,18 @@
                         <label class="cf-check">
                             <input type="checkbox" name="consent" id="id_consent" required aria-describedby="err_consent"{% if form.consent.value %} checked{% endif %}>
                             <span class="cf-check-box" aria-hidden="true"><i class="fas fa-check"></i></span>
-                            <span>I agree to TM Solutech contacting me about this enquiry, as described in the <a href="{% url 'cms:page_detail' slug='privacy-policy' %}" target="_blank" rel="noopener">privacy policy</a>.</span>
+                            <span>{{ cp.consent_text }} <a href="{% url 'cms:page_detail' slug='privacy-policy' %}" target="_blank" rel="noopener">privacy policy</a>.</span>
                         </label>
                         <p class="cf-error" id="err_consent">{{ form.consent.errors.0 }}</p>
                     </div>
 
                     <div class="cf-actions">
                         <button type="submit" class="cf-submit" id="cfSubmit">
-                            <span class="cf-submit-label">Send message</span>
+                            <span class="cf-submit-label">{{ cp.submit_label }}</span>
                             <span class="cf-submit-icon" aria-hidden="true"><i class="fas fa-paper-plane"></i></span>
                             <span class="cf-spinner" aria-hidden="true"></span>
                         </button>
-                        <p class="cf-secure"><i class="fas fa-lock" aria-hidden="true"></i> Your details are only used to reply to this enquiry.</p>
+                        {% if cp.privacy_note %}<p class="cf-secure"><i class="fas fa-lock" aria-hidden="true"></i> {{ cp.privacy_note }}</p>{% endif %}
                     </div>
                 </form>
 
@@ -112,26 +123,31 @@
                     <div class="cf-success-mark" aria-hidden="true">
                         <svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="24"/><path d="M15 27l7 7 15-16"/></svg>
                     </div>
-                    <h3>Message sent</h3>
-                    <p id="cfSuccessText">Your enquiry has reached our team. We reply within 1–2 business days.</p>
+                    <h3>{{ cp.success_title }}</h3>
+                    <p id="cfSuccessText">{{ cp.success_message }}</p>
                     <button type="button" class="cf-again" id="cfAgain"><i class="fas fa-rotate-left" aria-hidden="true"></i> Send another message</button>
                 </div>
             </div>
 
             {# ================= SIDE ================= #}
             <aside class="cf-side">
+                {% if cp.reply_title or cp.reply_time %}
                 <div class="cf-promise animate-on-scroll">
                     <div class="cf-promise-glow" aria-hidden="true"></div>
                     <span class="cf-promise-icon" aria-hidden="true"><i class="fas fa-reply"></i></span>
-                    <h3>We reply within <span>1–2 business days</span></h3>
-                    <p>Every enquiry is read by our team and answered personally.</p>
+                    <h3>{{ cp.reply_title }} {% if cp.reply_time %}<span>{{ cp.reply_time }}</span>{% endif %}</h3>
+                    {% if cp.reply_text %}<p>{{ cp.reply_text }}</p>{% endif %}
+                    {% if cp.reply_steps %}
                     <ol class="cf-steps">
-                        <li><span>1</span><div><strong>We review your message</strong>and what you need.</div></li>
-                        <li><span>2</span><div><strong>We get in touch</strong>by email or phone within 1–2 business days.</div></li>
-                        <li><span>3</span><div><strong>We plan the next step</strong>together, with no obligation.</div></li>
+                        {% for step in cp.reply_steps %}
+                        <li><span>{{ forloop.counter }}</span><div><strong>{{ step.title }}</strong>{{ step.text }}</div></li>
+                        {% endfor %}
                     </ol>
+                    {% endif %}
                 </div>
+                {% endif %}
 
+                {% if cp.show_details %}
                 <div class="cf-details animate-on-scroll animate-delay-1">
                     <h3 class="cf-side-title">Contact details</h3>
                     <ul class="cf-detail-list">
@@ -147,8 +163,12 @@
                         </li>
                         <li>
                             <span class="cf-d-icon"><i class="fas fa-clock"></i></span>
-                            <div class="cf-d-body"><small>Office hours</small><span>Mon – Sat, 9:30 AM – 6:30 PM</span></div>
-                            <span class="cf-open-pill" data-office-status hidden></span>
+                            <div class="cf-d-body"><small>Office hours</small><span>{{ cp.office_hours_label }}</span></div>
+                            {% if cp.show_open_status %}
+                            <span class="cf-open-pill" data-office-status hidden
+                                  data-days="{{ cp.open_weekdays|join:',' }}"
+                                  data-open="{{ cp.office_open|time:'H:i' }}" data-close="{{ cp.office_close|time:'H:i' }}"></span>
+                            {% endif %}
                         </li>
                         <li>
                             <span class="cf-d-icon"><i class="fas fa-location-dot"></i></span>
@@ -156,16 +176,17 @@
                         </li>
                     </ul>
                 </div>
+                {% endif %}
 
-                {% if site_settings.linkedin_url or site_settings.facebook_url or site_settings.instagram_url or site_settings.youtube_url or site_settings.whatsapp_number %}
+                {% if cp.show_socials and contact_socials %}
                 <div class="cf-social animate-on-scroll animate-delay-2">
-                    <h3 class="cf-side-title">Follow TM Solutech</h3>
+                    <h3 class="cf-side-title">{{ cp.socials_title }}</h3>
                     <div class="cf-social-row">
-                        {% if site_settings.linkedin_url %}<a href="{{ site_settings.linkedin_url }}" class="cf-soc cf-soc-linkedin" target="_blank" rel="noopener" aria-label="TM Solutech on LinkedIn"><i class="fab fa-linkedin-in"></i><span>LinkedIn</span></a>{% endif %}
-                        {% if site_settings.facebook_url %}<a href="{{ site_settings.facebook_url }}" class="cf-soc cf-soc-facebook" target="_blank" rel="noopener" aria-label="TM Solutech on Facebook"><i class="fab fa-facebook-f"></i><span>Facebook</span></a>{% endif %}
-                        {% if site_settings.instagram_url %}<a href="{{ site_settings.instagram_url }}" class="cf-soc cf-soc-instagram" target="_blank" rel="noopener" aria-label="TM Solutech on Instagram"><i class="fab fa-instagram"></i><span>Instagram</span></a>{% endif %}
-                        {% if site_settings.youtube_url %}<a href="{{ site_settings.youtube_url }}" class="cf-soc cf-soc-youtube" target="_blank" rel="noopener" aria-label="TM Solutech on YouTube"><i class="fab fa-youtube"></i><span>YouTube</span></a>{% endif %}
-                        {% if site_settings.whatsapp_number %}<a href="https://wa.me/{{ site_settings.whatsapp_number|cut:' '|cut:'+' }}" class="cf-soc cf-soc-whatsapp" target="_blank" rel="noopener" aria-label="Chat with TM Solutech on WhatsApp"><i class="fab fa-whatsapp"></i><span>WhatsApp</span></a>{% endif %}
+                        {% for s in contact_socials %}
+                        <a href="{{ s.url }}" class="cf-soc" style="--soc: {{ s.brand_color }}" target="_blank" rel="noopener" aria-label="TM Solutech on {{ s.display_label }}">
+                            <i class="{{ s.icon_class }}"></i><span>{{ s.display_label }}</span>
+                        </a>
+                        {% endfor %}
                     </div>
                 </div>
                 {% endif %}
@@ -175,17 +196,18 @@
 </section>
 
 {# ================= MAP ================= #}
+{% if cp.show_map %}
 <section class="cf-map-section">
     <div class="container">
         <div class="cf-map-head animate-on-scroll">
             <span class="section-badge"><i class="fas fa-location-dot"></i> Visit us</span>
-            <h2>Our <span class="highlight">office</span></h2>
+            <h2>{{ cp.map_heading }} {% if cp.map_heading_highlight %}<span class="highlight">{{ cp.map_heading_highlight }}</span>{% endif %}</h2>
         </div>
         <div class="cf-map animate-on-scroll">
             {% if site_settings and site_settings.google_maps_embed %}
             {{ site_settings.google_maps_embed|safe }}
             {% else %}
-            <iframe title="TM Solutech office map" src="https://www.google.com/maps?q={{ address|urlencode }}&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            <iframe title="Office map" src="https://www.google.com/maps?q={{ address|urlencode }}&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
             {% endif %}
             <div class="cf-map-card">
                 <span class="cf-d-icon"><i class="fas fa-building"></i></span>
@@ -200,8 +222,11 @@
         </div>
     </div>
 </section>
+{% endif %}
 
 <div class="cf-toast" id="cfToast" role="status" aria-live="polite" hidden></div>
+{{ phone_countries|json_script:"cfCountries" }}
+{{ service_icons|json_script:"cfServiceIcons" }}
 {% endwith %}
 {% endblock %}
 

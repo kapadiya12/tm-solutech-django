@@ -14,11 +14,11 @@ def aged_token(seconds=10):
 
 
 VALID = {
-    'topic': 'New project',
     'name': 'Priya Shah',
     'company': 'Acme Industries',
     'email': '  Priya.Shah@Acme.COM ',
-    'phone': '+91 98765 43210',
+    'phone_country': 'IN',
+    'phone': '98765 43210',
     'service': '',
     'message': 'We need help migrating our ERP servers to the cloud this quarter.',
     'consent': 'on',
@@ -44,7 +44,7 @@ class ContactFormTests(TestCase):
         self.assertRedirects(res, self.url)
         inquiry = ContactInquiry.objects.get()
         self.assertEqual(inquiry.email, 'priya.shah@acme.com')
-        self.assertEqual(inquiry.subject, 'New project')
+        self.assertEqual(inquiry.phone, '+91 98765 43210')
         self.assertEqual(len(mail.outbox), 2)
         self.assertEqual(mail.outbox[0].to, ['team@example.com'])
         self.assertEqual(mail.outbox[1].to, ['priya.shah@acme.com'])
@@ -69,7 +69,7 @@ class ContactFormTests(TestCase):
         self.assertFalse(ContactInquiry.objects.exists())
 
     def test_required_fields(self):
-        for field in ('name', 'company', 'email', 'message'):
+        for field in ('name', 'email', 'message'):
             with self.subTest(field=field):
                 self.assertFieldError(field, **{field: ''})
 
@@ -90,9 +90,33 @@ class ContactFormTests(TestCase):
         self.assertFieldError('email', email='not-an-email')
 
     def test_phone_rules(self):
-        for bad in ('12345', 'call me', '+91 98765 43210 99999 1'):
+        for bad in ('12345', 'call me', '98765 43210 99999 1'):
             with self.subTest(bad=bad):
                 self.assertFieldError('phone', phone=bad)
+
+    def test_phone_other_country_and_optional(self):
+        self.post(phone_country='GB', phone='07400 123456')
+        self.assertEqual(ContactInquiry.objects.get().phone, '+44 7400 123456')
+        ContactInquiry.objects.all().delete(); cache.clear()
+        self.post(phone='')
+        self.assertEqual(ContactInquiry.objects.get().phone, '')
+
+    def test_wrong_length_for_country(self):
+        self.assertFieldError('phone', phone_country='US', phone='98765 43210 1')
+
+    def test_company_optional(self):
+        self.post(company='')
+        self.assertEqual(ContactInquiry.objects.get().company, '')
+
+    def test_settings_drive_emails(self):
+        from .models import ContactPageSettings
+        page = ContactPageSettings.get()
+        page.notify_email = 'sales@example.com'
+        page.send_acknowledgement = False
+        page.save()
+        self.post()
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, ['sales@example.com'])
 
     def test_message_length_and_links(self):
         self.assertFieldError('message', message='Too short')
@@ -139,7 +163,9 @@ class ContactFormTests(TestCase):
 
     # ---- page ----
     def test_page_renders_with_token_and_prefill(self):
-        res = self.client.get(self.url + '?service=Hardware+Procurement&topic=Support')
+        res = self.client.get(self.url + '?service=Hardware+Procurement')
         self.assertContains(res, 'name="form_token"')
         self.assertContains(res, '<option value="Hardware Procurement" selected>')
         self.assertContains(res, '1–2 business days')
+        self.assertContains(res, 'id="cfCountries"')
+        self.assertNotContains(res, 'What can we help with')

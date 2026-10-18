@@ -1,0 +1,68 @@
+{% extends 'dashboard/base.html' %}
+{% block dashboard_content %}
+<div class="ed-head">
+    <div class="ed-head-text">
+        <a href="{% url 'dashboard:social_list' %}" class="ed-back"><i class="fas fa-arrow-left"></i> All social links</a>
+        <h2>{{ page_title }}</h2>
+    </div>
+</div>
+
+<form method="post" class="ed" data-guard novalidate>
+    {% csrf_token %}
+    {% if form.errors %}<div class="ed-alert"><i class="fas fa-circle-exclamation"></i> Some fields need your attention.</div>{% endif %}
+    <div class="ed-main" style="grid-column: 1 / -1; max-width: 760px;">
+        <section class="ed-card">
+            <header class="ed-card-head">
+                <span class="sl-preview" id="slPreview"><i></i></span>
+                <div><h3 id="slPreviewName">Social link</h3><p>Pick the platform and paste the full profile link.</p></div>
+            </header>
+            <div class="ed-grid-2">
+                {% include 'dashboard/partials/field.html' with field=form.platform %}
+                {% include 'dashboard/partials/field.html' with field=form.label %}
+            </div>
+            {% include 'dashboard/partials/field.html' with field=form.url %}
+            <div id="slIconRow">{% include 'dashboard/partials/field.html' with field=form.icon %}</div>
+            <div class="ed-toggles">
+                {% include 'dashboard/partials/field.html' with field=form.is_active %}
+                {% include 'dashboard/partials/field.html' with field=form.show_in_footer %}
+                {% include 'dashboard/partials/field.html' with field=form.show_on_contact %}
+            </div>
+            {% include 'dashboard/partials/field.html' with field=form.display_order %}
+        </section>
+        <div class="ed-savebar">
+            <span class="ed-savebar-hint"><i class="fas fa-circle-info"></i> Appears on the site as soon as you save.</span>
+            <div class="ed-savebar-actions">
+                <a href="{% url 'dashboard:social_list' %}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> Save</button>
+            </div>
+        </div>
+    </div>
+</form>
+{{ platforms|json_script:"slPlatforms" }}
+<style>
+.sl-preview { width: 44px; height: 44px; border-radius: 13px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; color: #fff; font-size: 1.1rem; background: var(--soc, #1B2585); transition: background .25s; }
+</style>
+<script>
+(function () {
+    const platforms = JSON.parse(document.getElementById('slPlatforms').textContent);
+    const sel = document.getElementById('id_platform');
+    const label = document.getElementById('id_label');
+    const icon = document.getElementById('id_icon');
+    const prev = document.getElementById('slPreview');
+    const name = document.getElementById('slPreviewName');
+    const iconRow = document.getElementById('slIconRow');
+    function sync() {
+        const p = platforms[sel.value] || platforms.other;
+        const isOther = sel.value === 'other';
+        iconRow.style.display = isOther ? '' : 'none';
+        prev.style.setProperty('--soc', p[2]);
+        prev.querySelector('i').className = isOther && icon.value ? icon.value : p[1];
+        name.textContent = label.value.trim() || p[0];
+        label.placeholder = p[0];
+    }
+    [sel, label, icon].forEach((el) => el && el.addEventListener('input', sync));
+    sel.addEventListener('change', sync);
+    sync();
+})();
+</script>
+{% endblock %}

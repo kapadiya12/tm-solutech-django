@@ -8,3 +8,4 @@ gunicorn
 whitenoise
 django-cloudinary-storage
 cloudinary
+phonenumbers==9.0.41

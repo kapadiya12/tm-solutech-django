@@ -1,0 +1,119 @@
+{% extends 'dashboard/base.html' %}
+{% block dashboard_content %}
+
+<div class="ed-head">
+    <div class="ed-head-text">
+        <h2>Contact Page</h2>
+        <p class="ed-url">Everything on <a href="{% url 'contact:contact' %}" target="_blank" rel="noopener">/contact/</a>. Phone, email and address come from <a href="{% url 'dashboard:site_settings' %}">Site Settings</a>; social icons from <a href="{% url 'dashboard:social_list' %}">Social Links</a>.</p>
+    </div>
+    <div class="ed-head-actions">
+        <a href="{% url 'contact:contact' %}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-up-right-from-square"></i> View page</a>
+    </div>
+</div>
+
+<form method="post" class="ed" data-guard novalidate>
+    {% csrf_token %}
+    {% if form.errors %}<div class="ed-alert"><i class="fas fa-circle-exclamation"></i> Some fields need your attention. They're marked in red below.</div>{% endif %}
+
+    <nav class="ed-nav" data-section-nav aria-label="Form sections">
+        <span class="ed-nav-title">Sections</span>
+        <a href="#sec-form"><span class="ed-nav-dot"></span> Form</a>
+        <a href="#sec-reply"><span class="ed-nav-dot"></span> Reply card</a>
+        <a href="#sec-hours"><span class="ed-nav-dot"></span> Details &amp; hours</a>
+        <a href="#sec-social"><span class="ed-nav-dot"></span> Socials &amp; map</a>
+        <a href="#sec-email"><span class="ed-nav-dot"></span> Email</a>
+    </nav>
+
+    <div class="ed-main">
+        <section class="ed-card" id="sec-form" data-section>
+            <header class="ed-card-head"><span class="ed-card-num">1</span><div><h3>Form</h3><p>Headings and wording around the enquiry form.</p></div><span class="ed-card-state"></span></header>
+            {% include 'dashboard/partials/field.html' with field=form.page_subtitle %}
+            <div class="ed-grid-2">
+                {% include 'dashboard/partials/field.html' with field=form.form_heading %}
+                {% include 'dashboard/partials/field.html' with field=form.form_heading_highlight %}
+            </div>
+            <div class="ed-grid-2">
+                {% include 'dashboard/partials/field.html' with field=form.message_placeholder %}
+                {% include 'dashboard/partials/field.html' with field=form.submit_label %}
+            </div>
+            {% include 'dashboard/partials/field.html' with field=form.consent_text %}
+            {% include 'dashboard/partials/field.html' with field=form.privacy_note %}
+            {% include 'dashboard/partials/field.html' with field=form.default_country %}
+            <div class="ed-grid-2">
+                {% include 'dashboard/partials/field.html' with field=form.success_title %}
+                {% include 'dashboard/partials/field.html' with field=form.success_message %}
+            </div>
+        </section>
+
+        <section class="ed-card" id="sec-reply" data-section>
+            <header class="ed-card-head"><span class="ed-card-num">2</span><div><h3>Reply card</h3><p>The dark card at the top right: your response promise and what happens next.</p></div><span class="ed-card-state"></span></header>
+            <div class="ed-grid-2">
+                {% include 'dashboard/partials/field.html' with field=form.reply_title %}
+                {% include 'dashboard/partials/field.html' with field=form.reply_time %}
+            </div>
+            {% include 'dashboard/partials/field.html' with field=form.reply_text %}
+            {% include 'dashboard/partials/repeater.html' with field=form.reply_steps title='Steps' noun='step' add_label='Add step' icon='fas fa-list-ol' min=0 max=5 schema='[{"key":"title","label":"Step title","placeholder":"e.g. We get in touch","max":80},{"key":"text","label":"Detail","placeholder":"e.g. by email or phone within 1–2 business days.","max":160}]' %}
+        </section>
+
+        <section class="ed-card" id="sec-hours" data-section>
+            <header class="ed-card-head"><span class="ed-card-num">3</span><div><h3>Details &amp; office hours</h3><p>Hours drive the live "Open now" badge (India time).</p></div><span class="ed-card-state"></span></header>
+            <div class="ed-toggles">
+                {% include 'dashboard/partials/field.html' with field=form.show_details %}
+                {% include 'dashboard/partials/field.html' with field=form.show_open_status %}
+            </div>
+            {% include 'dashboard/partials/field.html' with field=form.office_days %}
+            <div class="ed-grid-2">
+                {% include 'dashboard/partials/field.html' with field=form.office_open %}
+                {% include 'dashboard/partials/field.html' with field=form.office_close %}
+            </div>
+        </section>
+
+        <section class="ed-card" id="sec-social" data-section>
+            <header class="ed-card-head"><span class="ed-card-num">4</span><div><h3>Socials &amp; map</h3><p>Add or reorder the icons themselves in <a href="{% url 'dashboard:social_list' %}">Social Links</a>.</p></div><span class="ed-card-state"></span></header>
+            <div class="ed-toggles">
+                {% include 'dashboard/partials/field.html' with field=form.show_socials %}
+                {% include 'dashboard/partials/field.html' with field=form.show_map %}
+            </div>
+            {% include 'dashboard/partials/field.html' with field=form.socials_title %}
+            <div class="ed-grid-2">
+                {% include 'dashboard/partials/field.html' with field=form.map_heading %}
+                {% include 'dashboard/partials/field.html' with field=form.map_heading_highlight %}
+            </div>
+        </section>
+
+        <section class="ed-card" id="sec-email" data-section>
+            <header class="ed-card-head"><span class="ed-card-num">5</span><div><h3>Email</h3><p>Where new enquiries are sent, and whether the visitor gets a confirmation.</p></div><span class="ed-card-state"></span></header>
+            {% include 'dashboard/partials/field.html' with field=form.notify_email %}
+            <div class="ed-toggles">
+                {% include 'dashboard/partials/field.html' with field=form.send_acknowledgement %}
+            </div>
+        </section>
+
+        <div class="ed-savebar">
+            <span class="ed-savebar-hint"><i class="fas fa-circle-info"></i> Changes appear on the live page as soon as you save.</span>
+            <div class="ed-savebar-actions">
+                <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> Save changes</button>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+/* Show full country names in the default-country list */
+(function () {
+    const sel = document.getElementById('id_default_country');
+    if (!sel || !window.Intl || !Intl.DisplayNames) return;
+    const names = new Intl.DisplayNames(['en'], { type: 'region' });
+    const opts = Array.from(sel.options).map((o) => {
+        const dial = (o.textContent.match(/\(\+\d+\)/) || [''])[0];
+        try { o.textContent = names.of(o.value) + ' ' + dial; } catch (e) {}
+        return o;
+    }).sort((a, b) => a.textContent.localeCompare(b.textContent));
+    const value = sel.value;
+    opts.forEach((o) => sel.appendChild(o));
+    sel.value = value;
+})();
+</script>
+{% endblock %}

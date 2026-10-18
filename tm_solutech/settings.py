@@ -163,6 +163,7 @@ TEMPLATES = [
                 "core.context_processors.site_settings",
 
                 "core.context_processors.nav_stats",
+                "core.context_processors.social_links",
 
                 "services.context_processors.service_categories",
             ],

@@ -6,15 +6,9 @@ from django.core import signing
 
 from services.models import ServiceCategory
 from .models import ContactInquiry
+from .phone import country_choices, normalise
 
 
-TOPIC_CHOICES = [
-    ('New project', 'New project'),
-    ('Support', 'Support'),
-    ('Partnership', 'Partnership'),
-    ('Careers', 'Careers'),
-    ('Other', 'Other'),
-]
 
 # Letters, with single separators or "dot + space" between parts (e.g. "Dr. R. K. Patel")
 NAME_RE = re.compile(r"^[^\W\d_]+(?:(?:\. ?|[ '\-])[^\W\d_]+)*\.?$", re.UNICODE)
@@ -52,7 +46,7 @@ def service_choices():
 
 
 class ContactForm(forms.ModelForm):
-    topic = forms.ChoiceField(choices=TOPIC_CHOICES, initial='New project', widget=forms.RadioSelect)
+    phone_country = forms.ChoiceField(required=False)
     consent = forms.BooleanField(
         required=True,
         error_messages={'required': 'Please agree so we can contact you about your enquiry.'},
@@ -74,19 +68,21 @@ class ContactForm(forms.ModelForm):
             'message': forms.Textarea(attrs={'rows': 5, 'maxlength': MESSAGE_MAX}),
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, default_country='IN', **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['service'] = forms.ChoiceField(
             choices=service_choices(), required=False,
             widget=forms.Select(attrs={'class': 'cf-input', 'aria-describedby': 'err_service'}),
         )
-        for name in ('name', 'company', 'email', 'message'):
+        for name in ('name', 'email', 'message'):
             self.fields[name].required = True
+        self.fields['company'].required = False
         self.fields['phone'].required = False
+        self.fields['phone_country'].choices = country_choices()
+        self.fields['phone_country'].initial = default_country
 
         messages = {
             'name': 'Please enter your full name.',
-            'company': 'Please enter your company name.',
             'email': 'Please enter your work email.',
             'message': 'Please tell us a little about what you need.',
         }
@@ -110,6 +106,8 @@ class ContactForm(forms.ModelForm):
 
     def clean_company(self):
         company = ' '.join(self.cleaned_data.get('company', '').split())
+        if not company:
+            return ''
         if len(company) < 2:
             raise forms.ValidationError('Your company name looks too short.')
         if len(company) > 150:
@@ -121,16 +119,9 @@ class ContactForm(forms.ModelForm):
     def clean_email(self):
         return self.cleaned_data.get('email', '').strip().lower()
 
-    def clean_phone(self):
-        phone = self.cleaned_data.get('phone', '').strip()
-        if not phone:
-            return ''
-        if not re.fullmatch(r'\+?[\d\s\-()]+', phone):
-            raise forms.ValidationError('Use digits only. A leading + and spaces are fine.')
-        digits = re.sub(r'\D', '', phone)
-        if not 10 <= len(digits) <= 15:
-            raise forms.ValidationError('Please enter a 10 to 15 digit phone number.')
-        return phone
+    def clean_phone_country(self):
+        iso = (self.cleaned_data.get('phone_country') or '').upper()
+        return iso if iso in dict(country_choices()) else 'IN'
 
     def clean_message(self):
         message = self.cleaned_data.get('message', '').strip()
@@ -144,6 +135,12 @@ class ContactForm(forms.ModelForm):
 
     def clean(self):
         cleaned = super().clean()
+        if 'phone' in cleaned:
+            formatted, error = normalise(cleaned.get('phone'), cleaned.get('phone_country') or 'IN')
+            if error:
+                self.add_error('phone', error)
+            else:
+                cleaned['phone'] = formatted
         self.is_spam = False
         if cleaned.get('website'):
             self.is_spam = True
@@ -162,7 +159,7 @@ class ContactForm(forms.ModelForm):
 
     def save(self, commit=True):
         inquiry = super().save(commit=False)
-        inquiry.subject = self.cleaned_data.get('topic', '')
+        inquiry.phone = self.cleaned_data.get('phone', '')
         if commit:
             inquiry.save()
         return inquiry

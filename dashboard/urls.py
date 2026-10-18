@@ -43,6 +43,12 @@ urlpatterns = [
     path('inquiries/', views.inquiry_list, name='inquiry_list'),
     path('inquiries/<int:pk>/', views.inquiry_detail, name='inquiry_detail'),
     path('inquiries/<int:pk>/delete/', views.inquiry_delete, name='inquiry_delete'),
+    # Contact page + social links
+    path('contact-page/', views.contact_page_edit, name='contact_page'),
+    path('social-links/', views.social_list, name='social_list'),
+    path('social-links/create/', views.social_create, name='social_create'),
+    path('social-links/<int:pk>/edit/', views.social_edit, name='social_edit'),
+    path('social-links/<int:pk>/delete/', views.social_delete, name='social_delete'),
     # Settings
     path('settings/', views.site_settings_edit, name='site_settings'),
     # Pages

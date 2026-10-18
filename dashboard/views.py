@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.http import JsonResponse
-from django.db.models import Count, Prefetch, Q
+from django.db.models import Count, Max, Prefetch, Q
 from django.db.models.functions import TruncMonth
 from django.utils import timezone
 from datetime import timedelta
@@ -1108,3 +1108,85 @@ def navbar_services_update(request):
         return JsonResponse({'ok': True})
 
     return JsonResponse({'ok': False, 'error': 'Unknown action'}, status=400)
+
+
+# ---- Contact page settings ----
+@login_required
+@staff_required
+def contact_page_edit(request):
+    from contact.models import ContactPageSettings
+    from dashboard.forms import ContactPageSettingsForm
+    page = ContactPageSettings.get()
+    if request.method == 'POST':
+        form = ContactPageSettingsForm(request.POST, instance=page)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Contact page updated.')
+            return redirect('dashboard:contact_page')
+        messages.error(request, 'Some fields need your attention.')
+    else:
+        form = ContactPageSettingsForm(instance=page)
+    return render(request, 'dashboard/contactpage/form.html', {'form': form, 'page_title': 'Contact Page'})
+
+
+# ---- Social links ----
+@login_required
+@staff_required
+def social_list(request):
+    from core.models import SocialLink
+    if request.method == 'POST' and request.POST.get('order'):
+        # Drag-to-reorder: "3,1,2"
+        ids = [int(x) for x in request.POST['order'].split(',') if x.isdigit()]
+        for position, pk in enumerate(ids, start=1):
+            SocialLink.objects.filter(pk=pk).update(display_order=position)
+        messages.success(request, 'Order saved.')
+        return redirect('dashboard:social_list')
+    return render(request, 'dashboard/socials/list.html', {'links': SocialLink.objects.all(), 'page_title': 'Social Links'})
+
+
+@login_required
+@staff_required
+def social_create(request):
+    from core.models import SocialLink
+    from dashboard.forms import SocialLinkForm
+    if request.method == 'POST':
+        form = SocialLinkForm(request.POST)
+        if form.is_valid():
+            link = form.save(commit=False)
+            if not link.display_order:
+                link.display_order = (SocialLink.objects.aggregate(m=Max('display_order'))['m'] or 0) + 1
+            link.save()
+            messages.success(request, f'{link.display_label} added.')
+            return redirect('dashboard:social_list')
+    else:
+        form = SocialLinkForm()
+    return render(request, 'dashboard/socials/form.html', {'form': form, 'page_title': 'Add Social Link', 'platforms': SocialLink.PLATFORMS})
+
+
+@login_required
+@staff_required
+def social_edit(request, pk):
+    from core.models import SocialLink
+    from dashboard.forms import SocialLinkForm
+    link = get_object_or_404(SocialLink, pk=pk)
+    if request.method == 'POST':
+        form = SocialLinkForm(request.POST, instance=link)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'{link.display_label} updated.')
+            return redirect('dashboard:social_list')
+    else:
+        form = SocialLinkForm(instance=link)
+    return render(request, 'dashboard/socials/form.html', {'form': form, 'link': link, 'page_title': 'Edit Social Link', 'platforms': SocialLink.PLATFORMS})
+
+
+@login_required
+@staff_required
+def social_delete(request, pk):
+    from core.models import SocialLink
+    link = get_object_or_404(SocialLink, pk=pk)
+    if request.method == 'POST':
+        label = link.display_label
+        link.delete()
+        messages.success(request, f'{label} removed.')
+    return redirect('dashboard:social_list')
