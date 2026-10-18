@@ -87,6 +87,16 @@
                         <p class="cf-error" id="err_service">{{ form.service.errors.0 }}</p>
                     </div>
 
+                    {# Shown when "Other (type your own)" is chosen #}
+                    <div class="cf-field cf-other{% if form.service.value == '__other__' %} is-shown{% endif %}{% if form.service_other.errors %} is-invalid{% endif %}" data-field="service_other" id="cfOtherWrap">
+                        <i class="fas fa-pen cf-icon" aria-hidden="true"></i>
+                        <input type="text" name="service_other" id="id_service_other" class="cf-input" maxlength="100" placeholder=" "
+                               value="{{ form.service_other.value|default:'' }}" aria-describedby="err_service_other">
+                        <label for="id_service_other" class="cf-label">Which service do you need? <span class="cf-req" aria-hidden="true">*</span></label>
+                        <span class="cf-state" aria-hidden="true"><i class="fas fa-check"></i></span>
+                        <p class="cf-error" id="err_service_other">{{ form.service_other.errors.0 }}</p>
+                    </div>
+
                     {# Message #}
                     <div class="cf-field cf-field-textarea{% if form.message.value %} has-value{% endif %}{% if form.message.errors %} is-invalid{% endif %}" data-field="message">
                         <textarea name="message" id="id_message" class="cf-input" rows="5" maxlength="{{ message_max }}" placeholder=" " required

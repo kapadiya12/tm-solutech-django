@@ -169,3 +169,37 @@ class ContactFormTests(TestCase):
         self.assertContains(res, '1–2 business days')
         self.assertContains(res, 'id="cfCountries"')
         self.assertNotContains(res, 'What can we help with')
+
+
+@override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend', ADMIN_EMAIL='team@example.com')
+class StricterRuleTests(ContactFormTests.__mro__[0]):
+    """Rules added for 'proper validation in all fields'."""
+
+    def test_email_shapes(self):
+        for bad in ('a@b', 'a..b@x.com', 'name@domain.c', 'name @x.com', 'name@-x.com'):
+            with self.subTest(bad=bad):
+                cache.clear()
+                self.assertFieldError('email', email=bad)
+
+    def test_name_needs_real_letters(self):
+        self.assertFieldError('name', name='aaaaaaa')
+
+    def test_company_needs_a_letter(self):
+        self.assertFieldError('company', company='12345')
+
+    def test_message_needs_words(self):
+        self.assertFieldError('message', message='a' * 30)
+        cache.clear()
+        self.assertFieldError('message', message='helpppppppp me with something please')
+
+    def test_india_phone_must_be_ten_digits(self):
+        self.assertFieldError('phone', phone='98765 4321')
+        cache.clear()
+        self.assertFieldError('phone', phone='1800 123 4567')  # toll-free
+
+    def test_other_service_typed(self):
+        self.post(service='__other__', service_other='Data centre cabling')
+        self.assertEqual(ContactInquiry.objects.get().service, 'Other: Data centre cabling')
+
+    def test_other_service_requires_text(self):
+        self.assertFieldError('service_other', service='__other__', service_other='')

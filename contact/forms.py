@@ -13,7 +13,12 @@ from .phone import country_choices, normalise
 # Letters, with single separators or "dot + space" between parts (e.g. "Dr. R. K. Patel")
 NAME_RE = re.compile(r"^[^\W\d_]+(?:(?:\. ?|[ '\-])[^\W\d_]+)*\.?$", re.UNICODE)
 URL_RE = re.compile(r'(https?://|www\.)', re.IGNORECASE)
+LETTER_RE = re.compile(r'[^\W\d_]', re.UNICODE)
+# local@domain.tld: no spaces, no consecutive dots, TLD of 2+ letters
+EMAIL_RE = re.compile(r'^(?!.*\.\.)[A-Za-z0-9._%+\-]+@[A-Za-z0-9](?:[A-Za-z0-9\-]*[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9\-]*[A-Za-z0-9])?)*\.[A-Za-z]{2,24}$')
+REPEAT_RE = re.compile(r'(.)\1{5,}')
 
+OTHER_SERVICE = '__other__'
 MESSAGE_MIN = 20
 MESSAGE_MAX = 2000
 
@@ -41,12 +46,13 @@ def service_choices():
         services.sort(key=lambda s: s.display_order)
         if services:
             choices.append((category.name, [(s.title, s.title) for s in services]))
-    choices.append(('Other', [('Not sure yet', 'Not sure yet / need advice')]))
+    choices.append(('Other', [('Not sure yet', 'Not sure yet / need advice'), (OTHER_SERVICE, 'Other (type your own)')]))
     return choices
 
 
 class ContactForm(forms.ModelForm):
     phone_country = forms.ChoiceField(required=False)
+    service_other = forms.CharField(required=False, max_length=100, widget=forms.TextInput(attrs={'maxlength': 100}))
     consent = forms.BooleanField(
         required=True,
         error_messages={'required': 'Please agree so we can contact you about your enquiry.'},
@@ -102,6 +108,8 @@ class ContactForm(forms.ModelForm):
             raise forms.ValidationError('Please keep your name under 100 characters.')
         if not NAME_RE.match(name):
             raise forms.ValidationError("Use letters only. Spaces, dots, hyphens and apostrophes are fine.")
+        if len(LETTER_RE.findall(name)) < 2 or REPEAT_RE.search(name.lower()):
+            raise forms.ValidationError('Please enter your real name.')
         return name
 
     def clean_company(self):
@@ -114,10 +122,15 @@ class ContactForm(forms.ModelForm):
             raise forms.ValidationError('Please keep the company name under 150 characters.')
         if URL_RE.search(company):
             raise forms.ValidationError('Please enter the company name, not a link.')
+        if not LETTER_RE.search(company):
+            raise forms.ValidationError('A company name needs at least one letter.')
         return company
 
     def clean_email(self):
-        return self.cleaned_data.get('email', '').strip().lower()
+        email = self.cleaned_data.get('email', '').strip().lower()
+        if len(email) > 254 or not EMAIL_RE.match(email):
+            raise forms.ValidationError('Please enter a valid email address, like name@company.com.')
+        return email
 
     def clean_phone_country(self):
         iso = (self.cleaned_data.get('phone_country') or '').upper()
@@ -129,12 +142,24 @@ class ContactForm(forms.ModelForm):
             raise forms.ValidationError(f'Please add a little more detail (at least {MESSAGE_MIN} characters).')
         if len(message) > MESSAGE_MAX:
             raise forms.ValidationError(f'Please keep your message under {MESSAGE_MAX} characters.')
+        if len(LETTER_RE.findall(message)) < 10 or len(message.split()) < 3:
+            raise forms.ValidationError('Please describe what you need in a few words.')
+        if REPEAT_RE.search(message):
+            raise forms.ValidationError('Please remove the repeated characters.')
         if len(URL_RE.findall(message)) > 3:
             raise forms.ValidationError('Please remove some links. Messages with many links are blocked as spam.')
         return message
 
     def clean(self):
         cleaned = super().clean()
+        if cleaned.get('service') == OTHER_SERVICE:
+            other = ' '.join((cleaned.get('service_other') or '').split())
+            if len(other) < 2:
+                self.add_error('service_other', 'Please tell us which service you need.')
+            elif URL_RE.search(other):
+                self.add_error('service_other', 'Please describe the service, not a link.')
+            else:
+                cleaned['service'] = f'Other: {other}'
         if 'phone' in cleaned:
             formatted, error = normalise(cleaned.get('phone'), cleaned.get('phone_country') or 'IN')
             if error:

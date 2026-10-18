@@ -22,18 +22,20 @@
     document.body.appendChild(backdrop);
     backdrop.addEventListener('click', () => openPop && openPop.close());
 
-    function createPopup({ anchor, items, groups, searchPlaceholder, renderItem, onPick, getSelected, title, wide }) {
+    function createPopup({ anchor, items, groups, searchPlaceholder, renderItem, onPick, getSelected, title, wide, customOption }) {
         const pop = document.createElement('div');
         pop.className = 'cf-pop' + (wide ? ' cf-pop-wide' : '');
         pop.setAttribute('role', 'dialog');
         pop.setAttribute('aria-label', title);
+        pop.setAttribute('data-lenis-prevent', '');   // let the list scroll natively (Lenis smooth-scroll ignores it)
         pop.innerHTML =
             '<div class="cf-pop-head"><strong>' + escapeHtml(title) + '</strong><button type="button" class="cf-pop-close" aria-label="Close"><i class="fas fa-xmark"></i></button></div>' +
-            '<div class="cf-pop-search"><i class="fas fa-magnifying-glass" aria-hidden="true"></i><input type="search" autocomplete="off" spellcheck="false" placeholder="' + escapeHtml(searchPlaceholder) + '" aria-label="' + escapeHtml(searchPlaceholder) + '"></div>' +
+            '<div class="cf-pop-search"><i class="fas fa-magnifying-glass" aria-hidden="true"></i><input type="text" autocomplete="off" spellcheck="false" placeholder="' + escapeHtml(searchPlaceholder) + '" aria-label="' + escapeHtml(searchPlaceholder) + '"><button type="button" class="cf-pop-clear" aria-label="Clear search" hidden><i class="fas fa-xmark"></i></button></div>' +
             '<ul class="cf-pop-list" role="listbox"></ul>' +
             '<p class="cf-pop-empty" hidden>No matches. Try another word.</p>';
         document.body.appendChild(pop);
         const search = pop.querySelector('input');
+        const clearBtn = pop.querySelector('.cf-pop-clear');
         const list = pop.querySelector('.cf-pop-list');
         const empty = pop.querySelector('.cf-pop-empty');
         let visible = [];
@@ -42,6 +44,11 @@
         function render(q) {
             const query = fold(q.trim());
             visible = items.filter((it) => !query || it.search.includes(query));
+            clearBtn.hidden = !q;
+            if (customOption && q.trim()) {
+                const extra = customOption(q.trim(), visible);
+                if (extra) visible.push(extra);
+            }
             let html = '';
             let lastGroup = null;
             visible.forEach((it, i) => {
@@ -54,7 +61,7 @@
             });
             list.innerHTML = html;
             empty.hidden = visible.length > 0;
-            const selIndex = visible.findIndex((it) => it.value === getSelected());
+            const selIndex = query ? -1 : visible.findIndex((it) => it.value === getSelected());
             setActive(selIndex >= 0 ? selIndex : 0, true);
         }
 
@@ -119,13 +126,14 @@
         search.setAttribute('aria-controls', pop.dataset.uid + '-list');
 
         search.addEventListener('input', () => render(search.value));
+        clearBtn.addEventListener('click', () => { search.value = ''; render(''); search.focus(); });
         search.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowDown') { e.preventDefault(); setActive(active + 1); }
             else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(active - 1); }
             else if (e.key === 'Home') { e.preventDefault(); setActive(0); }
             else if (e.key === 'End') { e.preventDefault(); setActive(visible.length - 1); }
             else if (e.key === 'Enter') { e.preventDefault(); if (visible[active]) { onPick(visible[active]); api.close(); } }
-            else if (e.key === 'Escape') { e.preventDefault(); api.close(); }
+            else if (e.key === 'Escape') { e.preventDefault(); if (search.value) { search.value = ''; render(''); } else api.close(); }
             else if (e.key === 'Tab') { api.close(false); }
         });
         list.addEventListener('mousemove', (e) => {
@@ -179,24 +187,54 @@
         const sync = () => {
             const opt = serviceSelect.options[serviceSelect.selectedIndex];
             const has = !!serviceSelect.value;
-            trigger.querySelector('.cf-combo-value').textContent = has ? opt.textContent : 'Select a service (optional)';
+            const otherText = document.getElementById('id_service_other');
+            const label = serviceSelect.value === '__other__' && otherText && otherText.value.trim() ? 'Other: ' + otherText.value.trim() : (opt ? opt.textContent : '');
+            trigger.querySelector('.cf-combo-value').textContent = has ? label : 'Select a service (optional)';
             trigger.classList.toggle('is-placeholder', !has);
         };
         sync();
+        const otherWrap = document.getElementById('cfOtherWrap');
+        const otherInput = document.getElementById('id_service_other');
+        const showOther = (on, focus) => {
+            if (!otherWrap) return;
+            otherWrap.classList.toggle('is-shown', on);
+            if (!on) { otherInput.value = ''; setError('service_other', ''); }
+            else if (focus) setTimeout(() => otherInput.focus(), 60);
+        };
         const pop = createPopup({
             anchor: trigger, items, groups: true, wide: true,
+            customOption: (q, matches) => (matches.some((m) => fold(m.label) === fold(q)) ? null
+                : { value: '__custom__', raw: q, label: q, custom: true, search: '' }),
             title: 'Service of interest',
             searchPlaceholder: 'Search 37 services…',
             getSelected: () => serviceSelect.value,
-            renderItem: (it, q) => it.value ? '<span class="cf-pop-text">' + highlight(it.label, q) + (q && it.group ? '<small>' + escapeHtml(it.group) + '</small>' : '') + '</span>'
+            renderItem: (it, q) => it.custom
+                ? '<span class="cf-pop-custom-icon" aria-hidden="true"><i class="fas fa-pen"></i></span><span class="cf-pop-text">Use “' + escapeHtml(it.raw) + '”<small>Not in the list? We’ll note it as your service.</small></span>'
+                : it.value === '__other__' ? '<span class="cf-pop-custom-icon" aria-hidden="true"><i class="fas fa-pen"></i></span><span class="cf-pop-text">' + highlight(it.label, q) + '</span>'
+                : it.value ? '<span class="cf-pop-text">' + highlight(it.label, q) + (q && it.group ? '<small>' + escapeHtml(it.group) + '</small>' : '') + '</span>'
                                               : '<span class="cf-pop-text cf-pop-muted">' + escapeHtml(it.label) + '</span>',
-            onPick: (it) => { serviceSelect.value = it.value; serviceSelect.dispatchEvent(new Event('change', { bubbles: true })); sync(); },
+            onPick: (it) => {
+                if (it.custom) {
+                    serviceSelect.value = '__other__';
+                    otherInput.value = it.raw;
+                    showOther(true);
+                    touched.add('service_other'); check('service_other');
+                } else {
+                    serviceSelect.value = it.value;
+                    showOther(it.value === '__other__', true);
+                }
+                serviceSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                sync();
+                saveDraft();
+            },
         });
         trigger.addEventListener('click', () => pop.toggle());
         trigger.addEventListener('keydown', (e) => {
             if (['ArrowDown', 'ArrowUp', 'Enter', ' '].includes(e.key)) { e.preventDefault(); pop.open(); }
         });
         serviceSelect.addEventListener('change', sync);
+        if (otherInput) otherInput.addEventListener('input', sync);
+        form.addEventListener('reset', () => setTimeout(() => showOther(false)));
         form.addEventListener('reset', () => setTimeout(sync));
     }
 
@@ -293,7 +331,9 @@
     const MIN = parseInt(form.dataset.messageMin, 10) || 20;
     const MAX = parseInt(form.dataset.messageMax, 10) || 2000;
     const NAME_RE = /^\p{L}+(?:(?:\. ?|[ '\-])\p{L}+)*\.?$/u;
-    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    const EMAIL_RE = /^(?!.*\.\.)[A-Za-z0-9._%+\-]+@[A-Za-z0-9](?:[A-Za-z0-9\-]*[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9\-]*[A-Za-z0-9])?)*\.[A-Za-z]{2,24}$/;
+    const LETTERS = /\p{L}/gu;
+    const REPEAT_RE = /(.)\1{5,}/;
     const URL_RE = /(https?:\/\/|www\.)/gi;
     const squash = (v) => v.replace(/\s+/g, ' ').trim();
     const phoneTouched = () => touched.has('phone');
@@ -305,6 +345,7 @@
             if (v.length < 2) return 'Your name looks too short.';
             if (v.length > 100) return 'Please keep your name under 100 characters.';
             if (!NAME_RE.test(v)) return 'Use letters only. Spaces, dots, hyphens and apostrophes are fine.';
+            if ((v.match(LETTERS) || []).length < 2 || REPEAT_RE.test(v.toLowerCase())) return 'Please enter your real name.';
             return '';
         },
         company(v) {
@@ -313,6 +354,7 @@
             if (v.length < 2) return 'Your company name looks too short.';
             if (v.length > 150) return 'Please keep the company name under 150 characters.';
             if (/(https?:\/\/|www\.)/i.test(v)) return 'Please enter the company name, not a link.';
+            if (!(v.match(LETTERS) || []).length) return 'A company name needs at least one letter.';
             return '';
         },
         email(v) {
@@ -339,7 +381,17 @@
             if (!v) return 'Please tell us a little about what you need.';
             if (v.length < MIN) return `Please add a little more detail (at least ${MIN} characters).`;
             if (v.length > MAX) return `Please keep your message under ${MAX} characters.`;
+            if ((v.match(LETTERS) || []).length < 10 || v.split(/\s+/).length < 3) return 'Please describe what you need in a few words.';
+            if (REPEAT_RE.test(v)) return 'Please remove the repeated characters.';
             if ((v.match(URL_RE) || []).length > 3) return 'Please remove some links. Messages with many links are blocked as spam.';
+            return '';
+        },
+        service_other(v) {
+            const sel = control('service');
+            if (!sel || sel.value !== '__other__') return '';
+            v = squash(v);
+            if (v.length < 2) return 'Please tell us which service you need.';
+            if (/(https?:\/\/|www\.)/i.test(v)) return 'Please describe the service, not a link.';
             return '';
         },
         consent(_, el) { return el.checked ? '' : 'Please agree so we can contact you about your enquiry.'; },
@@ -375,6 +427,64 @@
         el.addEventListener(el.type === 'checkbox' ? 'change' : 'blur', () => { touched.add(name); check(name); });
         el.addEventListener('input', () => { if (touched.has(name)) check(name); saveDraft(); });
     });
+    /* ---------- Typing guards ---------- */
+    const nameEl = control('name');
+    if (nameEl) nameEl.addEventListener('input', () => {
+        const clean = nameEl.value.replace(/[^\p{L}\p{M} .'\-]/gu, '');
+        if (clean !== nameEl.value) { nameEl.value = clean; flashHint('name', 'Names can only contain letters.'); }
+    });
+    const phoneEl = control('phone');
+    if (phoneEl) phoneEl.addEventListener('input', () => {
+        if (phoneEl.value.trim().startsWith('+')) return; // handled by country auto-detect
+        let v = phoneEl.value.replace(/[^\d\s\-()]/g, '');
+        const lengths = (currentCountry && currentCountry.lengths) || [];
+        const max = lengths.length ? Math.max(...lengths) + (v.replace(/\D/g, '').startsWith('0') ? 1 : 0) : 15;
+        let digits = 0;
+        v = Array.from(v).filter((ch) => (/\d/.test(ch) ? ++digits <= max : true)).join('');
+        if (v !== phoneEl.value) { phoneEl.value = v; if (digits > max) flashHint('phone', 'That is the maximum length for this country.'); }
+    });
+    function flashHint(name, text) {
+        const err = form.querySelector('#err_' + name);
+        if (!err || fieldBox(name).classList.contains('is-invalid')) return;
+        err.textContent = text;
+        clearTimeout(err._t);
+        err._t = setTimeout(() => { if (!fieldBox(name).classList.contains('is-invalid')) err.textContent = ''; }, 1800);
+    }
+
+    // "Did you mean …@gmail.com?" for common domain typos
+    const DOMAINS = ['gmail.com', 'yahoo.com', 'yahoo.co.in', 'outlook.com', 'hotmail.com', 'icloud.com', 'rediffmail.com', 'live.com', 'protonmail.com', 'zoho.com'];
+    const lev = (a, b) => {
+        const d = Array.from({ length: a.length + 1 }, (_, i) => [i]);
+        for (let j = 1; j <= b.length; j++) d[0][j] = j;
+        for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++)
+            d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+        return d[a.length][b.length];
+    };
+    const emailEl = control('email');
+    if (emailEl) {
+        const tip = document.createElement('button');
+        tip.type = 'button';
+        tip.className = 'cf-suggest';
+        tip.hidden = true;
+        fieldBox('email').appendChild(tip);
+        emailEl.addEventListener('blur', () => {
+            const v = emailEl.value.trim().toLowerCase();
+            const at = v.lastIndexOf('@');
+            tip.hidden = true;
+            if (at < 1) return;
+            const domain = v.slice(at + 1);
+            if (!domain || DOMAINS.includes(domain)) return;
+            const best = DOMAINS.map((d) => [d, lev(domain, d)]).sort((a, b) => a[1] - b[1])[0];
+            if (best && best[1] > 0 && best[1] <= 2) {
+                const fixed = v.slice(0, at + 1) + best[0];
+                tip.innerHTML = '<i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i> Did you mean <strong>' + escapeHtml(fixed) + '</strong>?';
+                tip.dataset.fix = fixed;
+                tip.hidden = false;
+            }
+        });
+        tip.addEventListener('click', () => { emailEl.value = tip.dataset.fix; tip.hidden = true; check('email'); saveDraft(); });
+    }
+
     ['name', 'company', 'email'].forEach((name) => {
         const el = control(name);
         if (el) el.addEventListener('blur', () => { el.value = name === 'email' ? el.value.trim() : squash(el.value); });
@@ -395,7 +505,7 @@
 
     /* ---------- Draft autosave ---------- */
     const DRAFT_KEY = 'tmContactDraft';
-    const draftFields = ['name', 'company', 'email', 'phone', 'phone_country', 'message', 'service'];
+    const draftFields = ['name', 'company', 'email', 'phone', 'phone_country', 'message', 'service', 'service_other'];
     function saveDraft() {
         try {
             const data = {};
@@ -413,7 +523,12 @@
             const el = control(n);
             if (!el || !data[n]) return;
             if (n === 'phone_country') { if (setCountryFn && byIso[data[n]]) setCountryFn(data[n]); }
-            else if (n === 'service') { el.value = data[n]; el.dispatchEvent(new Event('change', { bubbles: true })); }
+            else if (n === 'service') {
+                el.value = data[n];
+                const wrap = document.getElementById('cfOtherWrap');
+                if (wrap) wrap.classList.toggle('is-shown', data[n] === '__other__');
+                el.dispatchEvent(new Event('change', { bubbles: true }));
+            }
             else if (!el.value) el.value = data[n];
         });
         updateCounter();

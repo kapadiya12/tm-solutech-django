@@ -495,7 +495,7 @@
 .cf-pop.is-open { opacity: 1; visibility: visible; transform: none; transition: opacity 0.18s ease, transform 0.28s var(--ease-premium), visibility 0s; }
 .cf-pop-head { display: none; }
 .cf-pop-search { position: relative; padding: 0.7rem 0.7rem 0.5rem; border-bottom: 1px solid #EEF1F7; }
-.cf-pop-search i { position: absolute; left: 1.45rem; top: 50%; transform: translateY(-40%); font-size: 0.8rem; color: #98A2B8; }
+.cf-pop-search > i { position: absolute; left: 1.45rem; top: 50%; transform: translateY(-40%); font-size: 0.8rem; color: #98A2B8; }
 .cf-pop-search input {
     width: 100%; height: 42px; padding: 0 0.9rem 0 2.3rem;
     border-radius: 11px; border: 1.5px solid #E2E6F0; background: #F7F9FC;
@@ -560,3 +560,43 @@
 @media (prefers-reduced-motion: reduce) {
     .cf-pop, .cf-pop.is-open, .cf-pop-backdrop { transition: none; }
 }
+
+/* Clear button in pop-up search */
+.cf-pop-search input { padding-right: 2.6rem; }
+.cf-pop-clear {
+    position: absolute; right: 1.2rem; top: 50%; transform: translateY(-40%);
+    width: 26px; height: 26px; border-radius: 50%; border: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 0.72rem; color: #4A5470; background: #E7EBF3; cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+.cf-pop-clear:hover { color: #ffffff; background: var(--tm-navy, #1B2585); }
+.cf-pop-clear[hidden] { display: none; }
+.cf-pop-custom-icon {
+    width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 0.72rem; color: var(--tm-orange-dark, #E57E27); background: rgba(244, 162, 30, 0.14);
+}
+
+/* "Other" service text box */
+.cf-other { display: none; margin-top: -0.25rem; }
+.cf-other.is-shown { display: block; animation: cfReveal 0.35s var(--ease-premium); }
+@keyframes cfReveal { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+
+/* Email typo suggestion */
+.cf-suggest {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    margin: 0.4rem 0 0 0.25rem; padding: 0.3rem 0.65rem;
+    border: 1px dashed rgba(10, 174, 224, 0.5); border-radius: 999px;
+    background: rgba(10, 174, 224, 0.06); color: #1E5F8F;
+    font-size: 0.78rem; cursor: pointer;
+}
+.cf-suggest:hover { background: rgba(10, 174, 224, 0.12); }
+.cf-suggest i { color: var(--tm-azure, #0AAEE0); }
+
+/* Room for Safari's autofill icon so it never sits on the check mark */
+.cf-field-phone .cf-input { padding-right: 3.6rem; }
+.cf-field-phone .cf-state { right: 2.4rem; }
+@media (prefers-reduced-motion: reduce) { .cf-other.is-shown { animation: none; } }
+.cf-suggest[hidden] { display: none; }
+.cf-pop-clear i { position: static; transform: none; }
