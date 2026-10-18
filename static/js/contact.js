@@ -285,6 +285,26 @@
         wrap.prepend(btn);
         field.classList.add('is-enhanced');
 
+        // Live digit counter, e.g. "7 / 10 digits" (green once the length is right)
+        const hint = field.querySelector('.cf-hint');
+        function updatePhoneCount() {
+            if (!hint || !currentCountry) return;
+            const digits = phoneInput.value.replace(/\D/g, '').length;
+            const lens = currentCountry.lengths || [];
+            const trunk = phoneInput.value.replace(/\D/g, '').startsWith('0') ? 1 : 0;
+            const ok = lens.includes(digits) || (trunk && lens.includes(digits - 1));
+            if (!digits) {
+                hint.textContent = 'Optional · ' + (lens.length === 1 ? lens[0] + ' digits' : 'e.g. ' + (currentCountry.example || ''));
+                hint.classList.remove('is-ok', 'is-count');
+                return;
+            }
+            const target = lens.length ? (lens.length === 1 ? String(lens[0] + trunk) : (Math.min(...lens) + trunk) + '–' + (Math.max(...lens) + trunk)) : '';
+            hint.textContent = target ? digits + ' / ' + target + ' digits' : digits + ' digits';
+            hint.classList.add('is-count');
+            hint.classList.toggle('is-ok', ok);
+        }
+        phoneInput.addEventListener('input', () => updatePhoneCount());
+
         const setCountry = (iso, keepFocus) => {
             const c = byIso[iso] || byIso.IN || countries[0];
             currentCountry = c;
@@ -292,8 +312,7 @@
             btn.innerHTML = flag(c.iso) + '<span class="cf-cc-dial">+' + c.dial + '</span><i class="fas fa-chevron-down" aria-hidden="true"></i>';
             btn.setAttribute('aria-label', 'Country code: ' + countryName(c.iso) + ' +' + c.dial + '. Change');
             phoneInput.setAttribute('data-example', c.example || '');
-            const hint = field.querySelector('.cf-hint');
-            if (hint) hint.textContent = c.example ? 'Optional · e.g. ' + c.example : 'Optional';
+            updatePhoneCount();
             if (keepFocus) phoneInput.focus();
         };
         setCountry(countrySelect.value);

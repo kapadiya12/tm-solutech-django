@@ -600,3 +600,6 @@
 @media (prefers-reduced-motion: reduce) { .cf-other.is-shown { animation: none; } }
 .cf-suggest[hidden] { display: none; }
 .cf-pop-clear i { position: static; transform: none; }
+.cf-hint.is-count { font-variant-numeric: tabular-nums; font-weight: 600; color: #C2621B; }
+.cf-hint.is-ok { color: #1C7A52; }
+.cf-hint.is-ok::after { content: ' ✓'; }
