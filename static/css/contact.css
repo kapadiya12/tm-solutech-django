@@ -603,3 +603,13 @@
 .cf-hint.is-count { font-variant-numeric: tabular-nums; font-weight: 600; color: #C2621B; }
 .cf-hint.is-ok { color: #1C7A52; }
 .cf-hint.is-ok::after { content: ' ✓'; }
+
+/* Email: room for Safari autofill icon + "checking" spinner */
+.cf-field[data-field="email"] .cf-input { padding-right: 3.6rem; }
+.cf-field[data-field="email"] .cf-state { right: 2.4rem; }
+.cf-field.is-checking .cf-state {
+    opacity: 1; transform: translateY(-50%) scale(1);
+    background: transparent; border: 2px solid #CFD6E4; border-top-color: var(--tm-azure, #0AAEE0);
+    animation: cfSpin 0.7s linear infinite;
+}
+.cf-field.is-checking .cf-state i { display: none; }

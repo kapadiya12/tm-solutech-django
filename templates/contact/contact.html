@@ -31,7 +31,7 @@
                 </div>
 
                 <form method="post" action="{% url 'contact:contact' %}" class="cf-form" id="contactForm" novalidate
-                      data-message-min="{{ message_min }}" data-message-max="{{ message_max }}" data-submit-label="{{ cp.submit_label }}">
+                      data-message-min="{{ message_min }}" data-message-max="{{ message_max }}" data-submit-label="{{ cp.submit_label }}" data-email-check="{% url 'contact:check_email' %}">
                     {% csrf_token %}
                     <input type="hidden" name="form_token" value="{{ form_token }}">
                     <div class="cf-hp" aria-hidden="true">

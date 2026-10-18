@@ -10,6 +10,7 @@ from django.shortcuts import redirect, render
 from .forms import MESSAGE_MAX, MESSAGE_MIN, ContactForm, issue_form_token
 from .models import ContactPageSettings
 from .phone import countries
+from .emailcheck import check_email
 from core.models import SocialLink
 from services.models import ServiceCategory
 
@@ -134,3 +135,14 @@ def contact_page(request):
         'page_subtitle': page.page_subtitle,
     }
     return render(request, 'contact/contact.html', context)
+
+
+def check_email_view(request):
+    """Live email check for the form: format, provider rules, typos, DNS."""
+    key = f'email-check-rate:{_client_ip(request)}'
+    count = cache.get(key, 0)
+    if count > 60:
+        return JsonResponse({'ok': True, 'error': None, 'suggestion': None})
+    cache.set(key, count + 1, 60)
+    error, suggestion = check_email(request.GET.get('email', '')[:254])
+    return JsonResponse({'ok': error is None, 'error': error, 'suggestion': suggestion})

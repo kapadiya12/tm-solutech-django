@@ -1,4 +1,5 @@
 import time
+from unittest import mock
 
 from django.core import mail, signing
 from django.core.cache import cache
@@ -32,6 +33,9 @@ class ContactFormTests(TestCase):
 
     def setUp(self):
         cache.clear()
+        patcher = mock.patch('contact.emailcheck.domain_accepts_mail', return_value=True)
+        patcher.start()
+        self.addCleanup(patcher.stop)
 
     def post(self, ajax=False, **overrides):
         data = {**VALID, 'form_token': aged_token(), **overrides}
@@ -203,3 +207,50 @@ class StricterRuleTests(ContactFormTests.__mro__[0]):
 
     def test_other_service_requires_text(self):
         self.assertFieldError('service_other', service='__other__', service_other='')
+
+
+from unittest import mock
+
+
+@override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend', ADMIN_EMAIL='team@example.com')
+class EmailRuleTests(TestCase):
+    url = reverse('contact:contact')
+
+    def setUp(self):
+        cache.clear()
+
+    def err(self, email, dns=True):
+        with mock.patch('contact.emailcheck.domain_accepts_mail', return_value=dns):
+            data = {**VALID, 'email': email, 'form_token': aged_token()}
+            res = self.client.post(self.url, data, HTTP_X_REQUESTED_WITH='fetch')
+        cache.clear()
+        return (res.json().get('errors') or {}).get('email', [None])[0]
+
+    def test_rules(self):
+        cases = {
+            'jihihihih@fma': 'incomplete',
+            'abc@gmail.com': '6 to 30',
+            'john_smith@gmail.com': 'letters, numbers and dots',
+            'x@mailinator.com': 'temporary',
+            'john@@x.com': 'exactly one @',
+        }
+        for email, needle in cases.items():
+            with self.subTest(email=email):
+                self.assertIn(needle, self.err(email) or '')
+
+    def test_dead_domain_rejected_with_suggestion(self):
+        self.assertIn('Did you mean gmail.com', self.err('john@gmal.com', dns=False))
+
+    def test_good_emails_pass(self):
+        for email in ('john.smith@gmail.com', 'priya@tmsolutech.com', 'sales@acme.co.in'):
+            with self.subTest(email=email):
+                self.assertIsNone(self.err(email))
+
+    def test_dns_unknown_never_blocks(self):
+        self.assertIsNone(self.err('priya@tmsolutech.com', dns=None))
+
+    def test_live_endpoint(self):
+        with mock.patch('contact.emailcheck.domain_accepts_mail', return_value=False):
+            data = self.client.get(reverse('contact:check_email'), {'email': 'john@gmal.com'}).json()
+        self.assertFalse(data['ok'])
+        self.assertEqual(data['suggestion'], 'john@gmail.com')

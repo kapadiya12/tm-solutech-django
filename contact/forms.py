@@ -7,6 +7,7 @@ from django.core import signing
 from services.models import ServiceCategory
 from .models import ContactInquiry
 from .phone import country_choices, normalise
+from .emailcheck import check_email
 
 
 
@@ -95,6 +96,7 @@ class ContactForm(forms.ModelForm):
         for name, text in messages.items():
             self.fields[name].error_messages['required'] = text
         self.fields['email'].error_messages['invalid'] = 'Please enter a valid email address, like name@company.com.'
+        self.fields['email'].validators = []  # contact.emailcheck gives specific messages instead
 
         if not self.is_bound:
             self.initial.setdefault('form_token', issue_form_token())
@@ -128,8 +130,9 @@ class ContactForm(forms.ModelForm):
 
     def clean_email(self):
         email = self.cleaned_data.get('email', '').strip().lower()
-        if len(email) > 254 or not EMAIL_RE.match(email):
-            raise forms.ValidationError('Please enter a valid email address, like name@company.com.')
+        error, _ = check_email(email)
+        if error:
+            raise forms.ValidationError(error)
         return email
 
     def clean_phone_country(self):

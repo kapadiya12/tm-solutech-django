@@ -377,9 +377,22 @@
             return '';
         },
         email(v) {
-            v = v.trim();
+            v = v.trim().toLowerCase();
             if (!v) return 'Please enter your work email.';
-            if (v.length > 254 || !EMAIL_RE.test(v)) return 'Please enter a valid email address, like name@company.com.';
+            if (/\s/.test(v)) return 'Email addresses cannot contain spaces.';
+            if ((v.match(/@/g) || []).length !== 1) return 'An email address needs exactly one @, like name@company.com.';
+            const [local, domain] = v.split('@');
+            if (!local) return 'Add your name before the @.';
+            if (!domain) return 'Add the domain after the @, like gmail.com.';
+            if (!domain.includes('.')) return 'The domain is incomplete. Did you forget ".com"?';
+            if (v.length > 254 || local.length > 64 || !EMAIL_RE.test(v)) return 'Please enter a valid email address, like name@company.com.';
+            if (domain === 'gmail.com' || domain === 'googlemail.com') {
+                const bare = local.split('+')[0];
+                if (!/^[a-z0-9](?:[a-z0-9.]*[a-z0-9])?$/.test(bare)) return 'Gmail addresses use only letters, numbers and dots.';
+                const n = bare.replace(/\./g, '').length;
+                if (n < 6 || n > 30) return 'Gmail usernames are 6 to 30 characters long.';
+            }
+            if (emailServerError && emailServerError.value === v) return emailServerError.message;
             return '';
         },
         phone(v) {
@@ -471,6 +484,7 @@
     }
 
     // "Did you mean …@gmail.com?" for common domain typos
+    let emailServerError = null;
     const DOMAINS = ['gmail.com', 'yahoo.com', 'yahoo.co.in', 'outlook.com', 'hotmail.com', 'icloud.com', 'rediffmail.com', 'live.com', 'protonmail.com', 'zoho.com'];
     const lev = (a, b) => {
         const d = Array.from({ length: a.length + 1 }, (_, i) => [i]);
@@ -486,22 +500,44 @@
         tip.className = 'cf-suggest';
         tip.hidden = true;
         fieldBox('email').appendChild(tip);
-        emailEl.addEventListener('blur', () => {
-            const v = emailEl.value.trim().toLowerCase();
-            const at = v.lastIndexOf('@');
+        const showTip = (fixed) => {
+            if (!fixed || fixed === emailEl.value.trim().toLowerCase()) { tip.hidden = true; return; }
+            tip.innerHTML = '<i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i> Did you mean <strong>' + escapeHtml(fixed) + '</strong>?';
+            tip.dataset.fix = fixed;
+            tip.hidden = false;
+        };
+        // Live: validate while typing (after a short pause) once an @ appears
+        let typingTimer = null;
+        emailEl.addEventListener('input', () => {
             tip.hidden = true;
-            if (at < 1) return;
-            const domain = v.slice(at + 1);
-            if (!domain || DOMAINS.includes(domain)) return;
-            const best = DOMAINS.map((d) => [d, lev(domain, d)]).sort((a, b) => a[1] - b[1])[0];
-            if (best && best[1] > 0 && best[1] <= 2) {
-                const fixed = v.slice(0, at + 1) + best[0];
-                tip.innerHTML = '<i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i> Did you mean <strong>' + escapeHtml(fixed) + '</strong>?';
-                tip.dataset.fix = fixed;
-                tip.hidden = false;
-            }
+            emailServerError = null;
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(() => {
+                if (emailEl.value.includes('@') || touched.has('email')) { touched.add('email'); check('email'); }
+            }, 550);
         });
-        tip.addEventListener('click', () => { emailEl.value = tip.dataset.fix; tip.hidden = true; check('email'); saveDraft(); });
+        // On leaving the field: ask the server (domain receives mail? disposable? typo?)
+        let lastAsked = '';
+        emailEl.addEventListener('blur', async () => {
+            const v = emailEl.value.trim().toLowerCase();
+            if (!v || rules.email(v) || v === lastAsked) return;
+            lastAsked = v;
+            const box = fieldBox('email');
+            box.classList.add('is-checking');
+            try {
+                const res = await fetch(form.dataset.emailCheck + '?email=' + encodeURIComponent(v), { headers: { 'X-Requested-With': 'fetch' } });
+                const data = await res.json();
+                if (emailEl.value.trim().toLowerCase() !== v) return; // changed meanwhile
+                emailServerError = data.error ? { value: v, message: data.error } : null;
+                check('email');
+                showTip(data.suggestion);
+            } catch (e) { /* offline: the server re-checks on submit */ }
+            finally { box.classList.remove('is-checking'); }
+        });
+        tip.addEventListener('click', () => {
+            emailEl.value = tip.dataset.fix; tip.hidden = true; emailServerError = null; lastAsked = '';
+            touched.add('email'); check('email'); saveDraft(); emailEl.focus();
+        });
     }
 
     ['name', 'company', 'email'].forEach((name) => {
