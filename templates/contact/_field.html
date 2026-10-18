@@ -1,0 +1,13 @@
+{# Floating-label input. Params: field, icon, label, required, hint #}
+<div class="cf-field{% if field.value %} has-value{% endif %}{% if field.errors %} is-invalid{% endif %}" data-field="{{ field.name }}">
+    <i class="fas {{ icon }} cf-icon" aria-hidden="true"></i>
+    <input type="{{ field.field.widget.input_type }}" name="{{ field.html_name }}" id="{{ field.id_for_label }}" class="cf-input"
+           value="{{ field.value|default:'' }}" placeholder=" "
+           {% for k, v in field.field.widget.attrs.items %}{{ k }}="{{ v }}" {% endfor %}
+           {% if required %}required aria-required="true"{% endif %}
+           aria-describedby="err_{{ field.name }}{% if hint %} hint_{{ field.name }}{% endif %}"{% if field.errors %} aria-invalid="true"{% endif %}>
+    <label for="{{ field.id_for_label }}" class="cf-label">{{ label }}{% if required %} <span class="cf-req" aria-hidden="true">*</span>{% endif %}</label>
+    <span class="cf-state" aria-hidden="true"><i class="fas fa-check"></i></span>
+    {% if hint %}<p class="cf-hint" id="hint_{{ field.name }}">{{ hint }}</p>{% endif %}
+    <p class="cf-error" id="err_{{ field.name }}">{{ field.errors.0 }}</p>
+</div>

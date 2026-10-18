@@ -1,7 +1,10 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static asset_tags %}
+
+{% block extra_css %}<link rel="stylesheet" href="{% static_v 'css/contact.css' %}">{% endblock %}
 
 {% block content %}
+{% with phone=site_settings.phone|default:'+91 79 4771 7070' email=site_settings.email|default:'info@tmsolutech.com' address=site_settings.address|default:'805/806 Aditya Building, Near Mithakhali Six Roads, Ellisbridge, Ahmedabad, Gujarat 380006' %}
 <div class="page-hero">
     <div class="hero-orb hero-orb-1"></div>
     <div class="hero-orb hero-orb-2"></div>
@@ -15,119 +18,191 @@
     </div>
 </div>
 
-<section class="contact-section-wrap">
+<section class="cf-section">
     <div class="container">
-        {# Contact Cards #}
-        <div class="contact-grid">
-            <div class="contact-card animate-on-scroll">
-                <div class="contact-card-icon"><i class="fas fa-map-marker-alt"></i></div>
-                <h4>Visit Us</h4>
-                <p>{% if site_settings %}{{ site_settings.address }}{% else %}805/806 Aditya Building, Near Mithakhali Six Roads, Ellisbridge, Ahmedabad, Gujarat 380006{% endif %}</p>
-            </div>
-            <div class="contact-card contact-card-accent animate-on-scroll animate-delay-1">
-                <div class="contact-card-icon"><i class="fas fa-phone"></i></div>
-                <h4>Call Us</h4>
-                <p><a href="tel:{% if site_settings %}{{ site_settings.phone }}{% else %}+917947717070{% endif %}">{% if site_settings %}{{ site_settings.phone }}{% else %}+91 79 4771 7070{% endif %}</a></p>
-            </div>
-            <div class="contact-card animate-on-scroll animate-delay-2">
-                <div class="contact-card-icon"><i class="fas fa-envelope"></i></div>
-                <h4>Email Us</h4>
-                <p><a href="mailto:{% if site_settings %}{{ site_settings.email }}{% else %}info@tmsolutech.com{% endif %}">{% if site_settings %}{{ site_settings.email }}{% else %}info@tmsolutech.com{% endif %}</a></p>
-            </div>
-        </div>
+        <div class="cf-layout">
 
-        {# Contact Form & Map #}
-        <div class="contact-form-map-split">
-            <div class="animate-on-scroll">
-                <div class="contact-form-card">
-                    <div class="contact-form-header">
-                        <span class="section-badge"><i class="fas fa-paper-plane"></i> Get In Touch</span>
-                        <h2>Send Us a <span class="highlight">Message</span></h2>
-                        <div class="contact-live-status">
-                            <span class="live-status-dot pulse"></span>
-                            Usually responds within 24 hours
+            {# ================= FORM ================= #}
+            <div class="cf-form-card animate-on-scroll" id="contactFormCard">
+                <div class="cf-form-head">
+                    <span class="section-badge"><i class="fas fa-paper-plane"></i> Get in touch</span>
+                    <h2>Send us a <span class="highlight">message</span></h2>
+                    <p>Fields marked <span class="cf-req" aria-hidden="true">*</span><span class="sr-only">with an asterisk</span> are required.</p>
+                </div>
+
+                <form method="post" action="{% url 'contact:contact' %}" class="cf-form" id="contactForm" novalidate
+                      data-message-min="{{ message_min }}" data-message-max="{{ message_max }}">
+                    {% csrf_token %}
+                    <input type="hidden" name="form_token" value="{{ form_token }}">
+                    <div class="cf-hp" aria-hidden="true">
+                        <label for="id_website">Leave this field empty</label>
+                        {{ form.website }}
+                    </div>
+
+                    <div class="cf-alert" id="cfAlert" role="alert" {% if not form.non_field_errors %}hidden{% endif %}>
+                        <i class="fas fa-circle-exclamation" aria-hidden="true"></i>
+                        <div>
+                            <strong>Please check the highlighted fields.</strong>
+                            <span id="cfAlertText">{% for e in form.non_field_errors %}{{ e }} {% endfor %}</span>
                         </div>
                     </div>
-                    <form method="post" action="{% url 'contact:contact' %}" data-validate>
-                        {% csrf_token %}
-                        <div class="form-grid">
-                            <div class="form-group input-icon-group">
-                                <label class="form-label">Name <span class="required">*</span></label>
-                                <div class="input-wrap">
-                                    <i class="fas fa-user input-icon"></i>
-                                    {{ form.name }}
-                                </div>
-                                {% if form.name.errors %}<div class="form-error">{{ form.name.errors.0 }}</div>{% endif %}
-                            </div>
-                            <div class="form-group input-icon-group">
-                                <label class="form-label">Company <span class="required">*</span></label>
-                                <div class="input-wrap">
-                                    <i class="fas fa-building input-icon"></i>
-                                    {{ form.company }}
-                                </div>
-                                {% if form.company.errors %}<div class="form-error">{{ form.company.errors.0 }}</div>{% endif %}
-                            </div>
+
+                    {# Topic chips #}
+                    <fieldset class="cf-topics">
+                        <legend>What can we help with?</legend>
+                        <div class="cf-chip-row">
+                            {% for radio in form.topic %}
+                            <label class="cf-chip">
+                                {{ radio.tag }}
+                                <span>{{ radio.choice_label }}</span>
+                            </label>
+                            {% endfor %}
                         </div>
-                        <div class="form-grid">
-                            <div class="form-group input-icon-group">
-                                <label class="form-label">Email <span class="required">*</span></label>
-                                <div class="input-wrap">
-                                    <i class="fas fa-envelope input-icon"></i>
-                                    {{ form.email }}
-                                </div>
-                                {% if form.email.errors %}<div class="form-error">{{ form.email.errors.0 }}</div>{% endif %}
-                            </div>
-                            <div class="form-group input-icon-group">
-                                <label class="form-label">Phone</label>
-                                <div class="input-wrap">
-                                    <i class="fas fa-phone input-icon"></i>
-                                    {{ form.phone }}
-                                </div>
-                                {% if form.phone.errors %}<div class="form-error">{{ form.phone.errors.0 }}</div>{% endif %}
-                            </div>
+                    </fieldset>
+
+                    <div class="cf-grid">
+                        {% include 'contact/_field.html' with field=form.name icon='fa-user' label='Full name' required=True hint='' %}
+                        {% include 'contact/_field.html' with field=form.company icon='fa-building' label='Company' required=True hint='' %}
+                        {% include 'contact/_field.html' with field=form.email icon='fa-envelope' label='Work email' required=True hint='' %}
+                        {% include 'contact/_field.html' with field=form.phone icon='fa-phone' label='Phone' required=False hint='Optional. Include your country code, e.g. +91.' %}
+                    </div>
+
+                    {# Service select #}
+                    <div class="cf-field cf-field-select{% if form.service.value %} has-value{% endif %}{% if form.service.errors %} is-invalid{% endif %}" data-field="service">
+                        <i class="fas fa-layer-group cf-icon" aria-hidden="true"></i>
+                        {{ form.service }}
+                        <label for="id_service" class="cf-label">Service of interest</label>
+                        <i class="fas fa-chevron-down cf-select-caret" aria-hidden="true"></i>
+                        <p class="cf-error" id="err_service">{{ form.service.errors.0 }}</p>
+                    </div>
+
+                    {# Message #}
+                    <div class="cf-field cf-field-textarea{% if form.message.value %} has-value{% endif %}{% if form.message.errors %} is-invalid{% endif %}" data-field="message">
+                        <textarea name="message" id="id_message" class="cf-input" rows="5" maxlength="{{ message_max }}" placeholder=" " required
+                                  aria-required="true" aria-describedby="err_message cf_counter">{{ form.message.value|default:'' }}</textarea>
+                        <label for="id_message" class="cf-label">How can we help? <span class="cf-req" aria-hidden="true">*</span></label>
+                        <div class="cf-meta">
+                            <p class="cf-error" id="err_message">{{ form.message.errors.0 }}</p>
+                            <span class="cf-counter" id="cf_counter" aria-live="polite"><span data-count>0</span> / {{ message_max }}</span>
                         </div>
-                        <div class="form-grid">
-                            <div class="form-group input-icon-group">
-                                <label class="form-label">Subject</label>
-                                <div class="input-wrap">
-                                    <i class="fas fa-tag input-icon"></i>
-                                    {{ form.subject }}
-                                </div>
-                            </div>
-                            <div class="form-group input-icon-group">
-                                <label class="form-label">Service Interest</label>
-                                <div class="input-wrap">
-                                    <i class="fas fa-layer-group input-icon"></i>
-                                    {{ form.service }}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Message <span class="required">*</span></label>
-                            {{ form.message }}
-                            {% if form.message.errors %}<div class="form-error">{{ form.message.errors.0 }}</div>{% endif %}
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-lg contact-submit-btn">Send Message <i class="fas fa-paper-plane"></i></button>
-                    </form>
+                    </div>
+
+                    {# Consent #}
+                    <div class="cf-consent{% if form.consent.errors %} is-invalid{% endif %}" data-field="consent">
+                        <label class="cf-check">
+                            <input type="checkbox" name="consent" id="id_consent" required aria-describedby="err_consent"{% if form.consent.value %} checked{% endif %}>
+                            <span class="cf-check-box" aria-hidden="true"><i class="fas fa-check"></i></span>
+                            <span>I agree to TM Solutech contacting me about this enquiry, as described in the <a href="{% url 'cms:page_detail' slug='privacy-policy' %}" target="_blank" rel="noopener">privacy policy</a>.</span>
+                        </label>
+                        <p class="cf-error" id="err_consent">{{ form.consent.errors.0 }}</p>
+                    </div>
+
+                    <div class="cf-actions">
+                        <button type="submit" class="cf-submit" id="cfSubmit">
+                            <span class="cf-submit-label">Send message</span>
+                            <span class="cf-submit-icon" aria-hidden="true"><i class="fas fa-paper-plane"></i></span>
+                            <span class="cf-spinner" aria-hidden="true"></span>
+                        </button>
+                        <p class="cf-secure"><i class="fas fa-lock" aria-hidden="true"></i> Your details are only used to reply to this enquiry.</p>
+                    </div>
+                </form>
+
+                {# Success state (shown after an in-page submit) #}
+                <div class="cf-success" id="cfSuccess" hidden tabindex="-1">
+                    <div class="cf-success-mark" aria-hidden="true">
+                        <svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="24"/><path d="M15 27l7 7 15-16"/></svg>
+                    </div>
+                    <h3>Message sent</h3>
+                    <p id="cfSuccessText">Your enquiry has reached our team. We reply within 1–2 business days.</p>
+                    <button type="button" class="cf-again" id="cfAgain"><i class="fas fa-rotate-left" aria-hidden="true"></i> Send another message</button>
                 </div>
             </div>
-            <div class="animate-on-scroll slide-right">
-                <div class="map-container">
-                    {% if site_settings and site_settings.google_maps_embed %}
-                    {{ site_settings.google_maps_embed|safe }}
-                    {% else %}
-                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3671.9026!2d72.5601!3d23.0317!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjPCsDAyJzA2LjEiTiA3MsKwMzMnMzYuNCJF!5e0!3m2!1sen!2sin!4v1&q=Mithakhali+Ahmedabad" allowfullscreen loading="lazy"></iframe>
-                    {% endif %}
-                    <div class="map-floating-badge">
-                        <i class="fas fa-clock"></i>
-                        <div>
-                            <strong>Mon – Sat</strong>
-                            <span>9:30 AM – 6:30 PM</span>
-                        </div>
+
+            {# ================= SIDE ================= #}
+            <aside class="cf-side">
+                <div class="cf-promise animate-on-scroll">
+                    <div class="cf-promise-glow" aria-hidden="true"></div>
+                    <span class="cf-promise-icon" aria-hidden="true"><i class="fas fa-reply"></i></span>
+                    <h3>We reply within <span>1–2 business days</span></h3>
+                    <p>Every enquiry is read by our team and answered personally.</p>
+                    <ol class="cf-steps">
+                        <li><span>1</span><div><strong>We review your message</strong>and what you need.</div></li>
+                        <li><span>2</span><div><strong>We get in touch</strong>by email or phone within 1–2 business days.</div></li>
+                        <li><span>3</span><div><strong>We plan the next step</strong>together, with no obligation.</div></li>
+                    </ol>
+                </div>
+
+                <div class="cf-details animate-on-scroll animate-delay-1">
+                    <h3 class="cf-side-title">Contact details</h3>
+                    <ul class="cf-detail-list">
+                        <li>
+                            <span class="cf-d-icon"><i class="fas fa-phone"></i></span>
+                            <div class="cf-d-body"><small>Call us</small><a href="tel:{{ phone|cut:' ' }}">{{ phone }}</a></div>
+                            <button type="button" class="cf-copy" data-copy="{{ phone }}" aria-label="Copy phone number"><i class="far fa-copy"></i></button>
+                        </li>
+                        <li>
+                            <span class="cf-d-icon"><i class="fas fa-envelope"></i></span>
+                            <div class="cf-d-body"><small>Email us</small><a href="mailto:{{ email }}">{{ email }}</a></div>
+                            <button type="button" class="cf-copy" data-copy="{{ email }}" aria-label="Copy email address"><i class="far fa-copy"></i></button>
+                        </li>
+                        <li>
+                            <span class="cf-d-icon"><i class="fas fa-clock"></i></span>
+                            <div class="cf-d-body"><small>Office hours</small><span>Mon – Sat, 9:30 AM – 6:30 PM</span></div>
+                            <span class="cf-open-pill" data-office-status hidden></span>
+                        </li>
+                        <li>
+                            <span class="cf-d-icon"><i class="fas fa-location-dot"></i></span>
+                            <div class="cf-d-body"><small>Visit us</small><span>{{ address }}</span></div>
+                        </li>
+                    </ul>
+                </div>
+
+                {% if site_settings.linkedin_url or site_settings.facebook_url or site_settings.instagram_url or site_settings.youtube_url or site_settings.whatsapp_number %}
+                <div class="cf-social animate-on-scroll animate-delay-2">
+                    <h3 class="cf-side-title">Follow TM Solutech</h3>
+                    <div class="cf-social-row">
+                        {% if site_settings.linkedin_url %}<a href="{{ site_settings.linkedin_url }}" class="cf-soc cf-soc-linkedin" target="_blank" rel="noopener" aria-label="TM Solutech on LinkedIn"><i class="fab fa-linkedin-in"></i><span>LinkedIn</span></a>{% endif %}
+                        {% if site_settings.facebook_url %}<a href="{{ site_settings.facebook_url }}" class="cf-soc cf-soc-facebook" target="_blank" rel="noopener" aria-label="TM Solutech on Facebook"><i class="fab fa-facebook-f"></i><span>Facebook</span></a>{% endif %}
+                        {% if site_settings.instagram_url %}<a href="{{ site_settings.instagram_url }}" class="cf-soc cf-soc-instagram" target="_blank" rel="noopener" aria-label="TM Solutech on Instagram"><i class="fab fa-instagram"></i><span>Instagram</span></a>{% endif %}
+                        {% if site_settings.youtube_url %}<a href="{{ site_settings.youtube_url }}" class="cf-soc cf-soc-youtube" target="_blank" rel="noopener" aria-label="TM Solutech on YouTube"><i class="fab fa-youtube"></i><span>YouTube</span></a>{% endif %}
+                        {% if site_settings.whatsapp_number %}<a href="https://wa.me/{{ site_settings.whatsapp_number|cut:' '|cut:'+' }}" class="cf-soc cf-soc-whatsapp" target="_blank" rel="noopener" aria-label="Chat with TM Solutech on WhatsApp"><i class="fab fa-whatsapp"></i><span>WhatsApp</span></a>{% endif %}
                     </div>
+                </div>
+                {% endif %}
+            </aside>
+        </div>
+    </div>
+</section>
+
+{# ================= MAP ================= #}
+<section class="cf-map-section">
+    <div class="container">
+        <div class="cf-map-head animate-on-scroll">
+            <span class="section-badge"><i class="fas fa-location-dot"></i> Visit us</span>
+            <h2>Our <span class="highlight">office</span></h2>
+        </div>
+        <div class="cf-map animate-on-scroll">
+            {% if site_settings and site_settings.google_maps_embed %}
+            {{ site_settings.google_maps_embed|safe }}
+            {% else %}
+            <iframe title="TM Solutech office map" src="https://www.google.com/maps?q={{ address|urlencode }}&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            {% endif %}
+            <div class="cf-map-card">
+                <span class="cf-d-icon"><i class="fas fa-building"></i></span>
+                <div>
+                    <strong>{{ site_settings.company_name|default:'TM Solutech Private Limited' }}</strong>
+                    <p>{{ address }}</p>
+                    <a class="cf-directions" href="{% if site_settings.google_maps_url %}{{ site_settings.google_maps_url }}{% else %}https://www.google.com/maps/dir/?api=1&destination={{ address|urlencode }}{% endif %}" target="_blank" rel="noopener">
+                        Get directions <i class="fas fa-arrow-right"></i>
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 </section>
+
+<div class="cf-toast" id="cfToast" role="status" aria-live="polite" hidden></div>
+{% endwith %}
 {% endblock %}
+
+{% block extra_js %}<script src="{% static_v 'js/contact.js' %}" defer></script>{% endblock %}
