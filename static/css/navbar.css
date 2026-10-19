@@ -2997,3 +2997,15 @@ html.search-locked body { overflow: hidden; }
 @media (max-width: 1024px) {
     .mega-join .mega-about-grid { padding: 0; }
 }
+
+/* Search: latest insights in the empty state */
+.ss-chip { cursor: pointer; font-family: inherit; }
+.ss-latest { display: flex; flex-direction: column; gap: 0.15rem; padding: 0 0.35rem; }
+.ss-latest-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.55rem 0.6rem; border-radius: 12px; color: var(--tm-navy, #12151C); transition: background 0.2s ease; }
+.ss-latest-item:hover, .ss-latest-item:focus-visible { background: rgba(20, 23, 30, 0.05); }
+.ss-latest-icon { width: 34px; height: 34px; flex-shrink: 0; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.78rem; color: #fff; background: linear-gradient(135deg, #343B4A, #0F1218); }
+.ss-latest-item > span:nth-child(2) { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.ss-latest-item strong { font-size: 0.88rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ss-latest-item small { font-size: 0.74rem; color: #6B7280; }
+.ss-latest-go { font-size: 0.75rem; color: #9CA3AF; opacity: 0; transform: translateX(-4px); transition: all 0.2s ease; }
+.ss-latest-item:hover .ss-latest-go { opacity: 1; transform: none; }

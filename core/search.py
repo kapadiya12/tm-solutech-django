@@ -17,6 +17,7 @@ from django.utils.text import Truncator
 from cms.models import Page
 from insights.models import BlogPost
 from services.models import Industry, Service, ServiceCategory
+from work.models import CaseStudy
 
 from .models import FAQ
 
@@ -25,6 +26,7 @@ MIN_QUERY_LENGTH = 2
 # Fixed site pages, matched on title + keywords
 SITE_PAGES = [
     ('About Us', 'core:about', 'fas fa-building', 'company history heritage mission 1985 who we are'),
+    ('Our Work', 'work:list', 'fas fa-briefcase', 'work case studies projects portfolio results'),
     ('Leadership', 'core:leadership', 'fas fa-user-tie', 'leaders directors team management ceo'),
     ('Our Clients', 'core:clients', 'fas fa-handshake', 'clients customers trusted organizations industries'),
     ('Why Choose Us', 'core:why_us', 'fas fa-award', 'why us benefits advantages quality'),
@@ -112,7 +114,7 @@ def run_search(query, per_group=5):
     } for i in industries[:20]])
 
     posts = BlogPost.objects.filter(
-        _all_terms_q(terms, ['title', 'excerpt']), is_published=True,
+        _all_terms_q(terms, ['title', 'excerpt', 'tags', 'focus_keyword', 'category__name']), is_published=True,
     ).select_related('category')
     add_group('insights', 'Insights', 'fas fa-lightbulb', [{
         'title': p.title,
@@ -121,6 +123,17 @@ def run_search(query, per_group=5):
         'url': p.get_absolute_url(),
         'icon': 'fas fa-newspaper',
     } for p in posts[:20]])
+
+    cases = CaseStudy.objects.filter(
+        _all_terms_q(terms, ['title', 'summary', 'client_name', 'industry__name', 'service__title']), is_published=True,
+    ).select_related('industry')
+    add_group('work', 'Case Studies', 'fas fa-briefcase', [{
+        'title': c.title,
+        'subtitle': _clean(c.summary),
+        'meta': c.industry.name if c.industry else 'Case study',
+        'url': c.get_absolute_url(),
+        'icon': 'fas fa-briefcase',
+    } for c in cases[:20]])
 
     lowered = [t.lower() for t in terms]
     pages = []

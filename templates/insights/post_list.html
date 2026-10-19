@@ -25,7 +25,29 @@
             <span class="ins-spinner" aria-hidden="true"></span>
             <button type="button" class="ins-clear" id="insClear" aria-label="Clear search"{% if not filters.q %} hidden{% endif %}><i class="fas fa-xmark"></i></button>
             <kbd class="ins-kbd" aria-hidden="true">/</kbd>
-            <div class="ins-suggest" id="insSuggest" role="listbox" hidden></div>
+            <div class="ins-suggest" id="insSuggest" role="listbox" data-lenis-prevent hidden></div>
+            <template id="insSuggestDefault">
+                {% if trending_tags %}
+                <div class="ins-sg-section">
+                    <span class="ins-sg-head">Popular searches</span>
+                    <div class="ins-sg-chips">{% for t in trending_tags %}<button type="button" data-term="{{ t }}"><i class="fas fa-arrow-trend-up"></i> {{ t }}</button>{% endfor %}</div>
+                </div>
+                {% endif %}
+                {% if categories %}
+                <div class="ins-sg-section">
+                    <span class="ins-sg-head">Browse topics</span>
+                    <div class="ins-sg-chips">{% for c in categories %}<button type="button" data-topic="{{ c.slug }}"><i class="fas fa-folder"></i> {{ c.name }} <em>{{ c.live_count }}</em></button>{% endfor %}</div>
+                </div>
+                {% endif %}
+                {% if popular %}
+                <div class="ins-sg-section">
+                    <span class="ins-sg-head">Most read</span>
+                    {% for p in popular|slice:":3" %}
+                    <a href="{{ p.get_absolute_url }}" role="option" data-i="{{ forloop.counter0 }}"><i class="fas fa-fire"></i><span><strong>{{ p.title }}</strong><small>{{ p.category.name|default:"Insights" }} · {{ p.reading_time }} min read</small></span></a>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </template>
         </form>
         <div class="ins-hero-stats">
             <span><strong>{{ all_count }}</strong> article{{ all_count|pluralize }}</span>

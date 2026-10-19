@@ -1,4 +1,5 @@
 import re
+from collections import Counter
 
 from django.core.paginator import Paginator
 from django.db.models import Count, F, Q
@@ -51,6 +52,13 @@ def _categories():
     ).filter(live_count__gt=0)
 
 
+def _trending_tags(limit=8):
+    counts = Counter()
+    for tags in _live_posts().values_list('tags', flat=True):
+        counts.update(t.strip() for t in (tags or '').split(',') if t.strip())
+    return [t for t, _ in counts.most_common(limit)]
+
+
 def _featured_split(posts, f):
     """On the unfiltered 'Latest' view the featured post sits in its own slot, never twice."""
     if f['category'] or f['q'] or f['tag'] or f['sort'] != 'latest':
@@ -76,6 +84,7 @@ def post_list(request):
         'filtering': filtering,
         'result_count': page.paginator.count,
         'popular': _live_posts().select_related('category').order_by('-view_count', '-published_at')[:4],
+        'trending_tags': _trending_tags(),
         'page_title': 'Insights',
         'page_subtitle': 'Ideas, guides and news on cloud, cybersecurity, AI and IT infrastructure.',
     }

@@ -88,10 +88,21 @@
             const words = q.split(/\s+/).filter((w) => w.length > 1).map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
             return words.length ? out.replace(new RegExp('(' + words.join('|') + ')', 'gi'), '<mark>$1</mark>') : out;
         }
+        const defaultTpl = document.getElementById('insSuggestDefault');
+        function renderDefault() {
+            if (!defaultTpl || document.activeElement !== input) return;
+            suggest.innerHTML = defaultTpl.innerHTML;
+            lastSuggest = Array.from(suggest.querySelectorAll('a[data-i]')).map((a) => ({ url: a.getAttribute('href') }));
+            activeIdx = -1;
+            suggest.classList.add('is-default');
+            suggest.hidden = !suggest.innerHTML.trim();
+        }
         function renderSuggest(items) {
             lastSuggest = items;
             activeIdx = -1;
-            if (!state.q || document.activeElement !== input) { suggest.hidden = true; return; }
+            suggest.classList.remove('is-default');
+            if (!state.q) { renderDefault(); return; }
+            if (document.activeElement !== input) { suggest.hidden = true; return; }
             if (!items.length) {
                 suggest.innerHTML = '<div class="ins-suggest-empty">No articles match “' + esc(state.q) + '”.</div>';
             } else {
@@ -122,13 +133,24 @@
             else if (e.key === 'Enter' && activeIdx >= 0 && lastSuggest[activeIdx]) { e.preventDefault(); location.href = lastSuggest[activeIdx].url; }
             else if (e.key === 'Escape') { suggest.hidden = true; }
         });
-        input.addEventListener('focus', () => { if (state.q && lastSuggest) renderSuggest(lastSuggest); });
+        input.addEventListener('focus', () => { if (state.q && lastSuggest) renderSuggest(lastSuggest); else if (!state.q) renderDefault(); });
+        input.addEventListener('click', () => { if (!state.q && suggest.hidden) renderDefault(); });
         document.addEventListener('click', (e) => { if (!form.contains(e.target)) suggest.hidden = true; });
+        suggest.addEventListener('mousedown', (e) => { if (e.target.closest('button')) e.preventDefault(); });   // keep focus in the input
         suggest.addEventListener('click', (e) => {
+            const term = e.target.closest('[data-term]');
+            if (term) { input.value = term.dataset.term; state.q = input.value; clearBtn.hidden = false; load(1, false); return; }
+            const topic = e.target.closest('[data-topic]');
+            if (topic) {
+                suggest.hidden = true;
+                chips.find((c) => c.dataset.category === topic.dataset.topic)?.click();
+                grid.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+                return;
+            }
             if (e.target.closest('[data-all]')) { e.preventDefault(); suggest.hidden = true; grid.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' }); }
         });
         form.addEventListener('submit', (e) => { e.preventDefault(); suggest.hidden = true; load(1, false); grid.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' }); });
-        clearBtn.addEventListener('click', () => { input.value = ''; state.q = ''; clearBtn.hidden = true; suggest.hidden = true; input.focus(); load(1, false); });
+        clearBtn.addEventListener('click', () => { input.value = ''; state.q = ''; clearBtn.hidden = true; input.focus(); renderDefault(); load(1, false); });
 
         // "/" focuses search
         document.addEventListener('keydown', (e) => {

@@ -348,7 +348,7 @@ NEW_POSTS = [
         content=CLOUD, focus_keyword='cloud migration', tags='Cloud, Cloud Migration, Azure, AWS',
         meta_title='Cloud Migration Checklist: 7 Steps | TM Solutech',
         meta_description='A practical cloud migration checklist: take inventory, choose a strategy per workload, design security in, estimate costs and migrate in tested waves.',
-        cover='cloud-migration-checklist.jpg', published_at=datetime(2026, 10, 2, 10, 0, tzinfo=dt_tz.utc),
+        cover='cloud-migration.jpg', published_at=datetime(2026, 10, 2, 10, 0, tzinfo=dt_tz.utc),
     ),
     dict(
         slug='vapt-explained-vulnerability-assessment-penetration-testing', category='cybersecurity',
@@ -357,7 +357,7 @@ NEW_POSTS = [
         content=VAPT, focus_keyword='VAPT', tags='VAPT, Penetration Testing, Cybersecurity, Compliance',
         meta_title='VAPT Explained | Vulnerability Assessment & Pen Testing',
         meta_description='VAPT explained: how vulnerability assessment and penetration testing differ, the types of testing, how often you need it and what a good report includes.',
-        cover='vapt-explained.jpg', published_at=datetime(2026, 10, 9, 10, 0, tzinfo=dt_tz.utc),
+        cover='vapt.jpg', published_at=datetime(2026, 10, 9, 10, 0, tzinfo=dt_tz.utc),
     ),
     dict(
         slug='disaster-recovery-planning-rto-rpo-backups', category='cloud-computing',
@@ -366,7 +366,7 @@ NEW_POSTS = [
         content=DR, focus_keyword='disaster recovery', tags='Disaster Recovery, Backup, Business Continuity, Ransomware',
         meta_title='Disaster Recovery Planning: RTO, RPO & Backups',
         meta_description='A practical disaster recovery guide: agree RTO and RPO, build ransomware-proof backups, choose a recovery site and test your plan so it works on the day.',
-        cover='disaster-recovery-planning.jpg', published_at=datetime(2026, 10, 15, 10, 0, tzinfo=dt_tz.utc),
+        cover='disaster-recovery.jpg', published_at=datetime(2026, 10, 15, 10, 0, tzinfo=dt_tz.utc),
     ),
 ]
 

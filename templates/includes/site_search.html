@@ -1,3 +1,4 @@
+{% load search_tags %}
 <div class="site-search" id="siteSearch" role="dialog" aria-modal="true" aria-label="Search the site" hidden
      data-suggest-url="{% url 'core:search_suggest' %}" data-search-url="{% url 'core:search' %}">
     <div class="ss-backdrop" data-ss-close></div>
@@ -15,11 +16,20 @@
 
         <div class="ss-body" id="ssResults" role="listbox" aria-label="Search results" data-lenis-prevent>
             {# Shown before typing #}
+            {% search_highlights as hl %}
             <div class="ss-default">
                 <div class="ss-section ss-recent" hidden>
                     <div class="ss-section-head"><span>Recent searches</span><button type="button" class="ss-link-btn" data-ss-clear-recent>Clear</button></div>
                     <div class="ss-chips" data-ss-recent></div>
                 </div>
+                {% if hl.terms %}
+                <div class="ss-section">
+                    <div class="ss-section-head"><span>Popular searches</span></div>
+                    <div class="ss-chips">
+                        {% for t in hl.terms %}<button type="button" class="ss-chip" data-ss-term="{{ t }}"><i class="fas fa-arrow-trend-up"></i> {{ t }}</button>{% endfor %}
+                    </div>
+                </div>
+                {% endif %}
                 {% if nav_service_categories %}
                 <div class="ss-section">
                     <div class="ss-section-head"><span>Service areas</span></div>
@@ -33,10 +43,21 @@
                     </div>
                 </div>
                 {% endif %}
+                {% if hl.latest %}
+                <div class="ss-section">
+                    <div class="ss-section-head"><span>Latest insights</span><a href="{% url 'insights:post_list' %}" class="ss-link-btn">View all</a></div>
+                    <div class="ss-latest">
+                        {% for p in hl.latest %}
+                        <a href="{{ p.url }}" class="ss-latest-item"><span class="ss-latest-icon"><i class="fas fa-newspaper"></i></span><span><strong>{{ p.title }}</strong><small>{{ p.meta }} · {{ p.minutes }} min read</small></span><i class="fas fa-arrow-right ss-latest-go"></i></a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
                 <div class="ss-section">
                     <div class="ss-section-head"><span>Quick links</span></div>
                     <div class="ss-chips">
-                        <a href="{% url 'core:about' %}" class="ss-chip"><i class="fas fa-building"></i> About Us</a>
+                        <a href="{% url 'core:why_us' %}" class="ss-chip"><i class="fas fa-award"></i> Why Us</a>
+                        <a href="{% url 'work:list' %}" class="ss-chip"><i class="fas fa-briefcase"></i> Our Work</a>
                         <a href="{% url 'core:clients' %}" class="ss-chip"><i class="fas fa-handshake"></i> Our Clients</a>
                         <a href="{% url 'insights:post_list' %}" class="ss-chip"><i class="fas fa-lightbulb"></i> Insights</a>
                         <a href="{% url 'core:faqs' %}" class="ss-chip"><i class="fas fa-circle-question"></i> FAQs</a>

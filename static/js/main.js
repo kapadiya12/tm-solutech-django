@@ -1218,6 +1218,13 @@ document.addEventListener('DOMContentLoaded', function () {
             renderRecent();
             input.focus();
         });
+        root.addEventListener('click', (e) => {
+            const term = e.target.closest('[data-ss-term]');
+            if (!term) return;
+            input.value = term.dataset.ssTerm;
+            onInput(true);
+            input.focus();
+        });
         recentList.addEventListener('click', (e) => {
             const chip = e.target.closest('[data-ss-recent-item]');
             if (!chip) return;
