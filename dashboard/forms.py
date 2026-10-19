@@ -267,7 +267,52 @@ class LeadershipForm(FormStyleMixin, forms.ModelForm):
 class BlogPostForm(FormStyleMixin, forms.ModelForm):
     class Meta:
         model = BlogPost
-        exclude = ['author']
+        fields = ['title', 'slug', 'category', 'excerpt', 'featured_image', 'content', 'tags',
+                  'is_published', 'published_at', 'is_featured', 'meta_title', 'meta_description']
+        widgets = {
+            'published_at': forms.DateTimeInput(attrs={'type': 'datetime-local'}, format='%Y-%m-%dT%H:%M'),
+            'excerpt': forms.Textarea(attrs={'rows': 3, 'maxlength': 300, 'data-count': '300'}),
+            'meta_title': forms.TextInput(attrs={'maxlength': 70, 'data-count': '60'}),
+            'meta_description': forms.Textarea(attrs={'rows': 2, 'maxlength': 200, 'data-count': '158'}),
+            'tags': forms.TextInput(attrs={'placeholder': 'Cloud, Security, Compliance'}),
+        }
+        labels = {
+            'is_published': 'Published',
+            'published_at': 'Publish date & time',
+            'is_featured': 'Feature on the Insights page',
+            'excerpt': 'Summary',
+        }
+        help_texts = {
+            'slug': 'The web address: /insights/<slug>/. Filled from the title automatically.',
+            'excerpt': 'One or two sentences shown on cards and under the title.',
+            'published_at': 'Leave empty to publish now. A future date schedules the post.',
+            'tags': 'Comma separated. Visitors can click a tag to see related articles.',
+            'meta_title': 'Title in Google results. Defaults to the post title.',
+            'meta_description': 'Description in Google results and link previews. About 150 characters.',
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['published_at'].input_formats = ['%Y-%m-%dT%H:%M', '%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M']
+        self.fields['category'].empty_label = 'No category'
+        self.fields['slug'].required = False   # filled from the title when left empty
+
+    def clean_slug(self):
+        from django.utils.text import slugify
+        slug = slugify(self.cleaned_data.get('slug') or self.cleaned_data.get('title') or '')
+        if not slug:
+            raise forms.ValidationError('Please enter a web address.')
+        if _unique_slug_error(BlogPost, slug, self.instance):
+            raise forms.ValidationError('Another post already uses this address.')
+        return slug
+
+    def clean_tags(self):
+        seen, tags = set(), []
+        for t in (self.cleaned_data.get('tags') or '').split(','):
+            t = ' '.join(t.split())
+            if t and t.lower() not in seen:
+                seen.add(t.lower()); tags.append(t)
+        return ', '.join(tags)[:250]
 
 
 class BlogCategoryForm(FormStyleMixin, forms.ModelForm):

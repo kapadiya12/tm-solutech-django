@@ -1,70 +1,122 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static asset_tags %}
 
 {% block title %}{{ post.meta_title|default:post.title }} | TM Solutech Insights{% endblock %}
+{% block meta_description %}{{ post.meta_description|default:post.excerpt|default:post.content|striptags|truncatechars:158 }}{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static_v 'css/insights.css' %}">
+<meta property="og:type" content="article">
+<meta property="og:title" content="{{ post.meta_title|default:post.title }}">
+<meta property="og:description" content="{{ post.meta_description|default:post.excerpt|striptags|truncatechars:158 }}">
+{% if post.featured_image %}<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ post.featured_image.url }}">{% endif %}
+<meta name="twitter:card" content="summary_large_image">
+{% endblock %}
 
 {% block content %}
-<div class="page-hero">
-    <div class="container">
+<div class="ins-progress" aria-hidden="true"><span id="insProgress"></span></div>
+
+<header class="ins-article-hero">
+    <div class="ins-hero-glow" aria-hidden="true"></div>
+    <div class="container ins-article-head">
         <ul class="breadcrumb-list">
             <li><a href="{% url 'core:home' %}"><i class="fas fa-home"></i> Home</a></li>
             <li><span class="separator"><i class="fas fa-chevron-right"></i></span> <a href="{% url 'insights:post_list' %}">Insights</a></li>
-            <li><span class="separator"><i class="fas fa-chevron-right"></i></span> {{ post.title|truncatewords:5 }}</li>
+            {% if post.category %}<li><span class="separator"><i class="fas fa-chevron-right"></i></span> <a href="{% url 'insights:post_list' %}?category={{ post.category.slug }}">{{ post.category.name }}</a></li>{% endif %}
         </ul>
-        <h1 class="page-title">{{ post.title }}</h1>
-        <div class="flex gap-4" style="margin-top:var(--space-4);color:rgba(255,255,255,0.7);font-size:var(--text-sm);">
-            {% if post.published_at %}<span><i class="fas fa-calendar"></i> {{ post.published_at|date:"F d, Y" }}</span>{% endif %}
-            <span><i class="fas fa-clock"></i> {{ post.reading_time }} min read</span>
-            {% if post.author %}<span><i class="fas fa-user"></i> {{ post.author.get_full_name|default:post.author.username }}</span>{% endif %}
-        </div>
-    </div>
-</div>
-
-<section class="section">
-    <div class="container-narrow">
-        {% if post.featured_image %}
-        <div style="border-radius:var(--radius-xl);overflow:hidden;margin-bottom:var(--space-8);box-shadow:var(--shadow-lg);">
-            <img src="{{ post.featured_image.url }}" alt="{{ post.title }}" style="width:100%;">
-        </div>
-        {% endif %}
-
-        <article style="color:var(--gray-700);font-size:var(--text-lg);line-height:1.8;">
-            {{ post.content|safe }}
-        </article>
-
-        {# Share buttons #}
-        <div style="margin-top:var(--space-8);padding-top:var(--space-6);border-top:1px solid var(--gray-200);">
-            <p style="font-weight:var(--font-semibold);margin-bottom:var(--space-3);">Share this article:</p>
-            <div class="flex gap-4">
-                <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ request.build_absolute_uri }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-secondary"><i class="fab fa-linkedin-in"></i> LinkedIn</a>
-                <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}&text={{ post.title }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-secondary"><i class="fab fa-twitter"></i> Twitter</a>
-                <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-secondary"><i class="fab fa-facebook-f"></i> Facebook</a>
+        {% if post.category %}<a href="{% url 'insights:post_list' %}?category={{ post.category.slug }}" class="ins-eyebrow">{{ post.category.name }}</a>{% endif %}
+        <h1>{{ post.title }}</h1>
+        {% if post.excerpt %}<p class="ins-lede">{{ post.excerpt }}</p>{% endif %}
+        <div class="ins-byline">
+            <span class="ins-avatar ins-avatar-lg" aria-hidden="true">{% if post.author.first_name %}{{ post.author.first_name|slice:":1" }}{% else %}T{% endif %}</span>
+            <div>
+                <strong>{% if post.author %}{{ post.author.get_full_name|default:"TM Solutech Team" }}{% else %}TM Solutech Team{% endif %}</strong>
+                <span>{{ post.published_at|date:"F d, Y" }} · {{ post.reading_time }} min read{% if post.view_count >= 10 %} · {{ post.view_count }} reads{% endif %}</span>
             </div>
         </div>
     </div>
-</section>
+</header>
 
-{# Related Posts #}
-{% if related_posts %}
-<section class="section section-gray">
-    <div class="container">
-        <div class="section-header"><h2>Related Insights</h2></div>
-        <div class="blog-grid">
-            {% for rp in related_posts %}
-            <a href="{{ rp.get_absolute_url }}" class="blog-card" style="text-decoration:none;color:inherit;">
-                <div class="blog-card-image">
-                    {% if rp.featured_image %}<img src="{{ rp.featured_image.url }}" alt="{{ rp.title }}" loading="lazy">
-                    {% else %}<img src="{% static 'images/blog/default-blog.jpg' %}" alt="{{ rp.title }}" loading="lazy">{% endif %}
+<div class="container ins-article-wrap">
+    {% if post.featured_image %}
+    <figure class="ins-cover"><img src="{{ post.featured_image.url }}" alt="{{ post.title }}" fetchpriority="high"></figure>
+    {% endif %}
+
+    <div class="ins-article-grid">
+        {# ---- Left rail: share ---- #}
+        <aside class="ins-share-rail" aria-label="Share this article">
+            <span>Share</span>
+            <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ request.build_absolute_uri|urlencode }}" target="_blank" rel="noopener" data-tip="LinkedIn" aria-label="Share on LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+            <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri|urlencode }}&text={{ post.title|urlencode }}" target="_blank" rel="noopener" data-tip="X" aria-label="Share on X"><i class="fab fa-x-twitter"></i></a>
+            <a href="https://wa.me/?text={{ post.title|urlencode }}%20{{ request.build_absolute_uri|urlencode }}" target="_blank" rel="noopener" data-tip="WhatsApp" aria-label="Share on WhatsApp"><i class="fab fa-whatsapp"></i></a>
+            <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri|urlencode }}" target="_blank" rel="noopener" data-tip="Facebook" aria-label="Share on Facebook"><i class="fab fa-facebook-f"></i></a>
+            <button type="button" data-copy-link data-tip="Copy link" aria-label="Copy link"><i class="fas fa-link"></i></button>
+        </aside>
+
+        {# ---- Article ---- #}
+        <article class="ins-prose" id="insArticle">
+            {{ post.content|safe }}
+
+            {% if post.tag_list %}
+            <div class="ins-tags">
+                {% for t in post.tag_list %}<a href="{% url 'insights:post_list' %}?tag={{ t|urlencode }}">#{{ t }}</a>{% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="ins-helpful" id="insHelpful" data-url="{% url 'insights:post_helpful' post.slug %}" data-voted="{{ voted|default:'' }}">
+                {% csrf_token %}
+                <div class="ins-helpful-ask">
+                    <strong>Was this article helpful?</strong>
+                    <div>
+                        <button type="button" data-answer="yes"><i class="far fa-thumbs-up"></i> Yes</button>
+                        <button type="button" data-answer="no"><i class="far fa-thumbs-down"></i> No</button>
+                    </div>
                 </div>
-                <div class="blog-card-content">
-                    <h3>{{ rp.title }}</h3>
-                    <p>{{ rp.excerpt|truncatewords:15 }}</p>
-                    <span class="blog-read-more">Read More <i class="fas fa-arrow-right"></i></span>
+                <p class="ins-helpful-thanks" hidden><i class="fas fa-circle-check"></i> Thanks for your feedback!</p>
+            </div>
+
+            <div class="ins-author-box">
+                <span class="ins-avatar ins-avatar-xl" aria-hidden="true">{% if post.author.first_name %}{{ post.author.first_name|slice:":1" }}{% else %}T{% endif %}</span>
+                <div>
+                    <small>Written by</small>
+                    <strong>{% if post.author %}{{ post.author.get_full_name|default:"TM Solutech Team" }}{% else %}TM Solutech Team{% endif %}</strong>
+                    <p>Practical insights from TM Solutech's engineers and consultants, helping businesses run secure, reliable IT since 1985.</p>
                 </div>
+            </div>
+        </article>
+
+        {# ---- Right rail: table of contents ---- #}
+        <aside class="ins-toc" id="insToc" aria-label="On this page" hidden>
+            <span class="ins-toc-title">On this page</span>
+            <ol id="insTocList"></ol>
+            <a href="{% url 'contact:contact' %}" class="ins-toc-cta">
+                <i class="fas fa-headset"></i>
+                <span><strong>Need help with this?</strong>Talk to our experts</span>
             </a>
-            {% endfor %}
+        </aside>
+    </div>
+
+    {# ---- Prev / next ---- #}
+    {% if newer or older %}
+    <nav class="ins-pn" aria-label="More articles">
+        {% if older %}<a href="{{ older.get_absolute_url }}" class="ins-pn-prev"><small><i class="fas fa-arrow-left"></i> Previous</small><strong>{{ older.title }}</strong></a>{% else %}<span></span>{% endif %}
+        {% if newer %}<a href="{{ newer.get_absolute_url }}" class="ins-pn-next"><small>Next <i class="fas fa-arrow-right"></i></small><strong>{{ newer.title }}</strong></a>{% endif %}
+    </nav>
+    {% endif %}
+</div>
+
+{% if related_posts %}
+<section class="ins-related">
+    <div class="container">
+        <div class="ins-related-head">
+            <h2>Keep reading</h2>
+            <a href="{% url 'insights:post_list' %}">All insights <i class="fas fa-arrow-right"></i></a>
         </div>
+        <div class="ins-grid">{% include 'insights/_cards.html' with posts=related_posts %}</div>
     </div>
 </section>
 {% endif %}
+
+<div class="ins-toast" id="insToast" role="status" aria-live="polite" hidden></div>
 {% endblock %}
+
+{% block extra_js %}<script src="{% static_v 'js/insights.js' %}" defer></script>{% endblock %}

@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.utils import timezone
 from django.db.models import Count, Q
 from django.urls import reverse
 from urllib.parse import quote
@@ -22,7 +23,7 @@ def home(request):
         'industries': Industry.objects.filter(is_active=True),
         'testimonials': Testimonial.objects.filter(is_active=True)[:5],
         'leadership': Leadership.objects.filter(is_active=True),
-        'latest_posts': BlogPost.objects.filter(is_published=True).select_related('category')[:3],
+        'latest_posts': BlogPost.objects.filter(is_published=True, published_at__lte=timezone.now()).select_related('category')[:3],
         'capabilities': Capability.objects.filter(is_active=True),
         'client_logos': ClientLogo.objects.filter(is_active=True),
         'hero_tags': HeroTag.objects.filter(is_active=True),

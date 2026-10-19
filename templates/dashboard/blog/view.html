@@ -1,0 +1,122 @@
+{% extends 'dashboard/base.html' %}
+{% load static dash_tags %}
+{% block dashboard_content %}
+
+<div class="bv-top">
+    <a href="{% url 'dashboard:blog_list' %}" class="ed-back"><i class="fas fa-arrow-left"></i> All posts</a>
+    <div class="bv-pager">
+        {% if newer %}<a href="{% url 'dashboard:blog_view' newer.pk %}" class="btn btn-sm btn-secondary"><i class="fas fa-chevron-left"></i> Newer</a>{% endif %}
+        {% if older %}<a href="{% url 'dashboard:blog_view' older.pk %}" class="btn btn-sm btn-secondary">Older <i class="fas fa-chevron-right"></i></a>{% endif %}
+    </div>
+</div>
+
+<header class="bv-hero">
+    <img class="bv-hero-img" src="{% if post.featured_image %}{{ post.featured_image.url }}{% else %}{% static 'images/blog/default-blog.jpg' %}{% endif %}" alt="">
+    <div class="bv-hero-text">
+        <div class="bv-badges">
+            <span class="bl-status bl-{{ post.status }}">{{ post.status_label }}</span>
+            {% if post.is_featured %}<span class="bv-feat"><i class="fas fa-star"></i> Featured</span>{% endif %}
+            {% if post.category %}<span class="bv-cat"><i class="fas fa-folder"></i> {{ post.category.name }}</span>{% endif %}
+        </div>
+        <h2>{{ post.title }}</h2>
+        <p>
+            <span><i class="fas fa-user"></i> {% if post.author %}{{ post.author.get_full_name|default:post.author.username }}{% else %}TM Solutech Team{% endif %}</span>
+            <span><i class="far fa-calendar"></i> {% if post.published_at %}{{ post.published_at|date:"M d, Y · H:i" }}{% else %}Not published{% endif %}</span>
+            <span><i class="fas fa-clock-rotate-left"></i> Edited {{ post.updated_at|short_ago }}</span>
+        </p>
+    </div>
+    <div class="bv-actions">
+        {% if post.status == 'published' %}<a href="{{ post.get_absolute_url }}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-up-right-from-square"></i> View live</a>{% endif %}
+        <a href="{% url 'dashboard:blog_edit' post.pk %}" class="btn btn-primary btn-sm"><i class="fas fa-pen"></i> Edit post</a>
+    </div>
+</header>
+
+<div class="bv-stats">
+    <div class="bl-stat bl-c-dark" data-tip="Unique reads since the post was created"><span class="bl-ic"><i class="fas fa-eye"></i></span><span><strong>{{ post.view_count }}</strong>Total views</span></div>
+    <div class="bl-stat bl-c-blue" data-tip="Reads in the last 30 days"><span class="bl-ic"><i class="fas fa-chart-line"></i></span><span><strong>{{ views_30 }}</strong>Last 30 days</span></div>
+    <div class="bl-stat bl-c-green" data-tip="{{ post.helpful_yes }} yes · {{ post.helpful_no }} no"><span class="bl-ic"><i class="fas fa-thumbs-up"></i></span><span><strong>{% if post.helpful_percent is not None %}{{ post.helpful_percent }}%{% else %}—{% endif %}</strong>Found it helpful{% if post.helpful_total %} ({{ post.helpful_total }}){% endif %}</span></div>
+    <div class="bl-stat bl-c-orange" data-tip="{{ post.word_count }} words"><span class="bl-ic"><i class="fas fa-book-open"></i></span><span><strong>{{ post.reading_time }} min</strong>Reading time</span></div>
+</div>
+
+<div class="bv-grid">
+    <div class="bv-main">
+        <section class="bv-card">
+            <header class="bv-card-head"><h3><i class="fas fa-chart-column"></i> Views · last 30 days</h3><span>Peak {{ peak }} / day</span></header>
+            <div class="bv-chart" role="img" aria-label="Daily views for the last 30 days">
+                {% for d in series %}
+                <span class="bv-bar{% if d.views %} has{% endif %}" style="--h: {{ d.pct }}%" data-tip="{{ d.date|date:'M d' }}: {{ d.views }} view{{ d.views|pluralize }}"></span>
+                {% endfor %}
+            </div>
+            <div class="bv-chart-axis"><span>{{ series.0.date|date:"M d" }}</span><span>Today</span></div>
+            {% if not views_30 %}<p class="bv-note">No views yet in this period. Views are counted once per visitor session, and bots are ignored.</p>{% endif %}
+        </section>
+
+        <section class="bv-card">
+            <header class="bv-card-head"><h3><i class="fas fa-desktop"></i> Article preview</h3>{% if post.status == 'published' %}<a href="{{ post.get_absolute_url }}" target="_blank" rel="noopener">Open <i class="fas fa-arrow-up-right-from-square"></i></a>{% endif %}</header>
+            <div class="ju-browser">
+                <div class="ju-browser-bar"><span></span><span></span><span></span><em>tmsolutech.com/insights/{{ post.slug }}/</em></div>
+                <div class="ju-hero"><small>Insights{% if post.category %} › {{ post.category.name }}{% endif %}</small><h2>{{ post.title }}</h2>{% if post.excerpt %}<p class="bv-lede">{{ post.excerpt }}</p>{% endif %}</div>
+                <article class="ju-content">{{ post.content|safe }}</article>
+            </div>
+        </section>
+    </div>
+
+    <aside class="bv-side">
+        <section class="bv-card">
+            <header class="bv-card-head"><h3><i class="fas fa-bolt"></i> Quick actions</h3></header>
+            <form method="post" action="{% url 'dashboard:blog_toggle' post.pk %}" class="bv-toggle">
+                {% csrf_token %}<input type="hidden" name="field" value="publish">
+                <div><strong>{% if post.is_published %}Published{% else %}Draft{% endif %}</strong><small>{% if post.status == 'scheduled' %}Goes live {{ post.published_at|date:"M d, H:i" }}{% elif post.is_published %}Visible to visitors{% else %}Only visible here{% endif %}</small></div>
+                <button type="submit" class="bv-switch{% if post.is_published %} is-on{% endif %}" aria-label="{% if post.is_published %}Unpublish{% else %}Publish{% endif %}"><span></span></button>
+            </form>
+            <form method="post" action="{% url 'dashboard:blog_toggle' post.pk %}" class="bv-toggle">
+                {% csrf_token %}<input type="hidden" name="field" value="feature">
+                <div><strong>Featured</strong><small>Shown large at the top of Insights</small></div>
+                <button type="submit" class="bv-switch{% if post.is_featured %} is-on{% endif %}" aria-label="Toggle featured"><span></span></button>
+            </form>
+            <button type="button" class="bv-copy" data-copy="{{ request.scheme }}://{{ request.get_host }}{{ post.get_absolute_url }}"><i class="fas fa-link"></i> Copy article link</button>
+        </section>
+
+        <section class="bv-card">
+            <header class="bv-card-head"><h3><i class="fab fa-google"></i> Search &amp; sharing</h3></header>
+            <div class="ju-serp">
+                <span class="ju-serp-url">tmsolutech.com › insights › {{ post.slug }}</span>
+                <strong>{{ post.meta_title|default:post.title }} | TM Solutech</strong>
+                <p>{{ post.meta_description|default:post.excerpt|default:post.content|striptags|truncatechars:158 }}</p>
+            </div>
+            <ul class="bv-checks">
+                <li class="{% if post.meta_description %}ok{% endif %}"><i class="fas {% if post.meta_description %}fa-check{% else %}fa-exclamation{% endif %}"></i> Search description {% if post.meta_description %}set{% else %}missing{% endif %}</li>
+                <li class="{% if post.featured_image %}ok{% endif %}"><i class="fas {% if post.featured_image %}fa-check{% else %}fa-exclamation{% endif %}"></i> Cover image {% if post.featured_image %}set{% else %}missing{% endif %}</li>
+                <li class="{% if post.excerpt %}ok{% endif %}"><i class="fas {% if post.excerpt %}fa-check{% else %}fa-exclamation{% endif %}"></i> Summary {% if post.excerpt %}set{% else %}missing{% endif %}</li>
+                <li class="{% if post.word_count >= 300 %}ok{% endif %}"><i class="fas {% if post.word_count >= 300 %}fa-check{% else %}fa-exclamation{% endif %}"></i> {{ post.word_count }} words {% if post.word_count < 300 %}(300+ ranks better){% endif %}</li>
+            </ul>
+        </section>
+
+        <section class="bv-card">
+            <header class="bv-card-head"><h3><i class="fas fa-tags"></i> Tags</h3></header>
+            {% if post.tag_list %}<div class="bv-tags">{% for t in post.tag_list %}<span>#{{ t }}</span>{% endfor %}</div>
+            {% else %}<p class="bv-note">No tags. <a href="{% url 'dashboard:blog_edit' post.pk %}#sec-meta">Add tags</a></p>{% endif %}
+        </section>
+
+        <section class="iqd-danger">
+            <div class="iqd-danger-head">
+                <span class="iqd-danger-icon"><i class="fas fa-triangle-exclamation"></i></span>
+                <div><h3>Danger zone</h3><p>Delete this post with its views and feedback. This cannot be undone.</p></div>
+            </div>
+            <form method="post" action="{% url 'dashboard:blog_delete' post.pk %}" data-confirm="The article, its views and feedback are deleted." data-confirm-name="{{ post.title|truncatechars:60 }}" data-confirm-title="Delete this post?">
+                {% csrf_token %}
+                <button type="submit" class="iqd-danger-btn"><i class="fas fa-trash-can"></i> Delete post</button>
+            </form>
+        </section>
+    </aside>
+</div>
+
+<link rel="stylesheet" href="{% static 'css/inquiries.css' %}">
+<link rel="stylesheet" href="{% static 'css/blog-admin.css' %}">
+<script>
+document.querySelectorAll('[data-copy]').forEach((b) => b.addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(b.dataset.copy); window.duiToast && window.duiToast('Link copied'); }
+    catch (e) { window.duiToast && window.duiToast('Press Ctrl+C to copy', 'info'); }
+}));
+</script>
+{% endblock %}

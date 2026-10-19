@@ -1,37 +1,104 @@
 {% extends 'dashboard/base.html' %}
+{% load static %}
 {% block dashboard_content %}
-<div class="flex-between mb-8">
-    <h2>{{ page_title }}</h2>
-    <a href="{% url 'dashboard:blog_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add Post</a>
+
+<div class="bl-head">
+    <p>Articles shown on the website's Insights page. Click any post for its details and stats.</p>
+    <a href="{% url 'dashboard:blog_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> New post</a>
 </div>
-<div class="dashboard-card">
-    <div class="dashboard-table-wrap">
-        <table class="dashboard-table">
-            <thead>
-                <tr><th>Title</th><th>Category</th><th>Status</th><th>Published</th><th>Actions</th></tr>
-            </thead>
-            <tbody>
-                {% for post in posts %}
-                <tr>
-                    <td><strong>{{ post.title }}</strong></td>
-                    <td>{{ post.category.name }}</td>
-                    <td><span class="status-badge {% if post.is_published %}status-active{% else %}status-draft{% endif %}">{% if post.is_published %}Published{% else %}Draft{% endif %}</span></td>
-                    <td>{{ post.published_at|date:"M d, Y"|default:"-" }}</td>
-                    <td>
-                        <div class="flex gap-2">
-                            <a href="{% url 'dashboard:blog_edit' post.pk %}" class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></a>
-                            <form method="post" action="{% url 'dashboard:blog_delete' post.pk %}" data-confirm="Delete this post?">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-sm" style="color: var(--danger);"><i class="fas fa-trash"></i></button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr><td colspan="5" class="text-center">No posts yet. <a href="{% url 'dashboard:blog_create' %}">Create one</a></td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
+
+<div class="bl-stats">
+    <a href="?" class="bl-stat {% if not filters.status %}is-active{% endif %}" data-tip="Every post, including drafts"><span class="bl-ic"><i class="fas fa-newspaper"></i></span><span><strong>{{ stats.total }}</strong>All posts</span></a>
+    <a href="?status=published" class="bl-stat bl-c-green {% if filters.status == 'published' %}is-active{% endif %}" data-tip="Live on the website"><span class="bl-ic"><i class="fas fa-circle-check"></i></span><span><strong>{{ stats.published }}</strong>Published</span></a>
+    <a href="?status=scheduled" class="bl-stat bl-c-blue {% if filters.status == 'scheduled' %}is-active{% endif %}" data-tip="Go live automatically on their publish date"><span class="bl-ic"><i class="fas fa-calendar-check"></i></span><span><strong>{{ stats.scheduled }}</strong>Scheduled</span></a>
+    <a href="?status=draft" class="bl-stat bl-c-orange {% if filters.status == 'draft' %}is-active{% endif %}" data-tip="Not visible to visitors"><span class="bl-ic"><i class="fas fa-file-pen"></i></span><span><strong>{{ stats.drafts }}</strong>Drafts</span></a>
+    <div class="bl-stat bl-c-dark" data-tip="{{ stats.views_30 }} in the last 30 days"><span class="bl-ic"><i class="fas fa-chart-line"></i></span><span><strong>{{ stats.views|default:0 }}</strong>Total views</span></div>
+</div>
+
+{% if top_post and top_post.view_count %}
+<a href="{% url 'dashboard:blog_view' top_post.pk %}" class="bl-top">
+    <span class="bl-top-badge"><i class="fas fa-trophy"></i> Most read</span>
+    <strong>{{ top_post.title }}</strong>
+    <span class="bl-top-views">{{ top_post.view_count }} views <i class="fas fa-arrow-right"></i></span>
+</a>
+{% endif %}
+
+<form class="bl-toolbar" id="blToolbar" method="get" autocomplete="off">
+    <div class="iq-tabs">
+        <a href="#" data-status="" class="{% if not filters.status %}is-active{% endif %}">All</a>
+        <a href="#" data-status="published" class="{% if filters.status == 'published' %}is-active{% endif %}">Published</a>
+        <a href="#" data-status="scheduled" class="{% if filters.status == 'scheduled' %}is-active{% endif %}">Scheduled</a>
+        <a href="#" data-status="draft" class="{% if filters.status == 'draft' %}is-active{% endif %}">Drafts</a>
+        <a href="#" data-status="featured" class="{% if filters.status == 'featured' %}is-active{% endif %}">Featured</a>
     </div>
+    <input type="hidden" name="status" value="{{ filters.status }}">
+    <div class="iq-search">
+        <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+        <input type="text" name="q" value="{{ filters.q }}" placeholder="Search title, summary or tags…" aria-label="Search posts">
+        <button type="button" class="bl-clear" aria-label="Clear search"{% if not filters.q %} hidden{% endif %}><i class="fas fa-xmark"></i></button>
+    </div>
+    <select name="category" aria-label="Category">
+        <option value="">All categories</option>
+        {% for c in categories %}<option value="{{ c.pk }}"{% if filters.category == c.pk|stringformat:'s' %} selected{% endif %}>{{ c.name }}</option>{% endfor %}
+    </select>
+    <select name="sort" aria-label="Sort">
+        <option value="recent"{% if filters.sort == 'recent' %} selected{% endif %}>Recently edited</option>
+        <option value="published"{% if filters.sort == 'published' %} selected{% endif %}>Publish date</option>
+        <option value="views"{% if filters.sort == 'views' %} selected{% endif %}>Most viewed</option>
+        <option value="title"{% if filters.sort == 'title' %} selected{% endif %}>Title A–Z</option>
+    </select>
+</form>
+
+<p class="bl-count"><span id="blCount">{{ posts|length }}</span> post{{ posts|length|pluralize }}</p>
+<div class="bl-list" id="blList" aria-live="polite">
+    {% include 'dashboard/blog/_rows.html' %}
 </div>
+
+<link rel="stylesheet" href="{% static 'css/inquiries.css' %}">
+<link rel="stylesheet" href="{% static 'css/blog-admin.css' %}">
+<script>
+(function () {
+    const form = document.getElementById('blToolbar');
+    const list = document.getElementById('blList');
+    const count = document.getElementById('blCount');
+    const q = form.querySelector('input[name=q]');
+    const clear = form.querySelector('.bl-clear');
+    const status = form.querySelector('input[name=status]');
+    let ctrl = null, t = null;
+    async function refresh() {
+        const params = new URLSearchParams(new FormData(form));
+        [...params.keys()].forEach((k) => { if (!params.get(k) || (k === 'sort' && params.get(k) === 'recent')) params.delete(k); });
+        history.replaceState(null, '', location.pathname + (params.toString() ? '?' + params : ''));
+        if (ctrl) ctrl.abort();
+        ctrl = new AbortController();
+        list.classList.add('is-loading');
+        try {
+            const res = await fetch(location.pathname + '?' + params, { headers: { 'X-Requested-With': 'fetch' }, signal: ctrl.signal });
+            const data = await res.json();
+            list.innerHTML = data.html;
+            count.textContent = data.count;
+            count.nextSibling.textContent = ' post' + (data.count === 1 ? '' : 's');
+            bindRows();
+        } catch (e) { if (e.name !== 'AbortError') window.duiToast && window.duiToast('Could not load posts', 'error'); }
+        finally { list.classList.remove('is-loading'); }
+    }
+    function bindRows() {
+        list.querySelectorAll('.bl-row').forEach((row) => {
+            row.addEventListener('click', (e) => { if (!e.target.closest('a, button, form')) location.href = row.dataset.href; });
+            row.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target === row) location.href = row.dataset.href; });
+        });
+    }
+    q.addEventListener('input', () => { clear.hidden = !q.value; clearTimeout(t); t = setTimeout(refresh, 250); });
+    clear.addEventListener('click', () => { q.value = ''; clear.hidden = true; q.focus(); refresh(); });
+    form.addEventListener('submit', (e) => { e.preventDefault(); refresh(); });
+    form.querySelectorAll('select').forEach((s) => s.addEventListener('change', refresh));
+    form.querySelectorAll('[data-status]').forEach((a) => a.addEventListener('click', (e) => {
+        e.preventDefault();
+        form.querySelectorAll('[data-status]').forEach((x) => x.classList.toggle('is-active', x === a));
+        status.value = a.dataset.status;
+        refresh();
+    }));
+    bindRows();
+})();
+</script>
 {% endblock %}

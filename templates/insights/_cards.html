@@ -1,0 +1,21 @@
+{% load static %}
+{% for post in posts %}
+<article class="ins-card" style="--i: {{ forloop.counter0 }}">
+    <a href="{{ post.get_absolute_url }}" class="ins-card-media" tabindex="-1" aria-hidden="true">
+        <img src="{% if post.featured_image %}{{ post.featured_image.url }}{% else %}{% static 'images/blog/default-blog.jpg' %}{% endif %}" alt="" loading="lazy" decoding="async">
+        {% if post.category %}<span class="ins-chip">{{ post.category.name }}</span>{% endif %}
+    </a>
+    <div class="ins-card-body">
+        <div class="ins-meta">
+            <span><i class="far fa-calendar" aria-hidden="true"></i> {{ post.published_at|date:"M d, Y" }}</span>
+            <span><i class="far fa-clock" aria-hidden="true"></i> {{ post.reading_time }} min read</span>
+        </div>
+        <h3><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h3>
+        <p>{{ post.excerpt|default:post.content|striptags|truncatewords:22 }}</p>
+        <div class="ins-card-foot">
+            <span class="ins-author"><span class="ins-avatar" aria-hidden="true">{% if post.author.first_name %}{{ post.author.first_name|slice:":1" }}{% else %}T{% endif %}</span>{% if post.author %}{{ post.author.get_full_name|default:"TM Solutech Team" }}{% else %}TM Solutech Team{% endif %}</span>
+            <a href="{{ post.get_absolute_url }}" class="ins-more" aria-label="Read {{ post.title }}">Read <i class="fas fa-arrow-right"></i></a>
+        </div>
+    </div>
+</article>
+{% endfor %}

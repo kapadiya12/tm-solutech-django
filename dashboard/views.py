@@ -413,11 +413,115 @@ def leadership_delete(request, pk):
 
 
 # ---- Blog CRUD ----
+def _blog_filtered(request):
+    from insights.models import BlogPost
+    now = timezone.now()
+    posts = BlogPost.objects.select_related('category', 'author')
+    status = request.GET.get('status', '')
+    cat = request.GET.get('category', '')
+    q = request.GET.get('q', '').strip()[:100]
+    sort = request.GET.get('sort', 'recent')
+    if status == 'published':
+        posts = posts.filter(is_published=True, published_at__lte=now)
+    elif status == 'scheduled':
+        posts = posts.filter(is_published=True, published_at__gt=now)
+    elif status == 'draft':
+        posts = posts.filter(is_published=False)
+    elif status == 'featured':
+        posts = posts.filter(is_featured=True)
+    if cat.isdigit():
+        posts = posts.filter(category_id=int(cat))
+    if q:
+        posts = posts.filter(Q(title__icontains=q) | Q(excerpt__icontains=q) | Q(tags__icontains=q))
+    order = {'recent': ['-updated_at'], 'views': ['-view_count'], 'published': ['-published_at'], 'title': ['title']}.get(sort, ['-updated_at'])
+    return posts.order_by(*order), {'status': status, 'category': cat, 'q': q, 'sort': sort}
+
+
 @login_required
 @staff_required
 def blog_list(request):
-    posts = BlogPost.objects.select_related('category', 'author').all()
-    return render(request, 'dashboard/blog/list.html', {'posts': posts, 'page_title': 'Blog Posts'})
+    from insights.models import BlogPost, BlogPostDailyView
+    from django.db.models import Sum
+    posts, f = _blog_filtered(request)
+    if request.headers.get('x-requested-with') == 'fetch':
+        html = render(request, 'dashboard/blog/_rows.html', {'posts': posts}).content.decode()
+        return JsonResponse({'html': html, 'count': posts.count()})
+    now = timezone.now()
+    base = BlogPost.objects.all()
+    stats = base.aggregate(
+        total=Count('id'),
+        published=Count('id', filter=Q(is_published=True, published_at__lte=now)),
+        scheduled=Count('id', filter=Q(is_published=True, published_at__gt=now)),
+        drafts=Count('id', filter=Q(is_published=False)),
+        views=Sum('view_count'),
+    )
+    stats['views_30'] = BlogPostDailyView.objects.filter(date__gte=timezone.localdate() - timedelta(days=29)).aggregate(v=Sum('views'))['v'] or 0
+    top = base.filter(is_published=True).order_by('-view_count').first()
+    return render(request, 'dashboard/blog/list.html', {
+        'posts': posts, 'filters': f, 'stats': stats, 'top_post': top,
+        'categories': BlogCategory.objects.all(),
+        'page_title': 'Blog Posts',
+    })
+
+
+def _blog_chart(post, days=30):
+    from insights.models import BlogPostDailyView
+    today = timezone.localdate()
+    start = today - timedelta(days=days - 1)
+    rows = dict(BlogPostDailyView.objects.filter(post=post, date__gte=start).values_list('date', 'views'))
+    series = [{'date': start + timedelta(days=i), 'views': rows.get(start + timedelta(days=i), 0)} for i in range(days)]
+    peak = max([d['views'] for d in series] + [1])
+    for d in series:
+        d['pct'] = round(100 * d['views'] / peak)
+    return series, sum(d['views'] for d in series), peak
+
+
+@login_required
+@staff_required
+def blog_view(request, pk):
+    from insights.models import BlogPost
+    post = get_object_or_404(BlogPost.objects.select_related('category', 'author'), pk=pk)
+    series, views_30, peak = _blog_chart(post)
+    newer = BlogPost.objects.filter(updated_at__gt=post.updated_at).order_by('updated_at').first()
+    older = BlogPost.objects.filter(updated_at__lt=post.updated_at).order_by('-updated_at').first()
+    return render(request, 'dashboard/blog/view.html', {
+        'post': post, 'series': series, 'views_30': views_30, 'peak': peak,
+        'newer': newer, 'older': older,
+        'page_title': post.title,
+    })
+
+
+@login_required
+@staff_required
+def blog_toggle(request, pk):
+    from insights.models import BlogPost
+    post = get_object_or_404(BlogPost, pk=pk)
+    if request.method == 'POST':
+        what = request.POST.get('field')
+        if what == 'publish':
+            post.is_published = not post.is_published
+            if post.is_published and not post.published_at:
+                post.published_at = timezone.now()
+            post.save(update_fields=['is_published', 'published_at', 'updated_at'])
+            messages.success(request, 'Post published.' if post.is_published else 'Post moved to drafts.')
+        elif what == 'feature':
+            post.is_featured = not post.is_featured
+            post.save(update_fields=['is_featured', 'updated_at'])
+            messages.success(request, 'Post featured on the Insights page.' if post.is_featured else 'Post is no longer featured.')
+    nxt = request.POST.get('next') or ''
+    if nxt.startswith('/admin-dashboard/'):
+        return redirect(nxt)
+    return redirect('dashboard:blog_view', pk=pk)
+
+
+def _blog_save(request, form, creating):
+    post = form.save(commit=False)
+    if creating:
+        post.author = request.user
+    if post.is_published and not post.published_at:
+        post.published_at = timezone.now()
+    post.save()
+    return post
 
 
 @login_required
@@ -427,15 +531,14 @@ def blog_create(request):
     if request.method == 'POST':
         form = BlogPostForm(request.POST, request.FILES)
         if form.is_valid():
-            post = form.save(commit=False)
-            post.author = request.user
-            if post.is_published and not post.published_at:
-                post.published_at = timezone.now()
-            post.save()
+            post = _blog_save(request, form, True)
             messages.success(request, 'Post created.')
-            return redirect('dashboard:blog_list')
+            if 'save_continue' in request.POST:
+                return redirect('dashboard:blog_edit', pk=post.pk)
+            return redirect('dashboard:blog_view', pk=post.pk)
+        messages.error(request, 'Some fields need your attention.')
     else:
-        form = BlogPostForm()
+        form = BlogPostForm(initial={'is_published': False})
     return render(request, 'dashboard/blog/form.html', {'form': form, 'page_title': 'New Post'})
 
 
@@ -443,24 +546,26 @@ def blog_create(request):
 @staff_required
 def blog_edit(request, pk):
     from dashboard.forms import BlogPostForm
+    from insights.models import BlogPost
     post = get_object_or_404(BlogPost, pk=pk)
     if request.method == 'POST':
         form = BlogPostForm(request.POST, request.FILES, instance=post)
         if form.is_valid():
-            post = form.save(commit=False)
-            if post.is_published and not post.published_at:
-                post.published_at = timezone.now()
-            post.save()
+            post = _blog_save(request, form, False)
             messages.success(request, 'Post updated.')
-            return redirect('dashboard:blog_list')
+            if 'save_continue' in request.POST:
+                return redirect('dashboard:blog_edit', pk=post.pk)
+            return redirect('dashboard:blog_view', pk=post.pk)
+        messages.error(request, 'Some fields need your attention.')
     else:
         form = BlogPostForm(instance=post)
-    return render(request, 'dashboard/blog/form.html', {'form': form, 'page_title': 'Edit Post', 'post': post})
+    return render(request, 'dashboard/blog/form.html', {'form': form, 'page_title': f'Edit: {post.title}', 'post': post})
 
 
 @login_required
 @staff_required
 def blog_delete(request, pk):
+    from insights.models import BlogPost
     post = get_object_or_404(BlogPost, pk=pk)
     if request.method == 'POST':
         post.delete()
