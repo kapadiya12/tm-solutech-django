@@ -150,7 +150,14 @@
             if (e.target.closest('[data-all]')) { e.preventDefault(); suggest.hidden = true; grid.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' }); }
         });
         form.addEventListener('submit', (e) => { e.preventDefault(); suggest.hidden = true; load(1, false); grid.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' }); });
-        clearBtn.addEventListener('click', () => { input.value = ''; state.q = ''; clearBtn.hidden = true; input.focus(); renderDefault(); load(1, false); });
+        clearBtn.addEventListener('click', () => {
+            if (!input.value) { suggest.hidden = true; input.blur(); return; }   // nothing typed: just close the panel
+            input.value = ''; state.q = ''; input.focus(); renderDefault(); load(1, false);
+        });
+        // The cross shows while there's text or the suggestions are open
+        const syncClear = () => { clearBtn.hidden = !input.value && suggest.hidden; clearBtn.setAttribute('aria-label', input.value ? 'Clear search' : 'Close suggestions'); };
+        new MutationObserver(syncClear).observe(suggest, { attributes: true, attributeFilter: ['hidden'] });
+        input.addEventListener('input', syncClear);
 
         // "/" focuses search
         document.addEventListener('keydown', (e) => {

@@ -21,9 +21,9 @@ def search_highlights():
         counts = Counter()
         for tags in live.values_list('tags', flat=True):
             counts.update(t.strip() for t in (tags or '').split(',') if t.strip())
-        terms = [t for t, _ in counts.most_common(6)]
+        terms = [t for t, _ in counts.most_common(4)]
         for t in FALLBACK_TERMS:
-            if len(terms) >= 8:
+            if len(terms) >= 6:
                 break
             if t.lower() not in {x.lower() for x in terms}:
                 terms.append(t)

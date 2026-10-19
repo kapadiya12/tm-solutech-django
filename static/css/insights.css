@@ -43,6 +43,8 @@
 .ins-clear { position: absolute; right: 3.4rem; top: 30px; transform: translateY(-50%); width: 30px; height: 30px; border-radius: 50%; border: 0; background: #EEF0F4; color: #4B5563; cursor: pointer; }
 .ins-clear:hover { background: #1F2430; color: #fff; }
 .ins-clear[hidden] { display: none; }
+.ins-clear { display: inline-flex; align-items: center; justify-content: center; animation: insFade .2s ease; }
+@keyframes insFade { from { opacity: 0; } }
 .ins-kbd { position: absolute; right: 1rem; top: 30px; transform: translateY(-50%); padding: .2rem .5rem; border-radius: 7px; font: 700 .75rem var(--font-sans, sans-serif); color: #6B7280; background: #F3F4F6; border: 1px solid #E5E7EB; }
 .ins-spinner { position: absolute; right: 3.4rem; top: 30px; width: 18px; height: 18px; margin-top: -9px; border-radius: 50%; border: 2px solid #D1D5DB; border-top-color: #1F2430; opacity: 0; }
 .ins-search.is-loading .ins-spinner { opacity: 1; animation: insSpin .7s linear infinite; }
@@ -66,7 +68,7 @@
 .ins-suggest-all { display: block; padding: .55rem .75rem; font-size: .82rem; font-weight: 700; color: #1F2430; border-top: 1px solid #F3F4F6; margin-top: .3rem; }
 .ins-suggest-empty { padding: .9rem; font-size: .88rem; color: #6B7280; }
 .ins-sg-section + .ins-sg-section { margin-top: .35rem; padding-top: .55rem; border-top: 1px solid #F3F4F6; }
-.ins-sg-head { display: block; padding: .35rem .75rem .45rem; font-size: .68rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: #9CA3AF; }
+.ins-sg-head { display: block; padding: .5rem .75rem .45rem; font-size: .68rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: #9CA3AF; }
 .ins-sg-chips { display: flex; flex-wrap: wrap; gap: .4rem; padding: 0 .75rem .45rem; }
 .ins-sg-chips button { display: inline-flex; align-items: center; gap: .4rem; height: 32px; padding: 0 .75rem; border-radius: 999px; border: 1px solid #E5E7EB; background: #F9FAFB; font: inherit; font-size: .8rem; font-weight: 600; color: #374151; cursor: pointer; transition: all .2s; }
 .ins-sg-chips button i { font-size: .68rem; color: #9CA3AF; }
