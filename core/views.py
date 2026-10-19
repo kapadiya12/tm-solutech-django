@@ -91,6 +91,7 @@ def faq_page(request):
         'uncategorised': uncategorised,
         'faq_count': len(faqs),
         'popular': [f for f in faqs if f.is_popular][:6],
+        'search_terms': ['Pricing', '24/7 support', 'CSCRF', 'Cloud migration', 'AMC'],
         'faq_schema': faqs,
         'page_title': 'Frequently Asked Questions',
         'page_subtitle': 'Answers about our services, pricing, support and security. Can\'t find yours? Our team is a message away.',

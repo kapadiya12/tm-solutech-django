@@ -608,7 +608,24 @@ class CapabilityForm(FormStyleMixin, forms.ModelForm):
 class ClientLogoForm(FormStyleMixin, forms.ModelForm):
     class Meta:
         model = ClientLogo
-        fields = '__all__'
+        fields = ['name', 'logo', 'display_order', 'is_active']
+        widgets = {'name': forms.TextInput(attrs={'placeholder': 'e.g. CEPT University', 'maxlength': 120})}
+        labels = {'name': 'Client name', 'logo': 'Logo', 'display_order': 'Display order', 'is_active': 'Show on website'}
+        help_texts = {
+            'name': 'Used as the logo\'s alt text and shown on hover. Only add clients who agreed to be listed.',
+            'logo': 'PNG with a transparent background works best, at least 300px wide.',
+            'display_order': 'Lower numbers show first in the logo strip and on the Clients page.',
+            'is_active': 'When off, the logo is hidden from the website.',
+        }
+
+    def clean_name(self):
+        name = ' '.join((self.cleaned_data.get('name') or '').split())
+        dupes = ClientLogo.objects.filter(name__iexact=name)
+        if self.instance.pk:
+            dupes = dupes.exclude(pk=self.instance.pk)
+        if dupes.exists():
+            raise forms.ValidationError('A client with this name already exists.')
+        return name
 
 
 class HeroTagForm(FormStyleMixin, forms.ModelForm):

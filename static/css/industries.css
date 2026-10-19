@@ -1,0 +1,10 @@
+/* Industries: images on list cards and the detail intro */
+.ind-card { overflow: hidden; padding-top: 0 !important; }
+.ind-card-media { position: relative; height: 210px; margin: 0 -2.25rem 2.4rem; background: #F3F5F8; display: flex; align-items: center; justify-content: center; }
+.ind-card-media img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; padding: 1rem 1.5rem; box-sizing: border-box; transition: transform .6s cubic-bezier(.16,1,.3,1); }
+.ind-card:hover .ind-card-media img { transform: scale(1.04); }
+.ind-card-icon { position: absolute; left: 50%; bottom: -22px; transform: translateX(-50%); width: 46px; height: 46px; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; color: #fff; background: linear-gradient(135deg, #343B4A, #0F1218); box-shadow: 0 12px 24px -12px rgba(10,12,16,.8); }
+.ind-intro { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 2.5rem; align-items: center; }
+.ind-intro-media { margin: 0; padding: 1.5rem; border-radius: 22px; background: #F3F5F8; }
+.ind-intro-media img { display: block; width: 100%; height: auto; max-height: 380px; object-fit: contain; }
+@media (max-width: 800px) { .ind-intro { grid-template-columns: 1fr; gap: 1.5rem; } .ind-intro-media { order: -1; } }

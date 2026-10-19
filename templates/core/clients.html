@@ -45,7 +45,7 @@
         <div class="clients-logo-grid">
             {% for client in client_logos %}
             <div class="clients-logo-card animate-on-scroll">
-                <img src="{{ client.logo.url }}" alt="{{ client.name }}" loading="lazy">
+                <img src="{{ client.logo.url }}" alt="{{ client.name }}" title="{{ client.name }}" loading="lazy">
             </div>
             {% endfor %}
         </div>

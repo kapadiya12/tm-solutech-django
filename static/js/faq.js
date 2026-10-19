@@ -9,6 +9,8 @@
     const clearBtn = document.getElementById('fqClear');
     const bar = document.getElementById('fqResultbar');
     const empty = document.getElementById('fqEmpty');
+    const suggest = document.getElementById('fqSuggest');
+    const defaultTpl = document.getElementById('fqSuggestDefault');
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const csrf = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
 
@@ -46,8 +48,7 @@
         openTarget('faq-' + a.dataset.open, true);
         history.replaceState(null, '', '#faq-' + a.dataset.open);
     }));
-    if (/^#faq-\d+$/.test(location.hash)) openTarget(location.hash.slice(1), true);
-    else setOpen(items[0], true);
+    if (/^#faq-\d+$/.test(location.hash)) openTarget(location.hash.slice(1), true);   // only a shared link opens an answer
     window.addEventListener('hashchange', () => { if (/^#faq-\d+$/.test(location.hash)) openTarget(location.hash.slice(1), true); });
 
     // ---- Topic nav: smooth scroll + active state
@@ -101,7 +102,7 @@
     function runSearch() {
         const raw = input.value.trim();
         const words = norm(raw).split(/\s+/).filter((w) => w.length > 1);
-        clearBtn.hidden = !input.value;
+        clearBtn.hidden = !input.value && suggest.hidden;
         let shown = 0;
         items.forEach((item) => {
             item._q.innerHTML = item._qHtml;
@@ -113,7 +114,7 @@
                 highlight(item._q, words);
                 highlight(item._a, words);
                 const inQuestion = words.every((w) => norm(item._q.textContent).includes(w));
-                setOpen(item, !inQuestion || shown <= 3);
+                setOpen(item, !inQuestion);   // open only when the match is inside the answer
             }
         });
         groups.forEach((g) => { g.hidden = !g.querySelector('.fq-item:not([hidden])'); });
@@ -124,16 +125,106 @@
         document.getElementById('fqCount').textContent = shown;
         document.getElementById('fqCountText').textContent = (shown === 1 ? 'answer' : 'answers') + ' for “' + raw + '”';
         document.getElementById('fqEmptyQ').textContent = raw;
-        if (!searching) items.forEach((item, i) => { if (!location.hash.includes(item.id)) setOpen(item, i === 0 && !location.hash); });
+        if (!searching) items.forEach((item) => setOpen(item, false));
         syncTopic();
     }
-    let t = null;
-    input.addEventListener('input', () => { clearTimeout(t); t = setTimeout(runSearch, 120); });
-    input.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') { input.value = ''; runSearch(); }
-        if (e.key === 'Enter') { const first = items.find((i) => !i.hidden); if (first) scrollToEl(first.closest('.fq-group') || first); }
+    // ---- Suggestions dropdown
+    let active = -1;
+    const escHtml = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    function markText(text, words) {
+        let out = escHtml(text);
+        if (words.length) out = out.replace(new RegExp('(' + words.map(escRe).join('|') + ')', 'gi'), '<mark>$1</mark>');
+        return out;
+    }
+    function showSuggest(open) {
+        suggest.hidden = !open;
+        input.setAttribute('aria-expanded', open ? 'true' : 'false');
+        active = -1;
+    }
+    function renderSuggest() {
+        if (document.activeElement !== input) return;
+        const raw = input.value.trim();
+        const words = norm(raw).split(/\s+/).filter((w) => w.length > 1);
+        if (!words.length) {
+            suggest.innerHTML = defaultTpl ? defaultTpl.innerHTML : '';
+            suggest.classList.add('is-default');
+            showSuggest(!!suggest.innerHTML.trim());
+            return;
+        }
+        suggest.classList.remove('is-default');
+        const matches = items.filter((i) => words.every((w) => i._text.includes(w)));
+        // Question-title matches first
+        matches.sort((a, b) => (words.every((w) => norm(b._qText).includes(w)) ? 1 : 0) - (words.every((w) => norm(a._qText).includes(w)) ? 1 : 0));
+        if (!matches.length) {
+            suggest.innerHTML = '<div class="fq-sg-empty"><i class="fas fa-circle-question"></i> No matching questions. <a href="/contact/">Ask our team</a></div>';
+        } else {
+            suggest.innerHTML = matches.slice(0, 6).map((i) =>
+                '<a href="#' + i.id + '" role="option" data-faq-link="' + i.dataset.faq + '"><i class="fas fa-circle-question"></i><span><strong>' + markText(i._qText, words) + '</strong><small>' + escHtml(i._topic) + '</small></span><i class="fas fa-arrow-right fq-sg-go"></i></a>'
+            ).join('') + (matches.length > 6 || matches.length > 1 ? '<button type="button" class="fq-sg-all" data-all>Show all ' + matches.length + ' answers <i class="fas fa-arrow-down"></i></button>' : '');
+        }
+        showSuggest(true);
+    }
+    function setActive(i) {
+        const links = Array.from(suggest.querySelectorAll('a[data-faq-link]'));
+        if (!links.length) return;
+        active = (i + links.length) % links.length;
+        links.forEach((a, k) => a.classList.toggle('is-active', k === active));
+        links[active].scrollIntoView({ block: 'nearest' });
+    }
+    function pick(id) {
+        showSuggest(false);
+        input.blur();
+        openTarget('faq-' + id, true);
+        history.replaceState(null, '', '#faq-' + id);
+    }
+    items.forEach((item) => {
+        item._qText = item._q.textContent.trim();
+        item._topic = item.closest('.fq-group')?.querySelector('.fq-group-head h2')?.textContent.trim() || 'FAQ';
     });
-    clearBtn.addEventListener('click', () => { input.value = ''; runSearch(); input.focus(); });
+    suggest.addEventListener('mousedown', (e) => { if (e.target.closest('button, a')) e.preventDefault(); });   // keep focus in the input
+    suggest.addEventListener('click', (e) => {
+        const link = e.target.closest('[data-faq-link]');
+        if (link) { e.preventDefault(); pick(link.dataset.faqLink); return; }
+        const term = e.target.closest('[data-term]');
+        if (term) { input.value = term.dataset.term; runSearch(); renderSuggest(); return; }
+        if (e.target.closest('[data-all]')) {
+            showSuggest(false);
+            const first = items.find((i) => !i.hidden);
+            if (first) scrollToEl(first.closest('.fq-group') || first);
+        }
+    });
+    input.addEventListener('focus', renderSuggest);
+    input.addEventListener('click', () => { if (suggest.hidden) renderSuggest(); });
+    document.addEventListener('click', (e) => {
+        if (!e.target.isConnected) return;   // the clicked chip was just re-rendered inside the panel
+        if (!e.target.closest('.fq-search')) showSuggest(false);
+    });
+
+    let t = null;
+    input.addEventListener('input', () => { clearTimeout(t); t = setTimeout(() => { runSearch(); renderSuggest(); }, 120); });
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowDown' && !suggest.hidden) { e.preventDefault(); setActive(active + 1); return; }
+        if (e.key === 'ArrowUp' && !suggest.hidden) { e.preventDefault(); setActive(active - 1); return; }
+        if (e.key === 'Escape') {
+            if (!suggest.hidden) { showSuggest(false); return; }
+            input.value = ''; runSearch();
+        }
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const links = suggest.querySelectorAll('a[data-faq-link]');
+            if (!suggest.hidden && active >= 0 && links[active]) { pick(links[active].dataset.faqLink); return; }
+            showSuggest(false);
+            const first = items.find((i) => !i.hidden);
+            if (first) scrollToEl(first.closest('.fq-group') || first);
+        }
+    });
+    // The cross shows while there's text or suggestions are open: clears text, or closes the panel
+    const syncClear = () => { clearBtn.hidden = !input.value && suggest.hidden; };
+    new MutationObserver(syncClear).observe(suggest, { attributes: true, attributeFilter: ['hidden'] });
+    clearBtn.addEventListener('click', () => {
+        if (!input.value) { showSuggest(false); input.blur(); return; }
+        input.value = ''; runSearch(); input.focus(); renderSuggest();
+    });
     document.getElementById('fqReset').addEventListener('click', () => { input.value = ''; runSearch(); scrollToEl(document.querySelector('.fq-body')); });
     document.addEventListener('keydown', (e) => {
         if (e.key === '/' && !/input|textarea|select/i.test(document.activeElement.tagName)) { e.preventDefault(); input.focus(); }

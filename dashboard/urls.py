@@ -39,6 +39,7 @@ urlpatterns = [
     # FAQs
     path('faqs/', views.faq_list, name='faq_list'),
     path('faqs/create/', views.faq_create, name='faq_create'),
+    path('faqs/<int:pk>/', views.faq_view, name='faq_view'),
     path('faqs/<int:pk>/edit/', views.faq_edit, name='faq_edit'),
     path('faqs/<int:pk>/delete/', views.faq_delete, name='faq_delete'),
     path('faqs/<int:pk>/toggle/', views.faq_toggle, name='faq_toggle'),

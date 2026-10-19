@@ -1,24 +1,57 @@
 {% extends 'dashboard/base.html' %}
+{% load static %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/blog-admin.css' %}">{% endblock %}
 {% block dashboard_content %}
-<div class="flex-between mb-8">
-    <h2>{{ page_title }}</h2>
-    <a href="{% url 'dashboard:clientlogo_list' %}" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Back</a>
+
+<div class="ed-head">
+    <div class="ed-head-text">
+        <a href="{% url 'dashboard:clientlogo_list' %}" class="ed-back"><i class="fas fa-arrow-left"></i> All clients</a>
+        {% if client %}<h2>{{ client.name }}</h2>{% endif %}
+    </div>
 </div>
-<div class="dashboard-card">
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {% for field in form %}
-        <div class="form-group">
-            <label class="form-label">{{ field.label }} {% if field.field.required %}<span class="required">*</span>{% endif %}</label>
-            {{ field }}
-            {% if field.errors %}<div class="form-error">{{ field.errors.0 }}</div>{% endif %}
-            {% if field.help_text %}<p style="font-size: var(--text-xs); color: var(--gray-500); margin-top: var(--space-1);">{{ field.help_text }}</p>{% endif %}
+
+<form method="post" enctype="multipart/form-data" class="ed bc-form" data-guard novalidate>
+    {% csrf_token %}
+    <div class="bc-form-main">
+        {% if form.errors %}<div class="ed-alert"><i class="fas fa-circle-exclamation"></i> Some fields need your attention. They're marked in red below.</div>{% endif %}
+        <section class="ed-card">
+            <header class="ed-card-head"><span class="ed-card-num">1</span><div><h3>Client</h3><p>The organisation and its logo.</p></div></header>
+            {% include 'dashboard/partials/field.html' with field=form.name %}
+            {% include 'dashboard/partials/field.html' with field=form.logo %}
+        </section>
+        <section class="ed-card">
+            <header class="ed-card-head"><span class="ed-card-num">2</span><div><h3>Visibility</h3><p>Where it appears and in what order.</p></div></header>
+            {% include 'dashboard/partials/field.html' with field=form.display_order %}
+            {% include 'dashboard/partials/field.html' with field=form.is_active %}
+        </section>
+        <div class="ed-savebar">
+            <span class="ed-savebar-hint"><i class="fas fa-circle-info"></i> Fields marked <span class="required">*</span> are required.</span>
+            <div class="ed-savebar-actions">
+                <a href="{% url 'dashboard:clientlogo_list' %}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> {% if client %}Save changes{% else %}Add client{% endif %}</button>
+            </div>
         </div>
-        {% endfor %}
-        <div class="flex gap-4">
-            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save</button>
-            <a href="{% url 'dashboard:clientlogo_list' %}" class="btn btn-secondary">Cancel</a>
+    </div>
+
+    <aside class="bc-preview" aria-label="Live preview">
+        <span class="seo-kicker">Live preview</span>
+        <p class="bc-preview-note">How the logo looks on the Clients page.</p>
+        <div class="cl-preview">
+            <div class="cl-preview-card"><img id="clPreview" src="{% if client and client.logo %}{{ client.logo.url }}{% endif %}" alt=""{% if not client or not client.logo %} hidden{% endif %}><span id="clPreviewEmpty"{% if client and client.logo %} hidden{% endif %}><i class="fas fa-image"></i> Upload a logo</span></div>
+            <strong id="clPreviewName">{{ form.name.value|default:"Client name" }}</strong>
         </div>
-    </form>
-</div>
+        <p class="bc-preview-state"><i class="fas fa-circle-info"></i> Shown in full colour on a white card, with the name as hover text.</p>
+    </aside>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const file = document.getElementById('id_logo'), img = document.getElementById('clPreview'), empty = document.getElementById('clPreviewEmpty');
+    const name = document.getElementById('id_name'), label = document.getElementById('clPreviewName');
+    file && file.addEventListener('change', () => { const f = file.files[0]; if (!f) return; img.src = URL.createObjectURL(f); img.hidden = false; empty.hidden = true; });
+    name && name.addEventListener('input', () => { label.textContent = name.value.trim() || 'Client name'; });
+})();
+</script>
 {% endblock %}

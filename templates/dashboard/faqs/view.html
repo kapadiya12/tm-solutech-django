@@ -1,0 +1,117 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/blog-admin.css' %}"><link rel="stylesheet" href="{% static 'css/inquiries.css' %}">{% endblock %}
+{% block dashboard_content %}
+
+<div class="bv-top">
+    <a href="{% url 'dashboard:faq_list' %}#faq-{{ faq.pk }}" class="ed-back"><i class="fas fa-arrow-left"></i> All questions</a>
+    <div class="bv-pager">
+        <span class="fqv-pos">{{ position }} of {{ total }}</span>
+        {% if prev_id %}<a href="{% url 'dashboard:faq_view' prev_id %}" class="btn btn-sm btn-secondary" aria-label="Previous question"><i class="fas fa-chevron-left"></i> Previous</a>{% endif %}
+        {% if next_id %}<a href="{% url 'dashboard:faq_view' next_id %}" class="btn btn-sm btn-secondary" aria-label="Next question">Next <i class="fas fa-chevron-right"></i></a>{% endif %}
+    </div>
+</div>
+
+<header class="bv-hero fqv-hero">
+    <span class="fqv-hero-icon"><i class="{% if faq.category %}{{ faq.category.icon }}{% else %}fas fa-circle-question{% endif %}"></i></span>
+    <div class="bv-hero-text">
+        <div class="bv-badges">
+            {% if faq.is_active %}<span class="bc-status is-on"><i class="fas fa-circle-check"></i> Live</span>{% else %}<span class="bc-status is-off"><i class="fas fa-eye-slash"></i> Hidden</span>{% endif %}
+            {% if faq.is_popular %}<span class="bv-feat"><i class="fas fa-star"></i> Popular</span>{% endif %}
+            <span class="bv-cat"><i class="fas fa-folder"></i> {{ faq.category.name|default:"No topic" }}</span>
+        </div>
+        <h2>{{ faq.question }}</h2>
+        <p><span><i class="fas fa-clock-rotate-left"></i> Last edited {{ faq.updated_at|date:"M d, Y · H:i" }}</span><span><i class="fas fa-arrow-down-1-9"></i> Order {{ faq.display_order }}</span></p>
+    </div>
+    <div class="bv-actions">
+        {% if faq.is_active and faq.category.is_active %}<a href="{% url 'core:faqs' %}#faq-{{ faq.pk }}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-up-right-from-square"></i> View on site</a>{% endif %}
+        <a href="{% url 'dashboard:faq_edit' faq.pk %}" class="btn btn-primary btn-sm"><i class="fas fa-pen"></i> Edit question</a>
+    </div>
+</header>
+
+<div class="bv-stats">
+    <div class="bl-stat bl-c-green" data-tip="Share of votes that said Yes"><span class="bl-ic"><i class="fas fa-thumbs-up"></i></span><span><strong>{% if faq.helpful_percent is not None %}{{ faq.helpful_percent }}%{% else %}—{% endif %}</strong>Found helpful</span></div>
+    <div class="bl-stat bl-c-blue"><span class="bl-ic"><i class="far fa-thumbs-up"></i></span><span><strong>{{ faq.helpful_yes }}</strong>Yes votes</span></div>
+    <div class="bl-stat bl-c-orange" data-tip="A high number means the answer needs work"><span class="bl-ic"><i class="far fa-thumbs-down"></i></span><span><strong>{{ faq.helpful_no }}</strong>No votes</span></div>
+    <div class="bl-stat bl-c-dark"><span class="bl-ic"><i class="fas fa-align-left"></i></span><span><strong>{{ faq.answer_text|wordcount }}</strong>Words in answer</span></div>
+</div>
+
+<div class="bv-grid">
+    <div class="bv-main">
+        <section class="bv-card">
+            <header class="bv-card-head"><h3><i class="fas fa-desktop"></i> As visitors see it</h3>{% if faq.is_active and faq.category.is_active %}<a href="{% url 'core:faqs' %}#faq-{{ faq.pk }}" target="_blank" rel="noopener">Open <i class="fas fa-arrow-up-right-from-square"></i></a>{% endif %}</header>
+            <div class="ju-browser">
+                <div class="ju-browser-bar"><span></span><span></span><span></span><em>tmsolutech.com/faqs/#faq-{{ faq.pk }}</em></div>
+                <div class="fqv-site">
+                    <span class="fqv-topic"><i class="{{ faq.category.icon|default:'fas fa-circle-question' }}"></i> {{ faq.category.name|default:"No topic" }}</span>
+                    <div class="fqv-item">
+                        <div class="fqv-q"><span>{{ faq.question }}</span>{% if faq.is_popular %}<em>Popular</em>{% endif %}<i></i></div>
+                        <div class="fqv-a fqa-preview-a">{{ faq.answer|safe }}</div>
+                        <div class="fqv-foot"><span>Was this helpful?</span><b><i class="far fa-thumbs-up"></i> Yes</b><b><i class="far fa-thumbs-down"></i> No</b><b class="fqv-copy"><i class="fas fa-link"></i> Copy link</b></div>
+                    </div>
+                </div>
+            </div>
+            {% if not faq.is_active %}<p class="bv-note"><i class="fas fa-eye-slash"></i> This question is hidden, so visitors can't see it. Turn on “Show on website” to publish it.</p>
+            {% elif faq.category and not faq.category.is_active %}<p class="bv-note"><i class="fas fa-eye-slash"></i> The topic “{{ faq.category.name }}” is hidden, so this question isn't shown. <a href="{% url 'dashboard:faqcategory_edit' faq.category.pk %}">Edit topic</a></p>
+            {% elif not faq.category %}<p class="bv-note"><i class="fas fa-circle-exclamation"></i> This question has no topic. <a href="{% url 'dashboard:faq_edit' faq.pk %}">Choose a topic</a> so it's grouped properly.</p>{% endif %}
+        </section>
+    </div>
+
+    <aside class="bv-side">
+        <section class="bv-card">
+            <header class="bv-card-head"><h3><i class="fas fa-bolt"></i> Quick actions</h3></header>
+            <form method="post" action="{% url 'dashboard:faq_toggle' faq.pk %}" class="bv-toggle">
+                {% csrf_token %}<input type="hidden" name="field" value="is_active"><input type="hidden" name="next" value="view">
+                <div><strong>Show on website</strong><small>{% if faq.is_active %}Visible on the FAQs page{% else %}Only visible here{% endif %}</small></div>
+                <button type="submit" class="bv-switch{% if faq.is_active %} is-on{% endif %}" aria-label="{% if faq.is_active %}Hide{% else %}Show{% endif %}"><span></span></button>
+            </form>
+            <form method="post" action="{% url 'dashboard:faq_toggle' faq.pk %}" class="bv-toggle">
+                {% csrf_token %}<input type="hidden" name="field" value="is_popular"><input type="hidden" name="next" value="view">
+                <div><strong>Popular question</strong><small>Quick link at the top of the FAQs page</small></div>
+                <button type="submit" class="bv-switch{% if faq.is_popular %} is-on{% endif %}" aria-label="Toggle popular"><span></span></button>
+            </form>
+            <button type="button" class="bv-copy" data-copy="{{ request.scheme }}://{{ request.get_host }}{% url 'core:faqs' %}#faq-{{ faq.pk }}"><i class="fas fa-link"></i> Copy link to this answer</button>
+        </section>
+
+        <section class="bv-card">
+            <header class="bv-card-head"><h3><i class="fas fa-circle-info"></i> Details</h3></header>
+            <dl class="fqv-dl">
+                <div><dt>Topic</dt><dd>{% if faq.category %}<a href="{% url 'dashboard:faqcategory_edit' faq.category.pk %}">{{ faq.category.name }}</a>{% else %}None{% endif %}</dd></div>
+                <div><dt>Status</dt><dd>{% if faq.is_active %}Live{% else %}Hidden{% endif %}</dd></div>
+                <div><dt>Popular</dt><dd>{{ faq.is_popular|yesno:"Yes,No" }}</dd></div>
+                <div><dt>Order in topic</dt><dd>{{ faq.display_order }}</dd></div>
+                <div><dt>Last edited</dt><dd>{{ faq.updated_at|date:"M d, Y" }}</dd></div>
+            </dl>
+        </section>
+
+        {% if siblings %}
+        <section class="bv-card">
+            <header class="bv-card-head"><h3><i class="fas fa-list"></i> Also in {{ faq.category.name }}</h3></header>
+            <ul class="fqv-siblings">
+                {% for s in siblings %}<li><a href="{% url 'dashboard:faq_view' s.pk %}"><i class="fas fa-circle-question"></i> {{ s.question }}</a></li>{% endfor %}
+            </ul>
+        </section>
+        {% endif %}
+
+        <section class="iqd-danger">
+            <div class="iqd-danger-head">
+                <span class="iqd-danger-icon"><i class="fas fa-triangle-exclamation"></i></span>
+                <div><h3>Danger zone</h3><p>Delete this question and its votes. This cannot be undone.</p></div>
+            </div>
+            <form method="post" action="{% url 'dashboard:faq_delete' faq.pk %}" data-confirm="The question is removed from the FAQs page." data-confirm-name="{{ faq.question|truncatechars:70 }}" data-confirm-title="Delete this question?">
+                {% csrf_token %}
+                <button type="submit" class="iqd-danger-btn"><i class="fas fa-trash-can"></i> Delete question</button>
+            </form>
+        </section>
+    </aside>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelectorAll('[data-copy]').forEach((b) => b.addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(b.dataset.copy); window.duiToast && window.duiToast('Link copied'); }
+    catch (e) { window.duiToast && window.duiToast('Press Ctrl+C to copy', 'info'); }
+}));
+</script>
+{% endblock %}

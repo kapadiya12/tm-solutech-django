@@ -5,7 +5,7 @@
 
 <div class="ed-head">
     <div class="ed-head-text">
-        <a href="{% url 'dashboard:faq_list' %}" class="ed-back"><i class="fas fa-arrow-left"></i> All questions</a>
+        <a href="{% if faq %}{% url 'dashboard:faq_view' faq.pk %}{% else %}{% url 'dashboard:faq_list' %}{% endif %}" class="ed-back"><i class="fas fa-arrow-left"></i> {% if faq %}Back to question{% else %}All questions{% endif %}</a>
         {% if faq %}<h2>Edit question</h2>{% endif %}
     </div>
     {% if faq and faq.is_active %}
@@ -44,7 +44,7 @@
         <div class="ed-savebar">
             <span class="ed-savebar-hint"><i class="fas fa-circle-info"></i> Fields marked <span class="required">*</span> are required.</span>
             <div class="ed-savebar-actions">
-                <a href="{% url 'dashboard:faq_list' %}" class="btn btn-secondary">Cancel</a>
+                <a href="{% if faq %}{% url 'dashboard:faq_view' faq.pk %}{% else %}{% url 'dashboard:faq_list' %}{% endif %}" class="btn btn-secondary">Cancel</a>
                 {% if faq %}<button type="submit" name="save_continue" class="btn btn-secondary"><i class="fas fa-floppy-disk"></i> Save &amp; keep editing</button>{% endif %}
                 <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> {% if faq %}Save changes{% else %}Add question{% endif %}</button>
             </div>

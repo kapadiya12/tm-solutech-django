@@ -1,34 +1,51 @@
 {% extends 'dashboard/base.html' %}
+{% load static %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/blog-admin.css' %}"><link rel="stylesheet" href="{% static 'css/inquiries.css' %}">{% endblock %}
 {% block dashboard_content %}
-<div class="flex-between mb-8">
-    <h2>{{ page_title }}</h2>
-    <a href="{% url 'dashboard:clientlogo_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add Client Logo</a>
-</div>
-<div class="dashboard-card">
-    <div class="dashboard-table-wrap">
-        <table class="dashboard-table">
-            <thead>
-                <tr><th>Logo</th><th>Name</th><th>Order</th><th>Active</th><th>Actions</th></tr>
-            </thead>
-            <tbody>
-                {% for logo in logos %}
-                <tr>
-                    <td>{% if logo.logo %}<img src="{{ logo.logo.url }}" alt="{{ logo.name }}" style="height:32px;width:auto;object-fit:contain;">{% endif %}</td><td><strong>{{ logo.name }}</strong></td><td>{{ logo.display_order }}</td><td><span class="status-badge {% if logo.is_active %}status-active{% else %}status-draft{% endif %}">{% if logo.is_active %}Active{% else %}Inactive{% endif %}</span></td>
-                    <td>
-                        <div class="flex gap-2">
-                            <a href="{% url 'dashboard:clientlogo_edit' logo.pk %}" class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></a>
-                            <form method="post" action="{% url 'dashboard:clientlogo_delete' logo.pk %}" data-confirm="Delete this item?">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-sm" style="color: var(--danger);"><i class="fas fa-trash"></i></button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr><td colspan="5" class="text-center">No client logos yet. <a href="{% url 'dashboard:clientlogo_create' %}">Create one</a></td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
+
+<div class="bl-head">
+    <p>Client logos shown in the homepage logo strip and on the <strong>Clients</strong> page.</p>
+    <div class="flex gap-2">
+        <a href="{% url 'core:clients' %}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-up-right-from-square"></i> View page</a>
+        <a href="{% url 'dashboard:clientlogo_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> New client</a>
     </div>
 </div>
+
+<div class="bl-stats bc-stats">
+    <div class="bl-stat"><span class="bl-ic"><i class="fas fa-building"></i></span><span><strong>{{ logos|length }}</strong>Clients</span></div>
+    <div class="bl-stat bl-c-green" data-tip="Visible on the website"><span class="bl-ic"><i class="fas fa-eye"></i></span><span><strong>{{ live }}</strong>On website</span></div>
+    <div class="bl-stat bl-c-orange" data-tip="Still called “Client N”: please add the real name"><span class="bl-ic"><i class="fas fa-pen-to-square"></i></span><span><strong>{{ unnamed }}</strong>Need a name</span></div>
+</div>
+
+{% if logos %}
+<div class="cl-grid">
+    {% for c in logos %}
+    <article class="cl-card{% if not c.is_active %} is-off{% endif %}{% if c.name|slice:':7' == 'Client ' %} needs-name{% endif %}">
+        <div class="cl-logo">{% if c.logo %}<img src="{{ c.logo.url }}" alt="{{ c.name }}" loading="lazy">{% endif %}</div>
+        <div class="cl-body">
+            <strong>{{ c.name }}</strong>
+            <small>
+                {% if c.name|slice:':7' == 'Client ' %}<span class="cl-warn"><i class="fas fa-circle-exclamation"></i> Add the real name</span>
+                {% elif c.is_active %}<span class="cl-on"><i class="fas fa-circle"></i> On website</span>{% else %}<span class="cl-off"><i class="fas fa-eye-slash"></i> Hidden</span>{% endif %}
+                · Order {{ c.display_order }}
+            </small>
+        </div>
+        <div class="cl-actions">
+            <a href="{% url 'dashboard:clientlogo_edit' c.pk %}" class="fqa-icon-btn" data-tip="Edit"><i class="fas fa-pen"></i></a>
+            <form method="post" action="{% url 'dashboard:clientlogo_delete' c.pk %}" data-confirm="The logo is removed from the website." data-confirm-name="{{ c.name }}" data-confirm-title="Delete this client?">
+                {% csrf_token %}<button type="submit" class="bc-del" aria-label="Delete {{ c.name }}" data-tip="Delete"><i class="fas fa-trash-can"></i></button>
+            </form>
+        </div>
+    </article>
+    {% endfor %}
+    <a href="{% url 'dashboard:clientlogo_create' %}" class="cl-card cl-add"><i class="fas fa-plus"></i><strong>New client</strong></a>
+</div>
+{% else %}
+<div class="bc-empty">
+    <span class="bc-icon"><i class="fas fa-building"></i></span>
+    <h3>No clients yet</h3>
+    <p>Add client logos to show them on the homepage and Clients page.</p>
+    <a href="{% url 'dashboard:clientlogo_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> New client</a>
+</div>
+{% endif %}
 {% endblock %}

@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.http import JsonResponse
 from django.urls import reverse
-from django.db.models import Count, Max, Prefetch, Q
+from django.db.models import Count, F, Max, Prefetch, Q
 from django.db.models.functions import TruncMonth
 from django.utils import timezone
 from datetime import timedelta
@@ -602,6 +602,24 @@ def faq_list(request):
     })
 
 
+@login_required
+@staff_required
+def faq_view(request, pk):
+    faq = get_object_or_404(FAQ.objects.select_related('category'), pk=pk)
+    ordered = list(FAQ.objects.select_related('category').order_by(
+        F('category__display_order').asc(nulls_last=True), 'category__name', 'display_order', 'pk').values_list('pk', flat=True))
+    i = ordered.index(faq.pk)
+    siblings = FAQ.objects.filter(category=faq.category).exclude(pk=faq.pk)[:5] if faq.category_id else []
+    return render(request, 'dashboard/faqs/view.html', {
+        'faq': faq,
+        'prev_id': ordered[i - 1] if i > 0 else None,
+        'next_id': ordered[i + 1] if i < len(ordered) - 1 else None,
+        'position': i + 1, 'total': len(ordered),
+        'siblings': siblings,
+        'page_title': 'Question',
+    })
+
+
 def _faq_save(request, instance=None):
     from dashboard.forms import FAQForm
     initial = {}
@@ -613,7 +631,7 @@ def _faq_save(request, instance=None):
         messages.success(request, 'Question {}.'.format('updated' if instance else 'added'))
         if 'save_continue' in request.POST:
             return redirect('dashboard:faq_edit', pk=faq.pk)
-        return redirect(reverse('dashboard:faq_list') + f'#faq-{faq.pk}')
+        return redirect('dashboard:faq_view', pk=faq.pk)
     return render(request, 'dashboard/faqs/form.html', {
         'form': form, 'faq': instance,
         'page_title': 'Edit Question' if instance else 'Add Question',
@@ -653,6 +671,10 @@ def faq_toggle(request, pk):
         faq.save(update_fields=[field, 'updated_at'])
     if request.headers.get('x-requested-with') == 'fetch':
         return JsonResponse({'ok': True, 'is_active': faq.is_active, 'is_popular': faq.is_popular})
+    if request.POST.get('next') == 'view':
+        messages.success(request, {'is_active': 'Shown on website.' if faq.is_active else 'Hidden from website.',
+                                   'is_popular': 'Marked as popular.' if faq.is_popular else 'Removed from popular.'}.get(field, 'Saved.'))
+        return redirect('dashboard:faq_view', pk=faq.pk)
     return redirect('dashboard:faq_list')
 
 
@@ -1222,7 +1244,12 @@ def capability_delete(request, pk):
 @staff_required
 def clientlogo_list(request):
     logos = ClientLogo.objects.all()
-    return render(request, 'dashboard/clientlogos/list.html', {'logos': logos, 'page_title': 'Client Logos'})
+    return render(request, 'dashboard/clientlogos/list.html', {
+        'logos': logos,
+        'live': sum(1 for l in logos if l.is_active),
+        'unnamed': sum(1 for l in logos if l.name.startswith('Client ')),
+        'page_title': 'Clients',
+    })
 
 
 @login_required
@@ -1233,11 +1260,11 @@ def clientlogo_create(request):
         form = ClientLogoForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Logo added.')
+            messages.success(request, 'Client added.')
             return redirect('dashboard:clientlogo_list')
     else:
         form = ClientLogoForm()
-    return render(request, 'dashboard/clientlogos/form.html', {'form': form, 'page_title': 'Add Client Logo'})
+    return render(request, 'dashboard/clientlogos/form.html', {'form': form, 'page_title': 'Add Client'})
 
 
 @login_required
@@ -1249,11 +1276,11 @@ def clientlogo_edit(request, pk):
         form = ClientLogoForm(request.POST, request.FILES, instance=logo)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Logo updated.')
+            messages.success(request, 'Client updated.')
             return redirect('dashboard:clientlogo_list')
     else:
         form = ClientLogoForm(instance=logo)
-    return render(request, 'dashboard/clientlogos/form.html', {'form': form, 'page_title': 'Edit Client Logo'})
+    return render(request, 'dashboard/clientlogos/form.html', {'form': form, 'client': logo, 'page_title': 'Edit Client'})
 
 
 @login_required

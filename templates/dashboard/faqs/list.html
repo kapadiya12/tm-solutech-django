@@ -4,7 +4,7 @@
 {% block dashboard_content %}
 
 <div class="bl-head">
-    <p>Questions on the website's <strong>FAQs</strong> page, grouped by topic. Drag <i class="fas fa-grip-vertical"></i> to reorder or move a question to another topic.</p>
+    <p>Questions on the website's <strong>FAQs</strong> page, grouped by topic. Click a question to view it. Drag <i class="fas fa-grip-vertical"></i> to reorder or move it to another topic.</p>
     <div class="flex gap-2">
         <a href="{% url 'dashboard:faqcategory_list' %}" class="btn btn-secondary btn-sm"><i class="fas fa-folder-tree"></i> Topics</a>
         <a href="{% url 'core:faqs' %}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-up-right-from-square"></i> View page</a>
@@ -55,7 +55,7 @@
                 data-live="{{ f.is_active|yesno:'1,0' }}" data-popular="{{ f.is_popular|yesno:'1,0' }}"
                 data-text="{{ f.question|lower }} {{ f.answer_text|lower|truncatewords:80 }}">
                 <span class="fqa-handle" aria-hidden="true" data-tip="Drag to reorder"><i class="fas fa-grip-vertical"></i></span>
-                <a href="{% url 'dashboard:faq_edit' f.pk %}" class="fqa-main">
+                <a href="{% url 'dashboard:faq_view' f.pk %}" class="fqa-main">
                     <strong>{{ f.question }}</strong>
                     <small>{{ f.answer_text|truncatechars:130 }}</small>
                 </a>
@@ -63,6 +63,7 @@
                 <button type="button" class="fqa-star{% if f.is_popular %} is-on{% endif %}" data-toggle="is_popular" data-url="{% url 'dashboard:faq_toggle' f.pk %}" data-tip="{% if f.is_popular %}Popular: shown at the top{% else %}Mark as popular{% endif %}" aria-label="Toggle popular"><i class="fas fa-star"></i></button>
                 <button type="button" class="bv-switch{% if f.is_active %} is-on{% endif %}" data-toggle="is_active" data-url="{% url 'dashboard:faq_toggle' f.pk %}" data-tip="{% if f.is_active %}Live on website{% else %}Hidden{% endif %}" aria-label="Show on website"><span></span></button>
                 <div class="fqa-actions">
+                    <a href="{% url 'dashboard:faq_view' f.pk %}" class="fqa-icon-btn" data-tip="View"><i class="fas fa-eye"></i></a>
                     <a href="{% url 'dashboard:faq_edit' f.pk %}" class="fqa-icon-btn" data-tip="Edit"><i class="fas fa-pen"></i></a>
                     <form method="post" action="{% url 'dashboard:faq_delete' f.pk %}" data-confirm="The question is removed from the FAQs page." data-confirm-name="{{ f.question|truncatechars:70 }}" data-confirm-title="Delete this question?">
                         {% csrf_token %}<button type="submit" class="bc-del" aria-label="Delete" data-tip="Delete"><i class="fas fa-trash-can"></i></button>

@@ -25,9 +25,22 @@
 
         <div class="fq-search" role="search">
             <i class="fas fa-magnifying-glass fq-search-icon" aria-hidden="true"></i>
-            <input type="search" id="fqSearch" placeholder="Search questions, e.g. pricing, 24/7 support, CSCRF…" aria-label="Search FAQs" autocomplete="off" aria-controls="fqResults">
+            <input type="search" id="fqSearch" placeholder="Search questions, e.g. pricing, 24/7 support, CSCRF…" aria-label="Search FAQs" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="fqSuggest" aria-autocomplete="list">
             <button type="button" class="fq-clear" id="fqClear" aria-label="Clear search" hidden><i class="fas fa-xmark"></i></button>
             <kbd class="fq-kbd" aria-hidden="true">/</kbd>
+            <div class="fq-suggest" id="fqSuggest" role="listbox" aria-label="Suggested questions" data-lenis-prevent hidden></div>
+            <template id="fqSuggestDefault">
+                <div class="fq-sg-section">
+                    <span class="fq-sg-head">Try searching</span>
+                    <div class="fq-sg-chips">{% for t in search_terms %}<button type="button" data-term="{{ t }}"><i class="fas fa-magnifying-glass"></i> {{ t }}</button>{% endfor %}</div>
+                </div>
+                {% if popular %}
+                <div class="fq-sg-section">
+                    <span class="fq-sg-head">Popular questions</span>
+                    {% for f in popular|slice:":4" %}<a href="#faq-{{ f.pk }}" role="option" data-faq-link="{{ f.pk }}"><i class="fas fa-star"></i><span><strong>{{ f.question }}</strong><small>{{ f.category.name|default:"FAQ" }}</small></span></a>{% endfor %}
+                </div>
+                {% endif %}
+            </template>
         </div>
 
         {% if popular %}

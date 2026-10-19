@@ -2059,8 +2059,9 @@ input:focus-visible, textarea:focus-visible, select:focus-visible {
 .trust-number span { color: inherit; background: inherit; -webkit-background-clip: text; background-clip: text; }
 
 /* Client logos: calm by default, full colour on hover */
-.client-logo-box img { filter: grayscale(100%); opacity: 0.6; transition: filter 0.35s ease, opacity 0.35s ease; }
-.client-logo-box:hover img { filter: none; opacity: 1; }
+/* Logos in full colour; hovering turns that one dark */
+.client-logo-box img { filter: none; opacity: 1; transition: filter 0.35s ease, opacity 0.35s ease; }
+.client-logo-box:hover img { filter: grayscale(100%) brightness(0.85) contrast(2.2); opacity: 1; }   /* dark mark, white stays white */
 .client-logo-box:hover { border-color: rgba(10, 174, 224, 0.35); }
 
 /* Three-colour rotation for card families (blue → green → orange) */

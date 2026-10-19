@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static asset_tags %}
+{% block extra_css %}<link rel="stylesheet" href="{% static_v 'css/industries.css' %}">{% endblock %}
 
 {% block content %}
 <div class="page-hero">
@@ -17,7 +18,12 @@
 <section class="section">
     <div class="container">
         <div class="container-narrow">
-            {% if industry.description %}
+            {% if industry.image %}
+            <div class="ind-intro animate-on-scroll">
+                <div class="ind-intro-text">{% if industry.description %}{{ industry.description|safe }}{% else %}<p>{{ industry.short_description }}</p>{% endif %}</div>
+                <figure class="ind-intro-media"><img src="{{ industry.image.url }}" alt="{{ industry.name }}"></figure>
+            </div>
+            {% elif industry.description %}
             <div class="animate-on-scroll">{{ industry.description|safe }}</div>
             {% endif %}
             {% if industry.benefits %}
