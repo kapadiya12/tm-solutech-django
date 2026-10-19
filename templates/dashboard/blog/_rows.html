@@ -9,6 +9,7 @@
         </div>
         <div class="bl-line2">
             <span class="bl-status bl-{{ post.status }}">{{ post.status_label }}</span>
+            {% with seo=post.seo %}<span class="seo-pill seo-{{ seo.grade }}" data-tip="SEO score: {{ seo.grade_label }} ({{ seo.passed }}/{{ seo.total }} checks)"><i class="fas fa-magnifying-glass-chart"></i> SEO {{ seo.score }}</span>{% endwith %}
             {% if post.category %}<span><i class="fas fa-folder"></i> {{ post.category.name }}</span>{% endif %}
             <span data-tip="{% if post.published_at %}{{ post.published_at|date:'D, M d, Y · H:i' }}{% else %}Not published{% endif %}"><i class="far fa-calendar"></i> {% if post.published_at %}{{ post.published_at|date:"M d, Y" }}{% else %}—{% endif %}</span>
             <span><i class="far fa-clock"></i> {{ post.reading_time }} min</span>

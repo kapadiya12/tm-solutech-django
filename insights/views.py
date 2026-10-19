@@ -51,25 +51,31 @@ def _categories():
     ).filter(live_count__gt=0)
 
 
+def _featured_split(posts, f):
+    """On the unfiltered 'Latest' view the featured post sits in its own slot, never twice."""
+    if f['category'] or f['q'] or f['tag'] or f['sort'] != 'latest':
+        return None, posts
+    featured = posts.filter(is_featured=True).first() or posts.first()
+    return featured, (posts.exclude(pk=featured.pk) if featured else posts)
+
+
 def post_list(request):
     posts, f = _filtered(request)
     filtering = bool(f['category'] or f['q'] or f['tag'])
-    featured = None
-    if not filtering and f['sort'] == 'latest':
-        featured = posts.filter(is_featured=True).first() or posts.first()
-        if featured:
-            posts = posts.exclude(pk=featured.pk)
+    featured, posts = _featured_split(posts, f)
     page = Paginator(posts, PER_PAGE).get_page(request.GET.get('page'))
+    categories = list(_categories())
     context = {
+        'active_category': next((c for c in categories if c.slug == f['category']), None),
         'posts': page,
         'featured_post': featured,
-        'categories': _categories(),
+        'categories': categories,
         'all_count': _live_posts().count(),
         'sorts': [(k, v[1]) for k, v in SORTS.items()],
         'filters': f,
         'filtering': filtering,
         'result_count': page.paginator.count,
-        'popular': _live_posts().order_by('-view_count')[:4],
+        'popular': _live_posts().select_related('category').order_by('-view_count', '-published_at')[:4],
         'page_title': 'Insights',
         'page_subtitle': 'Ideas, guides and news on cloud, cybersecurity, AI and IT infrastructure.',
     }
@@ -79,11 +85,13 @@ def post_list(request):
 def post_search(request):
     """AJAX: filtered cards (live search, category chips, sort, load more) + quick suggestions."""
     posts, f = _filtered(request)
+    suggest_from = posts
+    featured, posts = _featured_split(posts, f)
     page = Paginator(posts, PER_PAGE).get_page(request.GET.get('page'))
     html = render_to_string('insights/_cards.html', {'posts': page}, request=request)
     suggestions = []
     if f['q']:
-        for p in posts[:5]:
+        for p in suggest_from[:5]:
             suggestions.append({
                 'title': p.title, 'url': p.get_absolute_url(),
                 'category': p.category.name if p.category else '',
@@ -91,7 +99,8 @@ def post_search(request):
             })
     return JsonResponse({
         'html': html,
-        'count': page.paginator.count,
+        'count': page.paginator.count + (1 if featured else 0),
+        'featured': bool(featured),
         'page': page.number,
         'has_next': page.has_next(),
         'suggestions': suggestions,

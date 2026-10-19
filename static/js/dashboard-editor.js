@@ -146,7 +146,7 @@
                     const cat = categorySlugs[categorySelect?.value] || 'category';
                     path = base + cat + '/';
                 }
-                preview.innerHTML = '<i class="fas fa-link"></i> ' + escapeHtml(location.host + path) + '<strong>' + escapeHtml(input.value || 'your-page') + '</strong>/';
+                preview.innerHTML = '<i class="fas fa-link"></i> ' + escapeHtml(location.host + path) + '<strong>' + escapeHtml(input.value || preview.dataset.placeholder || 'your-page') + '</strong>' + (preview.dataset.kind === 'query' ? '' : '/');
             }
         }
         source.addEventListener('input', () => { if (!manual) { input.value = slugify(source.value); render(); } });

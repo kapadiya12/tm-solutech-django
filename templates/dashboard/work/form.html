@@ -1,0 +1,114 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/blog-admin.css' %}">{% endblock %}
+{% block dashboard_content %}
+
+<div class="ed-head">
+    <div class="ed-head-text">
+        <a href="{% url 'dashboard:work_list' %}" class="ed-back"><i class="fas fa-arrow-left"></i> All case studies</a>
+        {% if case %}<h2>{{ case.title }}</h2>{% endif %}
+        <p class="ed-url" data-url-preview data-base="/work/" data-placeholder="your-project"></p>
+    </div>
+    {% if case and case.is_published %}
+    <div class="ed-head-actions">
+        <a href="{{ case.get_absolute_url }}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-up-right-from-square"></i> View live</a>
+    </div>
+    {% endif %}
+</div>
+
+<form method="post" enctype="multipart/form-data" class="ed" data-guard novalidate>
+    {% csrf_token %}
+    {% if form.errors %}<div class="ed-alert"><i class="fas fa-circle-exclamation"></i> Some fields need your attention. They're marked in red below.</div>{% endif %}
+
+    <nav class="ed-nav" data-section-nav aria-label="Form sections">
+        <span class="ed-nav-title">Sections</span>
+        <a href="#sec-basics"><span class="ed-nav-dot"></span> Basics</a>
+        <a href="#sec-client"><span class="ed-nav-dot"></span> Client</a>
+        <a href="#sec-story"><span class="ed-nav-dot"></span> The story</a>
+        <a href="#sec-results"><span class="ed-nav-dot"></span> Results</a>
+        <a href="#sec-quote"><span class="ed-nav-dot"></span> Client quote</a>
+        <a href="#sec-publish"><span class="ed-nav-dot"></span> Publishing</a>
+    </nav>
+
+    <div class="ed-main">
+        <section class="ed-card" id="sec-basics" data-section>
+            <header class="ed-card-head"><span class="ed-card-num">1</span><div><h3>Basics</h3><p>The project title, its web address and the short summary shown on the card.</p></div></header>
+            {% include 'dashboard/partials/field.html' with field=form.title %}
+            {% include 'dashboard/partials/field.html' with field=form.slug %}
+            {% include 'dashboard/partials/field.html' with field=form.summary %}
+            <div class="bf-cover">
+                <img id="wkCoverPreview" src="{% if case and case.cover_image %}{{ case.cover_image.url }}{% else %}{% static 'images/blog/default-blog.jpg' %}{% endif %}" alt="">
+                <div style="flex:1">{% include 'dashboard/partials/field.html' with field=form.cover_image %}</div>
+            </div>
+        </section>
+
+        <section class="ed-card" id="sec-client" data-section>
+            <header class="ed-card-head"><span class="ed-card-num">2</span><div><h3>Client</h3><p>Who the work was for. Only name or show a logo with the client's permission.</p></div></header>
+            <div class="ed-grid-2">
+                {% include 'dashboard/partials/field.html' with field=form.client_name %}
+                {% include 'dashboard/partials/field.html' with field=form.year %}
+            </div>
+            {% include 'dashboard/partials/field.html' with field=form.client_logo %}
+            <div class="ed-grid-2">
+                {% include 'dashboard/partials/field.html' with field=form.industry %}
+                {% include 'dashboard/partials/field.html' with field=form.service %}
+            </div>
+        </section>
+
+        <section class="ed-card" id="sec-story" data-section>
+            <header class="ed-card-head"><span class="ed-card-num">3</span><div><h3>The story</h3><p>Plain language works best: what was wrong, and what we did about it.</p></div></header>
+            {% include 'dashboard/partials/field.html' with field=form.challenge %}
+            {% include 'dashboard/partials/field.html' with field=form.solution %}
+        </section>
+
+        <section class="ed-card" id="sec-results" data-section>
+            <header class="ed-card-head"><span class="ed-card-num">4</span><div><h3>Results</h3><p>Outcomes convince buyers most. Use real numbers wherever you can.</p></div></header>
+            {% include 'dashboard/partials/field.html' with field=form.metrics %}
+            {% include 'dashboard/partials/field.html' with field=form.results %}
+        </section>
+
+        <section class="ed-card" id="sec-quote" data-section>
+            <header class="ed-card-head"><span class="ed-card-num">5</span><div><h3>Client quote <span class="optional">Optional</span></h3><p>A short testimonial from the client, shown as a highlighted quote.</p></div></header>
+            {% include 'dashboard/partials/field.html' with field=form.testimonial_quote %}
+            {% include 'dashboard/partials/field.html' with field=form.testimonial_author %}
+        </section>
+
+        <section class="ed-card" id="sec-publish" data-section>
+            <header class="ed-card-head"><span class="ed-card-num">6</span><div><h3>Publishing</h3><p>Drafts are only visible here. Only one project can be featured at a time.</p></div></header>
+            <div class="ed-toggles">
+                {% include 'dashboard/partials/field.html' with field=form.is_published %}
+                {% include 'dashboard/partials/field.html' with field=form.is_featured %}
+            </div>
+            {% include 'dashboard/partials/field.html' with field=form.order %}
+        </section>
+
+        <div class="ed-savebar">
+            <span class="ed-savebar-hint"><i class="fas fa-circle-info"></i> Fields marked <span class="required">*</span> are required.</span>
+            <div class="ed-savebar-actions">
+                <a href="{% url 'dashboard:work_list' %}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" name="save_continue" class="btn btn-secondary"><i class="fas fa-floppy-disk"></i> Save &amp; keep editing</button>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> {% if case %}Save changes{% else %}Create case study{% endif %}</button>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    document.querySelectorAll('[data-count]').forEach((el) => {
+        const label = el.closest('.form-group')?.querySelector('.form-label-row');
+        if (!label) return;
+        const c = document.createElement('span');
+        c.className = 'bf-count';
+        label.appendChild(c);
+        const upd = () => { c.textContent = el.value.length + ' / ' + el.dataset.count; c.classList.toggle('is-over', el.value.length > Number(el.dataset.count)); };
+        el.addEventListener('input', upd); upd();
+    });
+    const file = document.getElementById('id_cover_image');
+    const prev = document.getElementById('wkCoverPreview');
+    if (file && prev) file.addEventListener('change', () => { const f = file.files[0]; if (f) prev.src = URL.createObjectURL(f); });
+})();
+</script>
+{% endblock %}

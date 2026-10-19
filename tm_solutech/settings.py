@@ -99,6 +99,7 @@ INSTALLED_APPS = [
     "accounts.apps.AccountsConfig",
     "services.apps.ServicesConfig",
     "insights.apps.InsightsConfig",
+    "work.apps.WorkConfig",
     "contact.apps.ContactConfig",
     "dashboard.apps.DashboardConfig",
     "cms.apps.CmsConfig",

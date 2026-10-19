@@ -77,6 +77,24 @@
             <button type="button" class="bv-copy" data-copy="{{ request.scheme }}://{{ request.get_host }}{{ post.get_absolute_url }}"><i class="fas fa-link"></i> Copy article link</button>
         </section>
 
+        {% with seo=post.seo %}
+        <section class="bv-card">
+            <header class="bv-card-head"><h3><i class="fas fa-magnifying-glass-chart"></i> SEO score</h3><a href="{% url 'dashboard:blog_edit' post.pk %}#sec-meta">Improve <i class="fas fa-arrow-right"></i></a></header>
+            <div class="seo-head">
+                <div class="seo-ring{% if seo.grade == 'good' %} is-good{% elif seo.grade == 'ok' %} is-ok{% endif %}" style="--p: {{ seo.score }}">
+                    <svg viewBox="0 0 36 36" aria-hidden="true"><circle class="seo-ring-bg" cx="18" cy="18" r="15.5"/><circle class="seo-ring-bar" cx="18" cy="18" r="15.5"/></svg>
+                    <strong>{{ seo.score }}</strong>
+                </div>
+                <div><span class="seo-kicker">Out of 100</span><strong class="seo-grade">{{ seo.grade_label }}</strong><small>{{ seo.passed }} of {{ seo.total }} checks passed{% if post.focus_keyword %} · keyword “{{ post.focus_keyword }}”{% endif %}</small></div>
+            </div>
+            <ul class="seo-checks" style="margin-top:.8rem">
+                {% for c in seo.checks %}
+                <li class="{% if c.ok %}is-ok{% elif c.partial %}is-partial{% endif %}"><i class="fas {% if c.ok %}fa-check{% elif c.partial %}fa-minus{% else %}fa-xmark{% endif %}"></i><span>{{ c.label }}</span><b>{{ c.points }}/{{ c.max }}</b><small>{{ c.tip }}</small></li>
+                {% endfor %}
+            </ul>
+        </section>
+        {% endwith %}
+
         <section class="bv-card">
             <header class="bv-card-head"><h3><i class="fab fa-google"></i> Search &amp; sharing</h3></header>
             <div class="ju-serp">
@@ -84,12 +102,7 @@
                 <strong>{{ post.meta_title|default:post.title }} | TM Solutech</strong>
                 <p>{{ post.meta_description|default:post.excerpt|default:post.content|striptags|truncatechars:158 }}</p>
             </div>
-            <ul class="bv-checks">
-                <li class="{% if post.meta_description %}ok{% endif %}"><i class="fas {% if post.meta_description %}fa-check{% else %}fa-exclamation{% endif %}"></i> Search description {% if post.meta_description %}set{% else %}missing{% endif %}</li>
-                <li class="{% if post.featured_image %}ok{% endif %}"><i class="fas {% if post.featured_image %}fa-check{% else %}fa-exclamation{% endif %}"></i> Cover image {% if post.featured_image %}set{% else %}missing{% endif %}</li>
-                <li class="{% if post.excerpt %}ok{% endif %}"><i class="fas {% if post.excerpt %}fa-check{% else %}fa-exclamation{% endif %}"></i> Summary {% if post.excerpt %}set{% else %}missing{% endif %}</li>
-                <li class="{% if post.word_count >= 300 %}ok{% endif %}"><i class="fas {% if post.word_count >= 300 %}fa-check{% else %}fa-exclamation{% endif %}"></i> {{ post.word_count }} words {% if post.word_count < 300 %}(300+ ranks better){% endif %}</li>
-            </ul>
+
         </section>
 
         <section class="bv-card">

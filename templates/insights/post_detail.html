@@ -65,7 +65,7 @@
             <div class="ins-helpful" id="insHelpful" data-url="{% url 'insights:post_helpful' post.slug %}" data-voted="{{ voted|default:'' }}">
                 {% csrf_token %}
                 <div class="ins-helpful-ask">
-                    <strong>Was this article helpful?</strong>
+                    <span class="ins-helpful-q"><strong>Was this article helpful?</strong><small>One click, anonymous. It tells our team which topics to write more about.</small></span>
                     <div>
                         <button type="button" data-answer="yes"><i class="far fa-thumbs-up"></i> Yes</button>
                         <button type="button" data-answer="no"><i class="far fa-thumbs-down"></i> No</button>

@@ -12,6 +12,7 @@ urlpatterns = [
     path('', include('core.urls')),
     path('services/', include('services.urls')),
     path('insights/', include('insights.urls')),
+    path('work/', include('work.urls')),
     path('contact/', include('contact.urls')),
     path('accounts/', include('accounts.urls')),
     path('admin-dashboard/', include('dashboard.urls')),

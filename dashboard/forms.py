@@ -6,6 +6,7 @@ from core.models import (
 from contact.models import ContactPageSettings
 from services.models import ServiceCategory, Service, Industry
 from insights.models import BlogPost, BlogCategory
+from work.models import CaseStudy
 from cms.models import Page
 
 
@@ -267,7 +268,7 @@ class LeadershipForm(FormStyleMixin, forms.ModelForm):
 class BlogPostForm(FormStyleMixin, forms.ModelForm):
     class Meta:
         model = BlogPost
-        fields = ['title', 'slug', 'category', 'excerpt', 'featured_image', 'content', 'tags',
+        fields = ['title', 'slug', 'category', 'excerpt', 'featured_image', 'content', 'focus_keyword', 'tags',
                   'is_published', 'published_at', 'is_featured', 'meta_title', 'meta_description']
         widgets = {
             'published_at': forms.DateTimeInput(attrs={'type': 'datetime-local'}, format='%Y-%m-%dT%H:%M'),
@@ -275,15 +276,18 @@ class BlogPostForm(FormStyleMixin, forms.ModelForm):
             'meta_title': forms.TextInput(attrs={'maxlength': 70, 'data-count': '60'}),
             'meta_description': forms.Textarea(attrs={'rows': 2, 'maxlength': 200, 'data-count': '158'}),
             'tags': forms.TextInput(attrs={'placeholder': 'Cloud, Security, Compliance'}),
+            'focus_keyword': forms.TextInput(attrs={'placeholder': 'e.g. CSCRF compliance', 'maxlength': 80}),
+            'slug': forms.TextInput(attrs={'data-slug-from': 'id_title'}),
         }
         labels = {
             'is_published': 'Published',
             'published_at': 'Publish date & time',
             'is_featured': 'Feature on the Insights page',
             'excerpt': 'Summary',
+            'slug': 'Web address',
         }
         help_texts = {
-            'slug': 'The web address: /insights/<slug>/. Filled from the title automatically.',
+            'slug': 'The link to this article. Created from the title automatically; click Edit to customise it.',
             'excerpt': 'One or two sentences shown on cards and under the title.',
             'published_at': 'Leave empty to publish now. A future date schedules the post.',
             'tags': 'Comma separated. Visitors can click a tag to see related articles.',
@@ -294,14 +298,64 @@ class BlogPostForm(FormStyleMixin, forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['published_at'].input_formats = ['%Y-%m-%dT%H:%M', '%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M']
-        self.fields['category'].empty_label = 'No category'
+        self.fields['category'].empty_label = 'Choose a category'
         self.fields['slug'].required = False   # filled from the title when left empty
+        for name in self.REQUIRED:
+            self.fields[name].required = True
+            self.fields[name].error_messages['required'] = {
+                'title': 'Please enter a title.', 'category': 'Please choose a category.',
+                'excerpt': 'Please write a short summary.', 'focus_keyword': 'Please add a focus keyword.',
+                'tags': 'Add at least 2 tags, separated by commas.', 'meta_description': 'Please write a search description.',
+            }[name]
+        self.fields['content'].required = False   # checked in clean_content (CKEditor hides the textarea)
+        self.fields['content'].show_required = True
+        self.fields['featured_image'].required = False   # checked in clean_featured_image (keeps the current image on edit)
+        self.fields['featured_image'].show_required = True
+        self.fields['focus_keyword'].help_text = 'The main phrase people would search for. Used for the SEO score.'
+        self.fields['tags'].help_text = 'At least 2, comma separated. Visitors can click a tag to see related articles.'
+        self.fields['meta_description'].help_text = 'Shown in Google results and link previews. Write 120 to 160 characters.'
+
+    REQUIRED = ('title', 'category', 'excerpt', 'focus_keyword', 'tags', 'meta_description')
+    MIN_WORDS = 300
+
+    def clean_title(self):
+        title = ' '.join((self.cleaned_data.get('title') or '').split())
+        if len(title) < 20:
+            raise forms.ValidationError(f'Please write a fuller title: at least 20 characters (currently {len(title)}).')
+        return title
+
+    def clean_excerpt(self):
+        text = ' '.join((self.cleaned_data.get('excerpt') or '').split())
+        if len(text) < 60:
+            raise forms.ValidationError(f'Write one or two full sentences: at least 60 characters (currently {len(text)}).')
+        return text
+
+    def clean_content(self):
+        html = self.cleaned_data.get('content') or ''
+        words = len(_strip_tags(html).replace('&nbsp;', ' ').split())
+        if not words:
+            raise forms.ValidationError('Please write the article.')
+        if words < self.MIN_WORDS:
+            raise forms.ValidationError(f'Articles need at least {self.MIN_WORDS} words (currently {words}).')
+        return html
+
+    def clean_featured_image(self):
+        image = self.cleaned_data.get('featured_image')
+        if image is False or not (image or (self.instance.pk and self.instance.featured_image)):
+            raise forms.ValidationError('Please add a cover image. It is shown on cards, the article and link previews.')
+        return image
+
+    def clean_meta_description(self):
+        text = ' '.join((self.cleaned_data.get('meta_description') or '').split())
+        if len(text) < 70:
+            raise forms.ValidationError(f'Too short for Google: write at least 70 characters, ideally 120 to 160 (currently {len(text)}).')
+        return text
 
     def clean_slug(self):
         from django.utils.text import slugify
-        slug = slugify(self.cleaned_data.get('slug') or self.cleaned_data.get('title') or '')
+        slug = slugify(self.cleaned_data.get('slug') or self.data.get('title', ''))[:190]
         if not slug:
-            raise forms.ValidationError('Please enter a web address.')
+            raise forms.ValidationError('Enter a title first; the address is created from it.')
         if _unique_slug_error(BlogPost, slug, self.instance):
             raise forms.ValidationError('Another post already uses this address.')
         return slug
@@ -312,13 +366,58 @@ class BlogPostForm(FormStyleMixin, forms.ModelForm):
             t = ' '.join(t.split())
             if t and t.lower() not in seen:
                 seen.add(t.lower()); tags.append(t)
+        if len(tags) < 2:
+            raise forms.ValidationError('Add at least 2 tags, separated by commas.')
         return ', '.join(tags)[:250]
 
 
 class BlogCategoryForm(FormStyleMixin, forms.ModelForm):
     class Meta:
         model = BlogCategory
-        fields = '__all__'
+        fields = ['name', 'slug', 'description', 'is_active']
+        widgets = {
+            'name': forms.TextInput(attrs={'placeholder': 'e.g. Cybersecurity', 'maxlength': 60}),
+            'slug': forms.TextInput(attrs={'data-slug-from': 'id_name'}),
+            'description': forms.Textarea(attrs={'rows': 3, 'maxlength': 240, 'data-count': '200',
+                                                 'placeholder': 'e.g. Guides on protecting your business from cyber threats, audits and compliance.'}),
+        }
+        labels = {
+            'name': 'Category name',
+            'slug': 'Web address',
+            'description': 'Short intro',
+            'is_active': 'Show on the website',
+        }
+        help_texts = {
+            'name': 'Shown as a filter chip on the Insights page and as a label on each article.',
+            'slug': 'The link to this topic. Created from the name automatically; only letters, numbers and dashes.',
+            'description': 'Optional. Shown under the heading when a visitor picks this topic on the Insights page.',
+            'is_active': 'When off, the topic chip is hidden. Its articles stay live and can still be found by search.',
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['slug'].required = False   # filled from the name when left empty
+
+    def clean_name(self):
+        name = ' '.join((self.cleaned_data.get('name') or '').split())
+        qs = BlogCategory.objects.filter(name__iexact=name)
+        if self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise forms.ValidationError('A category with this name already exists.')
+        return name
+
+    def clean_slug(self):
+        from django.utils.text import slugify
+        slug = slugify(self.cleaned_data.get('slug') or self.data.get('name', ''))[:190]
+        if not slug:
+            raise forms.ValidationError('Enter a name first; the address is created from it.')
+        if _unique_slug_error(BlogCategory, slug, self.instance):
+            raise forms.ValidationError('Another category already uses this address.')
+        return slug
+
+    def clean_description(self):
+        return ' '.join((self.cleaned_data.get('description') or '').split())
 
 
 class FAQForm(FormStyleMixin, forms.ModelForm):
@@ -445,3 +544,87 @@ class HeroSlideForm(FormStyleMixin, forms.ModelForm):
     class Meta:
         model = HeroSlide
         fields = '__all__'
+
+
+class CaseStudyForm(FormStyleMixin, forms.ModelForm):
+    class Meta:
+        model = CaseStudy
+        fields = ['title', 'slug', 'summary', 'client_name', 'client_logo', 'industry', 'service', 'year',
+                  'cover_image', 'challenge', 'solution', 'results', 'metrics',
+                  'testimonial_quote', 'testimonial_author', 'is_published', 'is_featured', 'order']
+        widgets = {
+            'title': forms.TextInput(attrs={'placeholder': 'e.g. 24/7 managed SOC for a SEBI-regulated broker', 'maxlength': 160}),
+            'slug': forms.TextInput(attrs={'data-slug-from': 'id_title'}),
+            'summary': forms.Textarea(attrs={'rows': 2, 'maxlength': 300, 'data-count': '200'}),
+            'client_name': forms.TextInput(attrs={'placeholder': 'e.g. ABC Securities, or leave empty'}),
+            'year': forms.NumberInput(attrs={'placeholder': 'e.g. 2025', 'min': 1985, 'max': 2100}),
+            'challenge': forms.Textarea(attrs={'rows': 5, 'placeholder': 'What problem did the client have? What was at stake?'}),
+            'solution': forms.Textarea(attrs={'rows': 6, 'placeholder': 'What did TM Solutech deliver, and how?'}),
+            'results': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Passed the SEBI CSCRF audit with zero findings\nAll branches monitored from one dashboard'}),
+            'metrics': forms.Textarea(attrs={'rows': 3, 'placeholder': '40% | Less downtime\n24/7 | Threat monitoring\n3 weeks | To go live'}),
+            'testimonial_quote': forms.Textarea(attrs={'rows': 3}),
+            'testimonial_author': forms.TextInput(attrs={'placeholder': 'e.g. Rahul Mehta, CTO, ABC Securities'}),
+        }
+        labels = {
+            'slug': 'Web address',
+            'summary': 'Short summary',
+            'client_name': 'Client name',
+            'challenge': 'The challenge',
+            'solution': 'What we delivered',
+            'results': 'Results',
+            'metrics': 'Key numbers',
+            'testimonial_quote': 'Client quote',
+            'testimonial_author': 'Quote by',
+            'is_published': 'Published',
+            'is_featured': 'Featured project',
+            'order': 'Display order',
+        }
+        help_texts = {
+            'slug': 'The link to this project. Created from the title automatically.',
+            'summary': 'One or two sentences shown on the project card.',
+            'client_name': 'Leave empty if the client can’t be named: it shows as “Confidential client”.',
+            'client_logo': 'Only with the client’s permission. PNG with a transparent background works best.',
+            'industry': 'Visitors can filter projects by industry.',
+            'service': 'Links the case study to the service page.',
+            'cover_image': 'Landscape, about 1600×900. Screenshots, photos of the setup or a diagram.',
+            'challenge': 'Leave a blank line between paragraphs.',
+            'solution': 'Leave a blank line between paragraphs.',
+            'results': 'One result per line. Shown as a ticked list.',
+            'metrics': 'Up to 4, one per line, as number | label. Shown as big highlighted numbers.',
+            'is_published': 'When off, the project is only visible here.',
+            'is_featured': 'Shown large at the top of the Our Work page.',
+            'order': 'Lower numbers show first.',
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['slug'].required = False
+        self.fields['industry'].empty_label = 'No industry'
+        self.fields['service'].empty_label = 'No service'
+        self.fields['results'].help_text += ' Add results or key numbers before publishing.'
+
+    def clean_slug(self):
+        from django.utils.text import slugify
+        slug = slugify(self.cleaned_data.get('slug') or self.data.get('title', ''))[:170]
+        if not slug:
+            raise forms.ValidationError('Enter a title first; the address is created from it.')
+        if _unique_slug_error(CaseStudy, slug, self.instance):
+            raise forms.ValidationError('Another project already uses this address.')
+        return slug
+
+    def clean_metrics(self):
+        lines = [l.strip() for l in (self.cleaned_data.get('metrics') or '').splitlines() if l.strip()]
+        bad = [l for l in lines if '|' not in l or not all(p.strip() for p in l.split('|', 1))]
+        if bad:
+            raise forms.ValidationError(f'Use the format number | label, e.g. “40% | Less downtime”. Check: {bad[0]}')
+        if len(lines) > 4:
+            raise forms.ValidationError('Please keep this to 4 numbers or fewer.')
+        return '\n'.join(lines)
+
+    def clean(self):
+        data = super().clean()
+        if data.get('is_published') and not (data.get('results') or data.get('metrics')):
+            self.add_error('results', 'Add at least one result or key number before publishing.')
+        if data.get('testimonial_quote') and not data.get('testimonial_author'):
+            self.add_error('testimonial_author', 'Say who the quote is from.')
+        return data

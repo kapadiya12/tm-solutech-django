@@ -952,8 +952,18 @@ def whyus_delete(request, pk):
 @login_required
 @staff_required
 def blogcategory_list(request):
-    categories = BlogCategory.objects.all()
-    return render(request, 'dashboard/blogcategories/list.html', {'categories': categories, 'page_title': 'Blog Categories'})
+    now = timezone.now()
+    categories = BlogCategory.objects.annotate(
+        live=Count('posts', filter=Q(posts__is_published=True, posts__published_at__lte=now)),
+        total=Count('posts'),
+        last_post=Max('posts__published_at', filter=Q(posts__is_published=True, posts__published_at__lte=now)),
+    ).order_by('name')
+    return render(request, 'dashboard/blogcategories/list.html', {
+        'categories': categories,
+        'shown': sum(1 for c in categories if c.is_active and c.live),
+        'uncategorised': BlogPost.objects.filter(category__isnull=True).count(),
+        'page_title': 'Blog Categories',
+    })
 
 
 @login_required
@@ -963,8 +973,8 @@ def blogcategory_create(request):
     if request.method == 'POST':
         form = BlogCategoryForm(request.POST)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Category added.')
+            category = form.save()
+            messages.success(request, f'Category “{category.name}” added.')
             return redirect('dashboard:blogcategory_list')
     else:
         form = BlogCategoryForm()
@@ -980,11 +990,11 @@ def blogcategory_edit(request, pk):
         form = BlogCategoryForm(request.POST, instance=category)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Category updated.')
+            messages.success(request, f'Category “{category.name}” updated.')
             return redirect('dashboard:blogcategory_list')
     else:
         form = BlogCategoryForm(instance=category)
-    return render(request, 'dashboard/blogcategories/form.html', {'form': form, 'page_title': 'Edit Category'})
+    return render(request, 'dashboard/blogcategories/form.html', {'form': form, 'category': category, 'page_title': 'Edit Category'})
 
 
 @login_required
@@ -992,9 +1002,70 @@ def blogcategory_edit(request, pk):
 def blogcategory_delete(request, pk):
     category = get_object_or_404(BlogCategory, pk=pk)
     if request.method == 'POST':
+        name = category.name
         category.delete()
-        messages.success(request, 'Category deleted.')
+        messages.success(request, f'Category “{name}” deleted. Its articles are kept without a category.')
     return redirect('dashboard:blogcategory_list')
+
+
+# ---- Our Work (case studies) ----
+@login_required
+@staff_required
+def work_list(request):
+    from work.models import CaseStudy
+    cases = CaseStudy.objects.select_related('industry', 'service')
+    return render(request, 'dashboard/work/list.html', {
+        'cases': cases,
+        'stats': {
+            'total': len(cases),
+            'published': sum(1 for c in cases if c.is_published),
+            'drafts': sum(1 for c in cases if not c.is_published),
+            'industries': len({c.industry_id for c in cases if c.industry_id and c.is_published}),
+        },
+        'page_title': 'Case Studies',
+    })
+
+
+def _work_save(request, instance=None):
+    from dashboard.forms import CaseStudyForm
+    form = CaseStudyForm(request.POST or None, request.FILES or None, instance=instance)
+    if request.method == 'POST' and form.is_valid():
+        case = form.save()
+        if case.is_featured:
+            type(case).objects.exclude(pk=case.pk).filter(is_featured=True).update(is_featured=False)
+        messages.success(request, f'“{case.title}” {"updated" if instance else "added"}.')
+        if 'save_continue' in request.POST:
+            return redirect('dashboard:work_edit', pk=case.pk)
+        return redirect('dashboard:work_list')
+    return render(request, 'dashboard/work/form.html', {
+        'form': form, 'case': instance,
+        'page_title': 'Edit Case Study' if instance else 'Add Case Study',
+    })
+
+
+@login_required
+@staff_required
+def work_create(request):
+    return _work_save(request)
+
+
+@login_required
+@staff_required
+def work_edit(request, pk):
+    from work.models import CaseStudy
+    return _work_save(request, get_object_or_404(CaseStudy, pk=pk))
+
+
+@login_required
+@staff_required
+def work_delete(request, pk):
+    from work.models import CaseStudy
+    case = get_object_or_404(CaseStudy, pk=pk)
+    if request.method == 'POST':
+        title = case.title
+        case.delete()
+        messages.success(request, f'“{title}” deleted.')
+    return redirect('dashboard:work_list')
 
 
 # ---- Capability CRUD ----

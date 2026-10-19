@@ -78,6 +78,10 @@ urlpatterns = [
     path('blog-categories/create/', views.blogcategory_create, name='blogcategory_create'),
     path('blog-categories/<int:pk>/edit/', views.blogcategory_edit, name='blogcategory_edit'),
     path('blog-categories/<int:pk>/delete/', views.blogcategory_delete, name='blogcategory_delete'),
+    path('work/', views.work_list, name='work_list'),
+    path('work/create/', views.work_create, name='work_create'),
+    path('work/<int:pk>/edit/', views.work_edit, name='work_edit'),
+    path('work/<int:pk>/delete/', views.work_delete, name='work_delete'),
     # Capabilities
     path('capabilities/', views.capability_list, name='capability_list'),
     path('capabilities/create/', views.capability_create, name='capability_create'),

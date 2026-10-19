@@ -7,14 +7,14 @@
     <div class="ed-head-text">
         <a href="{% if post %}{% url 'dashboard:blog_view' post.pk %}{% else %}{% url 'dashboard:blog_list' %}{% endif %}" class="ed-back"><i class="fas fa-arrow-left"></i> {% if post %}Back to post{% else %}All posts{% endif %}</a>
         <h2>{% if post %}Edit post{% else %}New post{% endif %}</h2>
-        <p class="ed-url" id="bfUrl">/insights/<strong>{{ form.slug.value|default:"your-post" }}</strong>/</p>
+        <p class="ed-url" data-url-preview data-base="/insights/" data-placeholder="your-post"></p>
     </div>
     <div class="ed-head-actions">
         {% if post and post.status == 'published' %}<a href="{{ post.get_absolute_url }}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-up-right-from-square"></i> View live</a>{% endif %}
     </div>
 </div>
 
-<form method="post" enctype="multipart/form-data" class="ed" data-guard novalidate>
+<form method="post" enctype="multipart/form-data" class="ed ed-seo" data-guard novalidate>
     {% csrf_token %}
     {% if form.errors %}<div class="ed-alert"><i class="fas fa-circle-exclamation"></i> Some fields need your attention. They're marked in red below.</div>{% endif %}
 
@@ -29,7 +29,7 @@
 
     <div class="ed-main">
         <section class="ed-card" id="sec-basics" data-section>
-            <header class="ed-card-head"><span class="ed-card-num">1</span><div><h3>Basics</h3><p>Title, web address, topic and the short summary shown on cards.</p></div></header>
+            <header class="ed-card-head"><span class="ed-card-num">1</span><div><h3>Basics</h3><p>Title, web address (the article's link, made from the title), topic and the short summary shown on cards.</p></div></header>
             {% include 'dashboard/partials/field.html' with field=form.title %}
             <div class="ed-grid-2">
                 {% include 'dashboard/partials/field.html' with field=form.slug %}
@@ -52,7 +52,8 @@
         </section>
 
         <section class="ed-card" id="sec-meta" data-section>
-            <header class="ed-card-head"><span class="ed-card-num">4</span><div><h3>Tags &amp; SEO</h3><p>How the post appears in Google and when shared.</p></div></header>
+            <header class="ed-card-head"><span class="ed-card-num">4</span><div><h3>Tags &amp; SEO</h3><p>How the post appears in Google and when shared. Your live SEO score is on the right.</p></div></header>
+            {% include 'dashboard/partials/field.html' with field=form.focus_keyword %}
             {% include 'dashboard/partials/field.html' with field=form.tags %}
             {% include 'dashboard/partials/field.html' with field=form.meta_title %}
             {% include 'dashboard/partials/field.html' with field=form.meta_description %}
@@ -76,23 +77,35 @@
             </div>
         </div>
     </div>
+
+    <aside class="seo-panel" id="seoPanel" data-has-cover="{% if post and post.featured_image %}1{% endif %}" aria-label="SEO score">
+        <div class="seo-head">
+            <div class="seo-ring" id="seoRing" style="--p: 0">
+                <svg viewBox="0 0 36 36" aria-hidden="true"><circle class="seo-ring-bg" cx="18" cy="18" r="15.5"/><circle class="seo-ring-bar" cx="18" cy="18" r="15.5"/></svg>
+                <strong id="seoScore">0</strong>
+            </div>
+            <div>
+                <span class="seo-kicker">SEO score</span>
+                <strong class="seo-grade" id="seoGrade">—</strong>
+                <small id="seoPassed"></small>
+            </div>
+        </div>
+        <div class="seo-google">
+            <span class="seo-google-url">tmsolutech.com › insights › <span id="seoSlug">your-post</span></span>
+            <strong id="seoTitle">Post title | TM Solutech</strong>
+            <p id="seoDesc">Search description…</p>
+        </div>
+        <ul class="seo-checks" id="seoChecks"></ul>
+        <p class="seo-foot"><i class="fas fa-circle-info"></i> Updates as you type. 80+ is good.</p>
+    </aside>
 </form>
 {% endblock %}
 
 {% block extra_js %}
 {{ form.media.js }}
+<script src="{% static 'js/blog-seo.js' %}" defer></script>
 <script>
 (function () {
-    const title = document.getElementById('id_title');
-    const slug = document.getElementById('id_slug');
-    const url = document.querySelector('#bfUrl strong');
-    const slugify = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 120);
-    let manual = !!(slug && slug.value);
-    const sync = () => { if (url) url.textContent = slug.value || 'your-post'; };
-    if (title && slug) {
-        title.addEventListener('input', () => { if (!manual) { slug.value = slugify(title.value); sync(); } });
-        slug.addEventListener('input', () => { manual = !!slug.value; slug.value = slugify(slug.value); sync(); });
-    }
     // Character counters (data-count = recommended length)
     document.querySelectorAll('[data-count]').forEach((el) => {
         const label = el.closest('.form-group')?.querySelector('.form-label-row');

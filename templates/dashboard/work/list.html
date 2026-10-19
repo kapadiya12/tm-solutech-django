@@ -1,0 +1,64 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/blog-admin.css' %}">{% endblock %}
+{% block dashboard_content %}
+
+<div class="bl-head">
+    <p>Past projects shown on the website's <strong>Our Work</strong> page. Use a confidential name when the client can't be named.</p>
+    <div class="flex gap-2">
+        <a href="/work/" target="_blank" rel="noopener" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-up-right-from-square"></i> View page</a>
+        <a href="{% url 'dashboard:work_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> New case study</a>
+    </div>
+</div>
+
+<div class="bl-stats bc-stats wk-stats">
+    <div class="bl-stat"><span class="bl-ic"><i class="fas fa-briefcase"></i></span><span><strong>{{ stats.total }}</strong>Case studies</span></div>
+    <div class="bl-stat bl-c-green" data-tip="Live on the website"><span class="bl-ic"><i class="fas fa-circle-check"></i></span><span><strong>{{ stats.published }}</strong>Published</span></div>
+    <div class="bl-stat bl-c-orange" data-tip="Only visible here"><span class="bl-ic"><i class="fas fa-file-pen"></i></span><span><strong>{{ stats.drafts }}</strong>Drafts</span></div>
+    <div class="bl-stat bl-c-blue" data-tip="Industries with a published project"><span class="bl-ic"><i class="fas fa-building"></i></span><span><strong>{{ stats.industries }}</strong>Industries</span></div>
+</div>
+
+{% if cases %}
+<div class="bc-grid">
+    {% for c in cases %}
+    <article class="bc-card wk-admin-card{% if not c.is_published %} is-off{% endif %}">
+        <div class="wk-admin-media">
+            {% if c.cover_image %}<img src="{{ c.cover_image.url }}" alt="">{% else %}<span><i class="fas fa-diagram-project"></i></span>{% endif %}
+            {% if c.is_featured %}<em class="wk-admin-feat"><i class="fas fa-star"></i> Featured</em>{% endif %}
+        </div>
+        <header class="bc-card-top">
+            <div class="bc-title">
+                <h3>{{ c.title }}</h3>
+                <code>{{ c.client_display }}{% if c.year %} · {{ c.year }}{% endif %}</code>
+            </div>
+            {% if c.is_published %}<span class="bc-status is-on"><i class="fas fa-circle-check"></i> Live</span>{% else %}<span class="bc-status is-off"><i class="fas fa-file-pen"></i> Draft</span>{% endif %}
+        </header>
+        <p class="bc-desc">{{ c.summary }}</p>
+        <div class="wk-admin-tags">
+            {% if c.industry %}<span><i class="fas fa-building"></i> {{ c.industry.name }}</span>{% endif %}
+            {% if c.service %}<span><i class="fas fa-layer-group"></i> {{ c.service.title }}</span>{% endif %}
+            {% if c.metric_list %}<span><i class="fas fa-chart-simple"></i> {{ c.metric_list|length }} number{{ c.metric_list|length|pluralize }}</span>{% endif %}
+            {% if c.testimonial_quote %}<span><i class="fas fa-quote-left"></i> Quote</span>{% endif %}
+        </div>
+        <footer class="bc-actions">
+            {% if c.is_published %}<a href="{{ c.get_absolute_url }}" target="_blank" rel="noopener" class="bc-link" data-tip="Open on the website"><i class="fas fa-arrow-up-right-from-square"></i></a>{% endif %}
+            <a href="{% url 'dashboard:work_edit' c.pk %}" class="btn btn-secondary btn-sm"><i class="fas fa-pen"></i> Edit</a>
+            <form method="post" action="{% url 'dashboard:work_delete' c.pk %}" data-confirm="The case study and its images are removed from the website." data-confirm-name="{{ c.title|truncatechars:60 }}" data-confirm-title="Delete this case study?">
+                {% csrf_token %}
+                <button type="submit" class="bc-del" aria-label="Delete {{ c.title }}" data-tip="Delete"><i class="fas fa-trash-can"></i></button>
+            </form>
+        </footer>
+    </article>
+    {% endfor %}
+    <a href="{% url 'dashboard:work_create' %}" class="bc-card bc-add"><i class="fas fa-plus"></i><strong>New case study</strong><span>Add a past project</span></a>
+</div>
+{% else %}
+<div class="bc-empty">
+    <span class="bc-icon"><i class="fas fa-briefcase"></i></span>
+    <h3>No case studies yet</h3>
+    <p>Until you publish one, the Our Work page shows a “case studies are on their way” message with a link to contact you.</p>
+    <a href="{% url 'dashboard:work_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> New case study</a>
+</div>
+{% endif %}
+<link rel="stylesheet" href="{% static 'css/inquiries.css' %}">
+{% endblock %}

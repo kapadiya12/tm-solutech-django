@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% load static asset_tags %}
+
+{% block title %}{{ case.title }} | Our Work | TM Solutech{% endblock %}
+{% block meta_description %}{{ case.summary }}{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static_v 'css/insights.css' %}"><link rel="stylesheet" href="{% static_v 'css/work.css' %}">
+<meta property="og:title" content="{{ case.title }}">
+<meta property="og:description" content="{{ case.summary }}">
+{% if case.cover_image %}<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ case.cover_image.url }}">{% endif %}
+{% endblock %}
+
+{% block content %}
+<section class="ins-hero wk-hero wk-detail-hero">
+    <div class="ins-hero-glow" aria-hidden="true"></div>
+    <div class="container">
+        <ul class="breadcrumb-list">
+            <li><a href="{% url 'core:home' %}"><i class="fas fa-home"></i> Home</a></li>
+            <li><span class="separator"><i class="fas fa-chevron-right"></i></span> <a href="{% url 'work:list' %}">Our Work</a></li>
+            <li><span class="separator"><i class="fas fa-chevron-right"></i></span> Case study</li>
+        </ul>
+        <span class="ins-eyebrow"><i class="fas fa-briefcase"></i> Case study</span>
+        <h1>{{ case.title }}</h1>
+        <p>{{ case.summary }}</p>
+        <div class="wk-facts">
+            <div><span>Client</span><strong>{% if case.client_logo %}<img src="{{ case.client_logo.url }}" alt="">{% endif %}{{ case.client_display }}</strong></div>
+            {% if case.industry %}<div><span>Industry</span><strong><a href="{{ case.industry.get_absolute_url }}">{{ case.industry.name }}</a></strong></div>{% endif %}
+            {% if case.service %}<div><span>Service</span><strong><a href="{{ case.service.get_absolute_url }}">{{ case.service.title }}</a></strong></div>{% endif %}
+            {% if case.year %}<div><span>Year</span><strong>{{ case.year }}</strong></div>{% endif %}
+        </div>
+    </div>
+</section>
+
+<section class="wk-body wk-article">
+    <div class="container">
+        {% if case.metric_list %}
+        <dl class="wk-metrics wk-metrics-band">
+            {% for m in case.metric_list %}<div><dt>{{ m.value }}</dt><dd>{{ m.label }}</dd></div>{% endfor %}
+        </dl>
+        {% endif %}
+
+        {% if case.cover_image %}<figure class="ins-cover wk-cover"><img src="{{ case.cover_image.url }}" alt="{{ case.title }}"></figure>{% endif %}
+
+        <div class="wk-story">
+            <section class="wk-block">
+                <span class="wk-step wk-c1"><i class="fas fa-triangle-exclamation"></i></span>
+                <div><h2>The challenge</h2><div class="wk-text">{{ case.challenge|linebreaks }}</div></div>
+            </section>
+            <section class="wk-block">
+                <span class="wk-step wk-c2"><i class="fas fa-screwdriver-wrench"></i></span>
+                <div><h2>What we delivered</h2><div class="wk-text">{{ case.solution|linebreaks }}</div></div>
+            </section>
+            {% if case.result_list %}
+            <section class="wk-block">
+                <span class="wk-step wk-c3"><i class="fas fa-chart-line"></i></span>
+                <div><h2>The results</h2>
+                    <ul class="wk-results">{% for r in case.result_list %}<li><i class="fas fa-circle-check"></i> {{ r }}</li>{% endfor %}</ul>
+                </div>
+            </section>
+            {% endif %}
+
+            {% if case.testimonial_quote %}
+            <blockquote class="wk-quote">
+                <i class="fas fa-quote-left" aria-hidden="true"></i>
+                <p>{{ case.testimonial_quote }}</p>
+                {% if case.testimonial_author %}<cite>{{ case.testimonial_author }}</cite>{% endif %}
+            </blockquote>
+            {% endif %}
+        </div>
+
+        {% if more %}
+        <div class="wk-section-head"><h2>More projects</h2><a href="{% url 'work:list' %}" class="wk-cta">All work <i class="fas fa-arrow-right"></i></a></div>
+        <div class="wk-grid">
+            {% for c in more %}
+            <a href="{{ c.get_absolute_url }}" class="wk-card" style="--i: {{ forloop.counter0 }}">
+                <div class="wk-card-media">
+                    {% if c.cover_image %}<img src="{{ c.cover_image.url }}" alt="" loading="lazy" decoding="async">{% else %}<span class="wk-feat-ph" aria-hidden="true"><i class="fas fa-diagram-project"></i></span>{% endif %}
+                    {% if c.industry %}<span class="ins-chip">{{ c.industry.name }}</span>{% endif %}
+                </div>
+                <div class="wk-card-body">
+                    <span class="wk-client">{{ c.client_display }}</span>
+                    <h3>{{ c.title }}</h3>
+                    <p>{{ c.summary }}</p>
+                    <span class="wk-cta">View project <i class="fas fa-arrow-right"></i></span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+{% include 'includes/cta_section.html' %}
+{% endblock %}

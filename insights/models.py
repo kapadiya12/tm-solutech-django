@@ -39,6 +39,7 @@ class BlogPost(models.Model):
     meta_title = models.CharField(max_length=200, blank=True)
     meta_description = models.TextField(blank=True)
     tags = models.CharField(max_length=250, blank=True, help_text='Comma separated, e.g. Cloud, Security, Compliance')
+    focus_keyword = models.CharField('Focus keyword', max_length=80, blank=True, help_text='The main phrase people would search for, e.g. "CSCRF compliance".')
 
     # Engagement (updated by the site, not edited by hand)
     view_count = models.PositiveIntegerField(default=0, editable=False)
@@ -80,6 +81,11 @@ class BlogPost(models.Model):
     @property
     def status_label(self):
         return {'draft': 'Draft', 'scheduled': 'Scheduled', 'published': 'Published'}[self.status]
+
+    @property
+    def seo(self):
+        from .seo import seo_report
+        return seo_report(self)
 
     @property
     def helpful_total(self):

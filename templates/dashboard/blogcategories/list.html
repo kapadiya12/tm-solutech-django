@@ -1,34 +1,64 @@
 {% extends 'dashboard/base.html' %}
+{% load static %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/blog-admin.css' %}">{% endblock %}
 {% block dashboard_content %}
-<div class="flex-between mb-8">
-    <h2>{{ page_title }}</h2>
-    <a href="{% url 'dashboard:blogcategory_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add Category</a>
+
+<div class="bl-head">
+    <p>Topics that group your articles. Each one appears as a filter chip on the Insights page once it has a published article.</p>
+    <a href="{% url 'dashboard:blogcategory_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> New category</a>
 </div>
-<div class="dashboard-card">
-    <div class="dashboard-table-wrap">
-        <table class="dashboard-table">
-            <thead>
-                <tr><th>Name</th><th>Slug</th><th>Posts</th><th>Active</th><th>Actions</th></tr>
-            </thead>
-            <tbody>
-                {% for category in categories %}
-                <tr>
-                    <td><strong>{{ category.name }}</strong></td><td>{{ category.slug }}</td><td>{{ category.post_count }}</td><td><span class="status-badge {% if category.is_active %}status-active{% else %}status-draft{% endif %}">{% if category.is_active %}Active{% else %}Inactive{% endif %}</span></td>
-                    <td>
-                        <div class="flex gap-2">
-                            <a href="{% url 'dashboard:blogcategory_edit' category.pk %}" class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></a>
-                            <form method="post" action="{% url 'dashboard:blogcategory_delete' category.pk %}" data-confirm="Delete this item?">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-sm" style="color: var(--danger);"><i class="fas fa-trash"></i></button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr><td colspan="5" class="text-center">No categories yet. <a href="{% url 'dashboard:blogcategory_create' %}">Create one</a></td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+
+<div class="bl-stats bc-stats">
+    <div class="bl-stat" data-tip="Every category, shown or hidden"><span class="bl-ic"><i class="fas fa-folder-tree"></i></span><span><strong>{{ categories|length }}</strong>Categories</span></div>
+    <div class="bl-stat bl-c-green" data-tip="Switched on and has at least one published article"><span class="bl-ic"><i class="fas fa-eye"></i></span><span><strong>{{ shown }}</strong>Visible on site</span></div>
+    <a href="{% url 'dashboard:blog_list' %}" class="bl-stat bl-c-orange" data-tip="Articles not assigned to any category"><span class="bl-ic"><i class="fas fa-inbox"></i></span><span><strong>{{ uncategorised }}</strong>Uncategorised posts</span></a>
 </div>
+
+{% if categories %}
+<div class="bc-grid">
+    {% for c in categories %}
+    <article class="bc-card{% if not c.is_active %} is-off{% endif %}">
+        <header class="bc-card-top">
+            <span class="bc-icon"><i class="fas fa-folder"></i></span>
+            <div class="bc-title">
+                <h3>{{ c.name }}</h3>
+                <code>/insights/?category={{ c.slug }}</code>
+            </div>
+            {% if not c.is_active %}
+            <span class="bc-status is-off" data-tip="Switched off: the chip is hidden on the website"><i class="fas fa-eye-slash"></i> Hidden</span>
+            {% elif c.live %}
+            <span class="bc-status is-on" data-tip="Shown as a filter chip on the Insights page"><i class="fas fa-circle-check"></i> Visible</span>
+            {% else %}
+            <span class="bc-status is-wait" data-tip="Appears on the website once it has a published article"><i class="fas fa-hourglass-half"></i> No articles yet</span>
+            {% endif %}
+        </header>
+
+        <p class="bc-desc{% if not c.description %} is-empty{% endif %}">{{ c.description|default:"No intro written. Add one so visitors know what this topic covers." }}</p>
+
+        <dl class="bc-meta">
+            <div><dt>Published</dt><dd>{{ c.live }}</dd></div>
+            <div><dt>All posts</dt><dd>{{ c.total }}</dd></div>
+            <div><dt>Latest</dt><dd>{% if c.last_post %}{{ c.last_post|date:"M d, Y" }}{% else %}—{% endif %}</dd></div>
+        </dl>
+
+        <footer class="bc-actions">
+            {% if c.is_active and c.live %}<a href="/insights/?category={{ c.slug }}" target="_blank" rel="noopener" class="bc-link" data-tip="Open this topic on the website"><i class="fas fa-arrow-up-right-from-square"></i></a>{% endif %}
+            <a href="{% url 'dashboard:blogcategory_edit' c.pk %}" class="btn btn-secondary btn-sm"><i class="fas fa-pen"></i> Edit</a>
+            <form method="post" action="{% url 'dashboard:blogcategory_delete' c.pk %}" data-confirm="{% if c.total %}Its {{ c.total }} article{{ c.total|pluralize }} stay{{ c.total|pluralize:'s,' }} on the site without a category.{% else %}This category has no articles.{% endif %}" data-confirm-name="{{ c.name }}" data-confirm-title="Delete this category?">
+                {% csrf_token %}
+                <button type="submit" class="bc-del" aria-label="Delete {{ c.name }}" data-tip="Delete"><i class="fas fa-trash-can"></i></button>
+            </form>
+        </footer>
+    </article>
+    {% endfor %}
+    <a href="{% url 'dashboard:blogcategory_create' %}" class="bc-card bc-add"><i class="fas fa-plus"></i><strong>New category</strong><span>Group articles under a topic</span></a>
+</div>
+{% else %}
+<div class="bc-empty">
+    <span class="bc-icon"><i class="fas fa-folder-plus"></i></span>
+    <h3>No categories yet</h3>
+    <p>Create topics like “Cybersecurity” or “Cloud” so visitors can filter articles on the Insights page.</p>
+    <a href="{% url 'dashboard:blogcategory_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> New category</a>
+</div>
+{% endif %}
 {% endblock %}

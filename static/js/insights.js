@@ -26,7 +26,8 @@
         const grid = document.getElementById('insGrid');
         const empty = document.getElementById('insEmpty');
         const more = document.getElementById('insMore');
-        const featured = document.getElementById('insFeatured');
+        const featured = document.getElementById('insTop');
+        const heading = document.getElementById('insHeading');
         const result = document.getElementById('insResult');
         const countEl = document.getElementById('insCount');
         const sort = document.getElementById('insSort');
@@ -58,7 +59,11 @@
                 if (append) grid.insertAdjacentHTML('beforeend', data.html);
                 else grid.innerHTML = data.html;
                 const filtering = !!(state.q || state.category || state.tag);
-                if (featured) featured.hidden = filtering || state.sort !== 'latest';
+                if (featured) featured.hidden = !data.featured;
+                const topic = state.category && !state.q && !state.tag ? chips.find((c) => c.dataset.category === state.category) : null;
+                if (heading) heading.textContent = topic ? topic.dataset.name : filtering ? 'Results' : (state.sort === 'popular' ? 'Most read articles' : state.sort === 'oldest' ? 'Oldest articles' : 'Latest articles');
+                const intro = document.getElementById('insIntro');
+                if (intro) { intro.textContent = topic ? topic.dataset.desc || '' : ''; intro.hidden = !intro.textContent; }
                 // the featured post is excluded server-side only on the initial render; re-show it inside the grid when filtering
                 empty.hidden = data.count > 0;
                 more.hidden = !data.has_next;
@@ -137,6 +142,35 @@
             load(1, false);
         }));
         sort.addEventListener('change', () => { state.sort = sort.value; load(1, false); });
+
+        // Styled sort dropdown
+        const sBtn = document.getElementById('insSortBtn');
+        const sMenu = document.getElementById('insSortMenu');
+        const sLabel = document.getElementById('insSortLabel');
+        if (sBtn && sMenu) {
+            const opts = Array.from(sMenu.querySelectorAll('[data-value]'));
+            let sIdx = -1;
+            const open = (on) => {
+                sMenu.hidden = !on; sBtn.setAttribute('aria-expanded', on ? 'true' : 'false');
+                sBtn.classList.toggle('is-open', on);
+                if (on) { sIdx = opts.findIndex((o) => o.dataset.value === sort.value); mark(); }
+            };
+            const mark = () => opts.forEach((o, i) => o.classList.toggle('is-active', i === sIdx));
+            const pick = (o) => {
+                opts.forEach((x) => x.setAttribute('aria-selected', x === o ? 'true' : 'false'));
+                sLabel.textContent = o.textContent.trim();
+                open(false); sBtn.focus();
+                if (sort.value !== o.dataset.value) { sort.value = o.dataset.value; sort.dispatchEvent(new Event('change')); }
+            };
+            sBtn.addEventListener('click', () => open(sMenu.hidden));
+            opts.forEach((o) => o.addEventListener('click', () => pick(o)));
+            sBtn.addEventListener('keydown', (e) => {
+                if (['ArrowDown', 'ArrowUp'].includes(e.key)) { e.preventDefault(); if (sMenu.hidden) open(true); else { sIdx = (sIdx + (e.key === 'ArrowDown' ? 1 : -1) + opts.length) % opts.length; mark(); } }
+                else if (e.key === 'Enter' && !sMenu.hidden && opts[sIdx]) { e.preventDefault(); pick(opts[sIdx]); }
+                else if (e.key === 'Escape') open(false);
+            });
+            document.addEventListener('click', (e) => { if (!e.target.closest('#insSortWrap')) open(false); });
+        }
         more.addEventListener('click', () => {
             if (!more.dataset.next) return;
             more.classList.add('is-loading');
@@ -145,6 +179,8 @@
         const reset = () => {
             state.q = ''; state.category = ''; state.tag = ''; state.sort = 'latest';
             input.value = ''; clearBtn.hidden = true; sort.value = 'latest';
+            const lab = document.getElementById('insSortLabel'); if (lab) lab.textContent = 'Latest';
+            document.querySelectorAll('#insSortMenu [data-value]').forEach((o) => o.setAttribute('aria-selected', o.dataset.value === 'latest' ? 'true' : 'false'));
             chips.forEach((c) => c.classList.toggle('is-active', !c.dataset.category));
             load(1, false);
         };

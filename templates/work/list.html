@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% load static asset_tags %}
+
+{% block title %}Our Work | TM Solutech{% endblock %}
+{% block meta_description %}Case studies from TM Solutech: how we've helped businesses with cloud, cybersecurity, infrastructure and AI projects.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static_v 'css/insights.css' %}"><link rel="stylesheet" href="{% static_v 'css/work.css' %}">{% endblock %}
+
+{% block content %}
+<section class="ins-hero wk-hero">
+    <div class="ins-hero-glow" aria-hidden="true"></div>
+    <div class="container">
+        <ul class="breadcrumb-list">
+            <li><a href="{% url 'core:home' %}"><i class="fas fa-home"></i> Home</a></li>
+            <li><span class="separator"><i class="fas fa-chevron-right"></i></span> Our Work</li>
+        </ul>
+        <span class="ins-eyebrow"><i class="fas fa-briefcase"></i> Case studies</span>
+        <h1>Real projects, <span>measurable results</span></h1>
+        <p>How we've helped organisations secure, modernise and run their IT, from the first conversation to the outcome.</p>
+        {% if count %}
+        <div class="ins-hero-stats">
+            <span><strong>{{ count }}</strong> case stud{{ count|pluralize:"y,ies" }}</span>
+            {% if industries %}<span><strong>{{ industries|length }}</strong> industr{{ industries|length|pluralize:"y,ies" }}</span>{% endif %}
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<section class="wk-body">
+    <div class="container">
+    {% if featured %}
+        <a href="{{ featured.get_absolute_url }}" class="wk-feat">
+            <div class="wk-feat-media">
+                {% if featured.cover_image %}<img src="{{ featured.cover_image.url }}" alt="" fetchpriority="high">{% else %}<span class="wk-feat-ph" aria-hidden="true"><i class="fas fa-diagram-project"></i></span>{% endif %}
+                <span class="wk-badge"><i class="fas fa-star"></i> Featured project</span>
+            </div>
+            <div class="wk-feat-body">
+                <div class="wk-tags">
+                    {% if featured.industry %}<span><i class="fas fa-building"></i> {{ featured.industry.name }}</span>{% endif %}
+                    {% if featured.service %}<span><i class="fas fa-layer-group"></i> {{ featured.service.title }}</span>{% endif %}
+                </div>
+                <h2>{{ featured.title }}</h2>
+                <p>{{ featured.summary }}</p>
+                {% if featured.metric_list %}
+                <dl class="wk-metrics">
+                    {% for m in featured.metric_list|slice:":3" %}<div><dt>{{ m.value }}</dt><dd>{{ m.label }}</dd></div>{% endfor %}
+                </dl>
+                {% endif %}
+                <span class="wk-client">{% if featured.client_logo %}<img src="{{ featured.client_logo.url }}" alt="">{% endif %}{{ featured.client_display }}</span>
+                <span class="wk-cta">Read the case study <i class="fas fa-arrow-right"></i></span>
+            </div>
+        </a>
+
+        {% if cases %}
+        <div class="wk-section-head">
+            <h2>More projects</h2>
+            {% if industries|length > 1 %}
+            <div class="ins-chips" role="tablist" aria-label="Filter by industry">
+                <button type="button" class="ins-chip-btn is-active" data-filter="">All</button>
+                {% for i in industries %}<button type="button" class="ins-chip-btn" data-filter="{{ i.slug }}">{{ i.name }}</button>{% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        <div class="wk-grid" id="wkGrid">
+            {% for c in cases %}
+            <a href="{{ c.get_absolute_url }}" class="wk-card" data-industry="{{ c.industry.slug|default:'' }}" style="--i: {{ forloop.counter0 }}">
+                <div class="wk-card-media">
+                    {% if c.cover_image %}<img src="{{ c.cover_image.url }}" alt="" loading="lazy" decoding="async">{% else %}<span class="wk-feat-ph" aria-hidden="true"><i class="fas fa-diagram-project"></i></span>{% endif %}
+                    {% if c.industry %}<span class="ins-chip">{{ c.industry.name }}</span>{% endif %}
+                </div>
+                <div class="wk-card-body">
+                    <span class="wk-client">{% if c.client_logo %}<img src="{{ c.client_logo.url }}" alt="">{% endif %}{{ c.client_display }}</span>
+                    <h3>{{ c.title }}</h3>
+                    <p>{{ c.summary }}</p>
+                    {% with m=c.metric_list.0 %}{% if m %}<div class="wk-card-metric"><strong>{{ m.value }}</strong> {{ m.label }}</div>{% endif %}{% endwith %}
+                    <span class="wk-cta">View project <i class="fas fa-arrow-right"></i></span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+    {% else %}
+        <div class="wk-soon">
+            <span class="wk-soon-icon" aria-hidden="true"><i class="fas fa-folder-open"></i></span>
+            <h2>Case studies are on their way</h2>
+            <p>We're writing up recent projects across cloud, cybersecurity and IT infrastructure. In the meantime, we're happy to walk you through work relevant to your business.</p>
+            <div class="wk-soon-actions">
+                <a href="{% url 'contact:contact' %}" class="btn btn-primary">Talk to our team <i class="fas fa-arrow-right"></i></a>
+                <a href="{% url 'services:service_list' %}" class="btn btn-secondary">Explore services</a>
+            </div>
+        </div>
+    {% endif %}
+    </div>
+</section>
+
+{% include 'includes/cta_section.html' %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const chips = document.querySelectorAll('[data-filter]');
+    const cards = document.querySelectorAll('#wkGrid .wk-card');
+    chips.forEach((chip) => chip.addEventListener('click', () => {
+        chips.forEach((c) => c.classList.toggle('is-active', c === chip));
+        const f = chip.dataset.filter;
+        cards.forEach((card) => { card.hidden = !!f && card.dataset.industry !== f; });
+    }));
+})();
+</script>
+{% endblock %}
