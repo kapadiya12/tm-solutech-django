@@ -1,0 +1,23 @@
+<article class="fq-item" id="faq-{{ f.pk }}" data-faq="{{ f.pk }}">
+    <h3 class="fq-q">
+        <button type="button" aria-expanded="false" aria-controls="faq-a-{{ f.pk }}">
+            <span class="fq-q-text">{{ f.question }}</span>
+            {% if f.is_popular %}<span class="fq-badge">Popular</span>{% endif %}
+            <span class="fq-toggle" aria-hidden="true"></span>
+        </button>
+    </h3>
+    <div class="fq-panel" id="faq-a-{{ f.pk }}" role="region">
+        <div class="fq-panel-inner">
+            <div class="fq-answer">{{ f.answer|safe }}</div>
+            <footer class="fq-foot">
+                <div class="fq-vote{% if f.vote %} is-voted{% endif %}" data-url="{% url 'core:faq_helpful' f.pk %}">
+                    <span class="fq-vote-ask">Was this helpful?</span>
+                    <button type="button" data-answer="yes"{% if f.vote == 'yes' %} class="is-picked"{% endif %}><i class="far fa-thumbs-up"></i> Yes</button>
+                    <button type="button" data-answer="no"{% if f.vote == 'no' %} class="is-picked"{% endif %}><i class="far fa-thumbs-down"></i> No</button>
+                    <span class="fq-vote-thanks"><i class="fas fa-circle-check"></i> Thanks for the feedback</span>
+                </div>
+                <button type="button" class="fq-copy" data-copy="{{ f.pk }}"><i class="fas fa-link"></i> <span>Copy link</span></button>
+            </footer>
+        </div>
+    </div>
+</article>

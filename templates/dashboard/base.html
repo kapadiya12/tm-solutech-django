@@ -60,12 +60,6 @@
                     <a href="{% url 'dashboard:industry_list' %}" class="sidebar-link {% if 'industry' in request.resolver_match.url_name %}active{% endif %}">
                         <i class="fas fa-industry"></i> Industries
                     </a>
-                    <a href="{% url 'dashboard:leadership_list' %}" class="sidebar-link {% if 'leadership' in request.resolver_match.url_name %}active{% endif %}">
-                        <i class="fas fa-user-tie"></i> Leadership
-                    </a>
-                    <a href="{% url 'dashboard:faq_list' %}" class="sidebar-link {% if 'faq' in request.resolver_match.url_name %}active{% endif %}">
-                        <i class="fas fa-question-circle"></i> FAQs
-                    </a>
                     <a href="{% url 'dashboard:page_list' %}" class="sidebar-link {% if request.resolver_match.url_name in 'page_list page_create page_edit page_delete' and page_obj.slug != 'careers' and page_obj.slug != 'life-at-tm-solutech' %}active{% endif %}">
                         <i class="fas fa-file-alt"></i> Pages
                     </a>
@@ -88,11 +82,21 @@
                     <a href="{% url 'dashboard:capability_list' %}" class="sidebar-link {% if 'capability' in request.resolver_match.url_name %}active{% endif %}">
                         <i class="fas fa-microchip"></i> Capabilities
                     </a>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Why Us</div>
                     <a href="{% url 'dashboard:whyus_list' %}" class="sidebar-link {% if 'whyus' in request.resolver_match.url_name %}active{% endif %}">
-                        <i class="fas fa-award"></i> Why Choose Us
+                        <i class="fas fa-award"></i> Why Us
+                    </a>
+                    <a href="{% url 'dashboard:leadership_list' %}" class="sidebar-link {% if 'leadership' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-user-tie"></i> Leadership
                     </a>
                     <a href="{% url 'dashboard:clientlogo_list' %}" class="sidebar-link {% if 'clientlogo' in request.resolver_match.url_name %}active{% endif %}">
-                        <i class="fas fa-building"></i> Client Logos
+                        <i class="fas fa-building"></i> Clients
+                    </a>
+                    <a href="{% url 'dashboard:faq_list' %}" class="sidebar-link {% if 'faq' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-question-circle"></i> FAQs
                     </a>
                 </div>
 

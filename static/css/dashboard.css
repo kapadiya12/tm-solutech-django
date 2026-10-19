@@ -786,3 +786,6 @@
 .dashboard-main { min-width: 0; }
 .db-chart canvas, .db-donut-chart canvas { max-width: 100%; }
 .sidebar-badge[hidden] { display: none !important; }
+
+/* Phones: hover tooltips near the right edge must not widen the page */
+@media (max-width: 760px) { .dashboard-main, .dashboard-content { overflow-x: clip; } }

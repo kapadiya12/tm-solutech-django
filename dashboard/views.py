@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.http import JsonResponse
+from django.urls import reverse
 from django.db.models import Count, Max, Prefetch, Q
 from django.db.models.functions import TruncMonth
 from django.utils import timezone
@@ -577,39 +578,58 @@ def blog_delete(request, pk):
 @login_required
 @staff_required
 def faq_list(request):
-    faqs = FAQ.objects.all()
-    return render(request, 'dashboard/faqs/list.html', {'faqs': faqs, 'page_title': 'FAQs'})
+    from core.models import FAQCategory
+    faqs = list(FAQ.objects.select_related('category'))
+    groups = []
+    for cat in FAQCategory.objects.all():
+        groups.append({'category': cat, 'faqs': [f for f in faqs if f.category_id == cat.pk]})
+    loose = [f for f in faqs if not f.category_id]
+    if loose:
+        groups.append({'category': None, 'faqs': loose})
+    votes_yes = sum(f.helpful_yes for f in faqs)
+    votes = votes_yes + sum(f.helpful_no for f in faqs)
+    return render(request, 'dashboard/faqs/list.html', {
+        'groups': groups,
+        'stats': {
+            'total': len(faqs),
+            'live': sum(1 for f in faqs if f.is_active),
+            'hidden': sum(1 for f in faqs if not f.is_active),
+            'popular': sum(1 for f in faqs if f.is_popular),
+            'helpful': round(100 * votes_yes / votes) if votes else None,
+            'votes': votes,
+        },
+        'page_title': 'FAQs',
+    })
+
+
+def _faq_save(request, instance=None):
+    from dashboard.forms import FAQForm
+    initial = {}
+    if not instance and request.GET.get('category'):
+        initial['category'] = request.GET['category']
+    form = FAQForm(request.POST or None, instance=instance, initial=initial)
+    if request.method == 'POST' and form.is_valid():
+        faq = form.save()
+        messages.success(request, 'Question {}.'.format('updated' if instance else 'added'))
+        if 'save_continue' in request.POST:
+            return redirect('dashboard:faq_edit', pk=faq.pk)
+        return redirect(reverse('dashboard:faq_list') + f'#faq-{faq.pk}')
+    return render(request, 'dashboard/faqs/form.html', {
+        'form': form, 'faq': instance,
+        'page_title': 'Edit Question' if instance else 'Add Question',
+    })
 
 
 @login_required
 @staff_required
 def faq_create(request):
-    from dashboard.forms import FAQForm
-    if request.method == 'POST':
-        form = FAQForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'FAQ created.')
-            return redirect('dashboard:faq_list')
-    else:
-        form = FAQForm()
-    return render(request, 'dashboard/faqs/form.html', {'form': form, 'page_title': 'Add FAQ'})
+    return _faq_save(request)
 
 
 @login_required
 @staff_required
 def faq_edit(request, pk):
-    from dashboard.forms import FAQForm
-    faq = get_object_or_404(FAQ, pk=pk)
-    if request.method == 'POST':
-        form = FAQForm(request.POST, instance=faq)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'FAQ updated.')
-            return redirect('dashboard:faq_list')
-    else:
-        form = FAQForm(instance=faq)
-    return render(request, 'dashboard/faqs/form.html', {'form': form, 'page_title': 'Edit FAQ'})
+    return _faq_save(request, get_object_or_404(FAQ, pk=pk))
 
 
 @login_required
@@ -618,8 +638,88 @@ def faq_delete(request, pk):
     faq = get_object_or_404(FAQ, pk=pk)
     if request.method == 'POST':
         faq.delete()
-        messages.success(request, 'FAQ deleted.')
+        messages.success(request, 'Question deleted.')
     return redirect('dashboard:faq_list')
+
+
+@login_required
+@staff_required
+def faq_toggle(request, pk):
+    """POST: flip 'is_active' or 'is_popular'. JSON for fetch(), redirect otherwise."""
+    faq = get_object_or_404(FAQ, pk=pk)
+    field = request.POST.get('field')
+    if request.method == 'POST' and field in ('is_active', 'is_popular'):
+        setattr(faq, field, not getattr(faq, field))
+        faq.save(update_fields=[field, 'updated_at'])
+    if request.headers.get('x-requested-with') == 'fetch':
+        return JsonResponse({'ok': True, 'is_active': faq.is_active, 'is_popular': faq.is_popular})
+    return redirect('dashboard:faq_list')
+
+
+@login_required
+@staff_required
+def faq_reorder(request):
+    """POST JSON {category: id|null, ids: [...]}: new order (and category) after a drag."""
+    if request.method != 'POST':
+        return JsonResponse({'ok': False}, status=405)
+    try:
+        data = json.loads(request.body)
+        ids = [int(i) for i in data.get('ids', [])]
+        cat = data.get('category')
+        cat = int(cat) if cat not in (None, '', 'none') else None
+    except (ValueError, TypeError):
+        return JsonResponse({'ok': False}, status=400)
+    for order, pk in enumerate(ids, start=1):
+        FAQ.objects.filter(pk=pk).update(display_order=order, category_id=cat)
+    return JsonResponse({'ok': True})
+
+
+# ---- FAQ categories ----
+@login_required
+@staff_required
+def faqcategory_list(request):
+    from core.models import FAQCategory
+    cats = FAQCategory.objects.annotate(
+        total=Count('faqs'), live=Count('faqs', filter=Q(faqs__is_active=True)))
+    return render(request, 'dashboard/faqs/categories.html', {'categories': cats, 'page_title': 'FAQ Topics'})
+
+
+def _faqcategory_save(request, instance=None):
+    from dashboard.forms import FAQCategoryForm
+    form = FAQCategoryForm(request.POST or None, instance=instance)
+    if request.method == 'POST' and form.is_valid():
+        cat = form.save()
+        messages.success(request, f'Topic “{cat.name}” {"updated" if instance else "added"}.')
+        return redirect('dashboard:faqcategory_list')
+    return render(request, 'dashboard/faqs/category_form.html', {
+        'form': form, 'category': instance,
+        'page_title': 'Edit Topic' if instance else 'Add Topic',
+    })
+
+
+@login_required
+@staff_required
+def faqcategory_create(request):
+    return _faqcategory_save(request)
+
+
+@login_required
+@staff_required
+def faqcategory_edit(request, pk):
+    from core.models import FAQCategory
+    return _faqcategory_save(request, get_object_or_404(FAQCategory, pk=pk))
+
+
+@login_required
+@staff_required
+def faqcategory_delete(request, pk):
+    from core.models import FAQCategory
+    cat = get_object_or_404(FAQCategory, pk=pk)
+    if request.method == 'POST':
+        name = cat.name
+        cat.delete()
+        messages.success(request, f'Topic “{name}” deleted. Its questions are kept under “No topic”.')
+    return redirect('dashboard:faqcategory_list')
 
 
 # ---- Contact Inquiries ----

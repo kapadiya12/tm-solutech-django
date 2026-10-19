@@ -265,7 +265,7 @@ class Command(BaseCommand):
             {'question': 'Where is TM Solutech located?', 'answer': '805/806 Aditya Building, Near Mithakhali Six Roads, Ellisbridge, Ahmedabad, Gujarat 380006, India. You can reach us at +91 79 4771 7070 or info@tmsolutech.com.', 'category': 'general', 'display_order': 8},
         ]
         for f in faqs:
-            FAQ.objects.get_or_create(question=f['question'], defaults=f)
+            FAQ.objects.get_or_create(question=f['question'], defaults={k: v for k, v in f.items() if k != 'category'})
         self.stdout.write(self.style.SUCCESS('  [OK] FAQs'))
 
         # CMS Pages

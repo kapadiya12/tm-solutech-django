@@ -41,6 +41,12 @@ urlpatterns = [
     path('faqs/create/', views.faq_create, name='faq_create'),
     path('faqs/<int:pk>/edit/', views.faq_edit, name='faq_edit'),
     path('faqs/<int:pk>/delete/', views.faq_delete, name='faq_delete'),
+    path('faqs/<int:pk>/toggle/', views.faq_toggle, name='faq_toggle'),
+    path('faqs/reorder/', views.faq_reorder, name='faq_reorder'),
+    path('faqs/topics/', views.faqcategory_list, name='faqcategory_list'),
+    path('faqs/topics/create/', views.faqcategory_create, name='faqcategory_create'),
+    path('faqs/topics/<int:pk>/edit/', views.faqcategory_edit, name='faqcategory_edit'),
+    path('faqs/topics/<int:pk>/delete/', views.faqcategory_delete, name='faqcategory_delete'),
     # Inquiries
     path('inquiries/', views.inquiry_list, name='inquiry_list'),
     path('inquiries/<int:pk>/', views.inquiry_detail, name='inquiry_detail'),

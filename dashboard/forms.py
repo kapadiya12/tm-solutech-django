@@ -1,6 +1,6 @@
 from django import forms
 from core.models import (
-    SiteSettings, WhyUsReason, Testimonial, Leadership, FAQ, Statistic, Gallery, SEOSettings,
+    SiteSettings, WhyUsReason, Testimonial, Leadership, FAQ, FAQCategory, Statistic, Gallery, SEOSettings,
     Capability, ClientLogo, HeroTag, HeroStat, HeroSlide, SocialLink,
 )
 from contact.models import ContactPageSettings
@@ -423,7 +423,90 @@ class BlogCategoryForm(FormStyleMixin, forms.ModelForm):
 class FAQForm(FormStyleMixin, forms.ModelForm):
     class Meta:
         model = FAQ
-        fields = '__all__'
+        fields = ['question', 'category', 'answer', 'is_active', 'is_popular', 'display_order']
+        widgets = {
+            'question': forms.TextInput(attrs={'placeholder': 'e.g. How is pricing structured?', 'maxlength': 200, 'data-count': '120'}),
+        }
+        labels = {
+            'category': 'Topic',
+            'is_active': 'Show on website',
+            'is_popular': 'Popular question',
+            'display_order': 'Order within topic',
+        }
+        help_texts = {
+            'question': 'Write it the way a customer would ask it. End with a question mark.',
+            'category': 'Questions are grouped by topic on the FAQs page.',
+            'answer': 'Keep it short and direct: answer in the first sentence, then add detail. Link to a service or article where useful.',
+            'is_active': 'When off, the question is only visible here.',
+            'is_popular': 'Shown as a quick link at the top of the FAQs page, with a “Popular” badge.',
+            'display_order': 'Lower numbers show first. You can also drag questions on the FAQs list.',
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        from core.models import FAQCategory
+        self.fields['category'].queryset = FAQCategory.objects.all()
+        self.fields['category'].required = True
+        self.fields['category'].empty_label = 'Choose a topic'
+        self.fields['category'].error_messages['required'] = 'Please choose a topic.'
+        self.fields['question'].error_messages['required'] = 'Please write the question.'
+        self.fields['answer'].required = False
+        self.fields['answer'].show_required = True
+
+    def clean_question(self):
+        q = ' '.join((self.cleaned_data.get('question') or '').split())
+        if len(q) < 10:
+            raise forms.ValidationError('Please write the full question (at least 10 characters).')
+        if not q.endswith('?'):
+            q += '?'
+        dupes = FAQ.objects.filter(question__iexact=q)
+        if self.instance.pk:
+            dupes = dupes.exclude(pk=self.instance.pk)
+        if dupes.exists():
+            raise forms.ValidationError('This question already exists.')
+        return q
+
+    def clean_answer(self):
+        html = self.cleaned_data.get('answer') or ''
+        n = len(_strip_tags(html).replace('&nbsp;', ' ').strip())
+        if n < 30:
+            raise forms.ValidationError('Please write an answer of at least 30 characters.' if n else 'Please write the answer.')
+        return html
+
+
+class FAQCategoryForm(FormStyleMixin, forms.ModelForm):
+    class Meta:
+        model = FAQCategory
+        fields = ['name', 'slug', 'icon', 'description', 'display_order', 'is_active']
+        widgets = {
+            'name': forms.TextInput(attrs={'placeholder': 'e.g. Support & AMC', 'maxlength': 60}),
+            'slug': forms.TextInput(attrs={'data-slug-from': 'id_name'}),
+            'description': forms.TextInput(attrs={'placeholder': 'e.g. Support hours, maintenance contracts and raising requests.', 'maxlength': 140}),
+        }
+        labels = {
+            'name': 'Topic name', 'slug': 'Web address', 'icon': 'Icon',
+            'description': 'Short description', 'display_order': 'Display order', 'is_active': 'Show on website',
+        }
+        help_texts = {
+            'name': 'Shown as the group heading and in the topics menu on the FAQs page.',
+            'slug': 'Used for the link to this topic, e.g. /faqs/#topic-support. Created from the name.',
+            'description': 'Optional. One line under the topic heading.',
+            'display_order': 'Lower numbers show first.',
+            'is_active': 'When off, the whole topic and its questions are hidden on the website.',
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['slug'].required = False
+
+    def clean_slug(self):
+        from django.utils.text import slugify
+        slug = slugify(self.cleaned_data.get('slug') or self.data.get('name', ''))[:80]
+        if not slug:
+            raise forms.ValidationError('Enter a name first; the address is created from it.')
+        if _unique_slug_error(FAQCategory, slug, self.instance):
+            raise forms.ValidationError('Another topic already uses this address.')
+        return slug
 
 
 class SiteSettingsForm(FormStyleMixin, forms.ModelForm):

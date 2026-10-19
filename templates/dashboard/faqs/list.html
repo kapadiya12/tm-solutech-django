@@ -1,36 +1,188 @@
 {% extends 'dashboard/base.html' %}
+{% load static %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/blog-admin.css' %}"><link rel="stylesheet" href="{% static 'css/inquiries.css' %}">{% endblock %}
 {% block dashboard_content %}
-<div class="flex-between mb-8">
-    <h2>{{ page_title }}</h2>
-    <a href="{% url 'dashboard:faq_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add FAQ</a>
-</div>
-<div class="dashboard-card">
-    <div class="dashboard-table-wrap">
-        <table class="dashboard-table">
-            <thead>
-                <tr><th>Question</th><th>Active</th><th>Order</th><th>Actions</th></tr>
-            </thead>
-            <tbody>
-                {% for faq in faqs %}
-                <tr>
-                    <td><strong>{{ faq.question }}</strong></td>
-                    <td><span class="status-badge {% if faq.is_active %}status-active{% else %}status-draft{% endif %}">{% if faq.is_active %}Active{% else %}Inactive{% endif %}</span></td>
-                    <td>{{ faq.display_order }}</td>
-                    <td>
-                        <div class="flex gap-2">
-                            <a href="{% url 'dashboard:faq_edit' faq.pk %}" class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></a>
-                            <form method="post" action="{% url 'dashboard:faq_delete' faq.pk %}" data-confirm="Delete this FAQ?">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-sm" style="color: var(--danger);"><i class="fas fa-trash"></i></button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr><td colspan="4" class="text-center">No FAQs yet. <a href="{% url 'dashboard:faq_create' %}">Create one</a></td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
+
+<div class="bl-head">
+    <p>Questions on the website's <strong>FAQs</strong> page, grouped by topic. Drag <i class="fas fa-grip-vertical"></i> to reorder or move a question to another topic.</p>
+    <div class="flex gap-2">
+        <a href="{% url 'dashboard:faqcategory_list' %}" class="btn btn-secondary btn-sm"><i class="fas fa-folder-tree"></i> Topics</a>
+        <a href="{% url 'core:faqs' %}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-up-right-from-square"></i> View page</a>
+        <a href="{% url 'dashboard:faq_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> New question</a>
     </div>
 </div>
+
+<div class="bl-stats fqa-stats">
+    <div class="bl-stat"><span class="bl-ic"><i class="fas fa-circle-question"></i></span><span><strong>{{ stats.total }}</strong>Questions</span></div>
+    <div class="bl-stat bl-c-green" data-tip="Visible on the website"><span class="bl-ic"><i class="fas fa-eye"></i></span><span><strong>{{ stats.live }}</strong>Live</span></div>
+    <div class="bl-stat bl-c-orange" data-tip="Only visible here"><span class="bl-ic"><i class="fas fa-eye-slash"></i></span><span><strong>{{ stats.hidden }}</strong>Hidden</span></div>
+    <div class="bl-stat bl-c-blue" data-tip="Quick links at the top of the FAQs page"><span class="bl-ic"><i class="fas fa-star"></i></span><span><strong>{{ stats.popular }}</strong>Popular</span></div>
+    <div class="bl-stat bl-c-dark" data-tip="{{ stats.votes }} vote{{ stats.votes|pluralize }} from visitors"><span class="bl-ic"><i class="fas fa-thumbs-up"></i></span><span><strong>{% if stats.helpful is not None %}{{ stats.helpful }}%{% else %}—{% endif %}</strong>Found helpful</span></div>
+</div>
+
+<div class="fqa-toolbar">
+    <div class="fqa-search">
+        <i class="fas fa-magnifying-glass"></i>
+        <input type="search" id="fqaSearch" placeholder="Search questions and answers…" autocomplete="off" aria-label="Search questions">
+        <button type="button" id="fqaClear" aria-label="Clear search" hidden><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="iq-tabs" id="fqaTabs">
+        <a href="#" data-filter="" class="is-active">All</a>
+        <a href="#" data-filter="live">Live</a>
+        <a href="#" data-filter="hidden">Hidden</a>
+        <a href="#" data-filter="popular">Popular</a>
+    </div>
+</div>
+
+{% csrf_token %}
+<div class="fqa-groups" data-reorder-url="{% url 'dashboard:faq_reorder' %}">
+    {% for g in groups %}
+    <section class="fqa-group{% if g.category and not g.category.is_active %} is-off{% endif %}">
+        <header class="fqa-group-head">
+            <span class="fqa-group-icon"><i class="{% if g.category %}{{ g.category.icon }}{% else %}fas fa-inbox{% endif %}"></i></span>
+            <div class="fqa-group-title">
+                <h3>{% if g.category %}{{ g.category.name }}{% else %}No topic{% endif %} <em data-count>{{ g.faqs|length }}</em></h3>
+                {% if g.category and not g.category.is_active %}<span class="bc-status is-off"><i class="fas fa-eye-slash"></i> Topic hidden</span>{% endif %}
+            </div>
+            {% if g.category %}
+            <a href="{% url 'dashboard:faqcategory_edit' g.category.pk %}" class="fqa-icon-btn" data-tip="Edit topic"><i class="fas fa-pen"></i></a>
+            <a href="{% url 'dashboard:faq_create' %}?category={{ g.category.pk }}" class="btn btn-secondary btn-sm"><i class="fas fa-plus"></i> Add</a>
+            {% endif %}
+        </header>
+        <ul class="fqa-list" data-category="{% if g.category %}{{ g.category.pk }}{% else %}none{% endif %}">
+            {% for f in g.faqs %}
+            <li class="fqa-row{% if not f.is_active %} is-off{% endif %}" id="faq-{{ f.pk }}" data-id="{{ f.pk }}"
+                data-live="{{ f.is_active|yesno:'1,0' }}" data-popular="{{ f.is_popular|yesno:'1,0' }}"
+                data-text="{{ f.question|lower }} {{ f.answer_text|lower|truncatewords:80 }}">
+                <span class="fqa-handle" aria-hidden="true" data-tip="Drag to reorder"><i class="fas fa-grip-vertical"></i></span>
+                <a href="{% url 'dashboard:faq_edit' f.pk %}" class="fqa-main">
+                    <strong>{{ f.question }}</strong>
+                    <small>{{ f.answer_text|truncatechars:130 }}</small>
+                </a>
+                <span class="fqa-metric" data-tip="{{ f.helpful_yes }} yes · {{ f.helpful_no }} no">{% if f.helpful_percent is not None %}<i class="fas fa-thumbs-up"></i> {{ f.helpful_percent }}%{% else %}<span class="fqa-muted">No votes</span>{% endif %}</span>
+                <button type="button" class="fqa-star{% if f.is_popular %} is-on{% endif %}" data-toggle="is_popular" data-url="{% url 'dashboard:faq_toggle' f.pk %}" data-tip="{% if f.is_popular %}Popular: shown at the top{% else %}Mark as popular{% endif %}" aria-label="Toggle popular"><i class="fas fa-star"></i></button>
+                <button type="button" class="bv-switch{% if f.is_active %} is-on{% endif %}" data-toggle="is_active" data-url="{% url 'dashboard:faq_toggle' f.pk %}" data-tip="{% if f.is_active %}Live on website{% else %}Hidden{% endif %}" aria-label="Show on website"><span></span></button>
+                <div class="fqa-actions">
+                    <a href="{% url 'dashboard:faq_edit' f.pk %}" class="fqa-icon-btn" data-tip="Edit"><i class="fas fa-pen"></i></a>
+                    <form method="post" action="{% url 'dashboard:faq_delete' f.pk %}" data-confirm="The question is removed from the FAQs page." data-confirm-name="{{ f.question|truncatechars:70 }}" data-confirm-title="Delete this question?">
+                        {% csrf_token %}<button type="submit" class="bc-del" aria-label="Delete" data-tip="Delete"><i class="fas fa-trash-can"></i></button>
+                    </form>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        <p class="fqa-empty-group"{% if g.faqs %} hidden{% endif %}>No questions in this topic yet. Drag one here or <a href="{% url 'dashboard:faq_create' %}{% if g.category %}?category={{ g.category.pk }}{% endif %}">add a question</a>.</p>
+    </section>
+    {% empty %}
+    <div class="bc-empty">
+        <span class="bc-icon"><i class="fas fa-circle-question"></i></span>
+        <h3>No topics yet</h3>
+        <p>Create a topic such as “Support &amp; AMC”, then add questions to it.</p>
+        <a href="{% url 'dashboard:faqcategory_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> New topic</a>
+    </div>
+    {% endfor %}
+    <div class="bc-empty fqa-noresults" id="fqaNoResults" hidden>
+        <span class="bc-icon"><i class="fas fa-magnifying-glass"></i></span>
+        <h3>No questions match</h3>
+        <p>Try another word or clear the filters.</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
+<script>
+(function () {
+    const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const rows = Array.from(document.querySelectorAll('.fqa-row'));
+    const search = document.getElementById('fqaSearch');
+    const clear = document.getElementById('fqaClear');
+    const tabs = Array.from(document.querySelectorAll('#fqaTabs a'));
+    let filter = '';
+
+    function apply() {
+        const words = search.value.toLowerCase().split(/\s+/).filter(Boolean);
+        clear.hidden = !search.value;
+        let shown = 0;
+        rows.forEach((r) => {
+            const okText = words.every((w) => r.dataset.text.includes(w));
+            const okFilter = !filter || (filter === 'live' && r.dataset.live === '1') || (filter === 'hidden' && r.dataset.live === '0') || (filter === 'popular' && r.dataset.popular === '1');
+            r.hidden = !(okText && okFilter);
+            if (!r.hidden) shown++;
+        });
+        const filtering = words.length || filter;
+        document.querySelectorAll('.fqa-group').forEach((g) => {
+            const visible = g.querySelectorAll('.fqa-row:not([hidden])').length;
+            g.hidden = filtering && !visible;
+            g.querySelector('.fqa-empty-group').hidden = filtering || g.querySelectorAll('.fqa-row').length > 0;
+        });
+        document.getElementById('fqaNoResults').hidden = !filtering || shown > 0;
+    }
+    search.addEventListener('input', apply);
+    clear.addEventListener('click', () => { search.value = ''; apply(); search.focus(); });
+    tabs.forEach((t) => t.addEventListener('click', (e) => {
+        e.preventDefault();
+        tabs.forEach((x) => x.classList.toggle('is-active', x === t));
+        filter = t.dataset.filter;
+        apply();
+    }));
+
+    // Quick toggles (live / popular)
+    document.querySelectorAll('[data-toggle]').forEach((btn) => btn.addEventListener('click', async () => {
+        const row = btn.closest('.fqa-row');
+        const field = btn.dataset.toggle;
+        btn.disabled = true;
+        try {
+            const res = await fetch(btn.dataset.url, { method: 'POST', headers: { 'X-CSRFToken': csrf, 'X-Requested-With': 'fetch', 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'field=' + field });
+            const data = await res.json();
+            if (field === 'is_active') {
+                btn.classList.toggle('is-on', data.is_active);
+                row.classList.toggle('is-off', !data.is_active);
+                row.dataset.live = data.is_active ? '1' : '0';
+                btn.dataset.tip = data.is_active ? 'Live on website' : 'Hidden';
+                window.duiToast && window.duiToast(data.is_active ? 'Question is live' : 'Question hidden', data.is_active ? 'success' : 'info');
+            } else {
+                btn.classList.toggle('is-on', data.is_popular);
+                row.dataset.popular = data.is_popular ? '1' : '0';
+                btn.dataset.tip = data.is_popular ? 'Popular: shown at the top' : 'Mark as popular';
+                window.duiToast && window.duiToast(data.is_popular ? 'Marked as popular' : 'Removed from popular', 'info');
+            }
+            apply();
+        } catch (e) {
+            window.duiToast && window.duiToast('Could not save. Please try again.', 'error');
+        } finally { btn.disabled = false; }
+    }));
+
+    // Drag to reorder / move between topics
+    const reorderUrl = document.querySelector('.fqa-groups').dataset.reorderUrl;
+    function save(list) {
+        const ids = Array.from(list.querySelectorAll('.fqa-row')).map((r) => r.dataset.id);
+        const group = list.closest('.fqa-group');
+        group.querySelector('[data-count]').textContent = ids.length;
+        group.querySelector('.fqa-empty-group').hidden = ids.length > 0;
+        return fetch(reorderUrl, { method: 'POST', headers: { 'X-CSRFToken': csrf, 'Content-Type': 'application/json' }, body: JSON.stringify({ category: list.dataset.category, ids }) });
+    }
+    if (window.Sortable) {
+        document.querySelectorAll('.fqa-list').forEach((list) => {
+            window.Sortable.create(list, {
+                group: 'faqs', handle: '.fqa-handle', animation: 200, ghostClass: 'fqa-ghost',
+                onEnd: async (evt) => {
+                    if (evt.from === evt.to && evt.oldIndex === evt.newIndex) return;
+                    try {
+                        await save(evt.to);
+                        if (evt.from !== evt.to) await save(evt.from);
+                        window.duiToast && window.duiToast(evt.from !== evt.to ? 'Moved to another topic' : 'Order saved');
+                    } catch (e) { window.duiToast && window.duiToast('Could not save the new order', 'error'); }
+                },
+            });
+        });
+    }
+
+    // Arriving from a save: highlight the question
+    if (/^#faq-\d+$/.test(location.hash)) {
+        const row = document.querySelector(location.hash);
+        if (row) { row.classList.add('is-flash'); row.scrollIntoView({ block: 'center' }); }
+    }
+})();
+</script>
 {% endblock %}

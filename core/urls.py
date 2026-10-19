@@ -10,6 +10,7 @@ urlpatterns = [
     path('leadership/', views.leadership_page, name='leadership'),
     path('clients/', views.clients_page, name='clients'),
     path('faqs/', views.faq_page, name='faqs'),
+    path('faqs/<int:pk>/helpful/', views.faq_helpful, name='faq_helpful'),
     path('search/', views.search, name='search'),
     path('search/suggest/', views.search_suggest, name='search_suggest'),
 ]

@@ -1,34 +1,116 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static asset_tags %}
+
+{% block title %}FAQs | TM Solutech{% endblock %}
+{% block meta_description %}Answers to common questions about TM Solutech's IT services, pricing, support, cloud, cybersecurity and compliance.{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static_v 'css/faq.css' %}">
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{% for f in faq_schema %}{"@type": "Question", "name": "{{ f.question|escapejs }}", "acceptedAnswer": {"@type": "Answer", "text": "{{ f.answer_text|escapejs }}"}}{% if not forloop.last %},{% endif %}{% endfor %}]}
+</script>
+{% endblock %}
 
 {% block content %}
-<div class="page-hero">
+<section class="fq-hero">
+    <div class="fq-hero-glow" aria-hidden="true"></div>
     <div class="container">
         <ul class="breadcrumb-list">
             <li><a href="{% url 'core:home' %}"><i class="fas fa-home"></i> Home</a></li>
+            <li><span class="separator"><i class="fas fa-chevron-right"></i></span> <a href="{% url 'core:why_us' %}">Why Us</a></li>
             <li><span class="separator"><i class="fas fa-chevron-right"></i></span> FAQs</li>
         </ul>
-        <h1 class="page-title">{{ page_title }}</h1>
-        <p class="page-subtitle">{{ page_subtitle }}</p>
-    </div>
-</div>
+        <span class="fq-eyebrow"><i class="fas fa-circle-question"></i> Help centre</span>
+        <h1>How can we <span>help you?</span></h1>
+        <p>{{ page_subtitle }}</p>
 
-<section class="section">
-    <div class="container-narrow">
-        <div class="accordion">
-            {% for faq in faqs %}
-            <div class="accordion-item animate-on-scroll {% if forloop.first %}active{% endif %}" id="faq-{{ faq.pk }}">
-                <div class="accordion-header">
-                    <h4>{{ faq.question }}</h4>
-                    <span class="accordion-icon"><i class="fas fa-chevron-down"></i></span>
-                </div>
-                <div class="accordion-body" {% if forloop.first %}style="max-height: 500px;"{% endif %}>
-                    <div class="accordion-body-inner">{{ faq.answer|safe }}</div>
-                </div>
+        <div class="fq-search" role="search">
+            <i class="fas fa-magnifying-glass fq-search-icon" aria-hidden="true"></i>
+            <input type="search" id="fqSearch" placeholder="Search questions, e.g. pricing, 24/7 support, CSCRF…" aria-label="Search FAQs" autocomplete="off" aria-controls="fqResults">
+            <button type="button" class="fq-clear" id="fqClear" aria-label="Clear search" hidden><i class="fas fa-xmark"></i></button>
+            <kbd class="fq-kbd" aria-hidden="true">/</kbd>
+        </div>
+
+        {% if popular %}
+        <div class="fq-popular">
+            <span>Popular:</span>
+            {% for f in popular|slice:":4" %}<a href="#faq-{{ f.pk }}" data-open="{{ f.pk }}">{{ f.question }}</a>{% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<section class="fq-body">
+    <div class="container fq-layout">
+        <aside class="fq-side">
+            <nav class="fq-topics" aria-label="FAQ topics">
+                <span class="fq-side-title">Topics</span>
+                {% for c in categories %}
+                <a href="#topic-{{ c.slug }}" data-topic="{{ c.slug }}"><span class="fq-topic-icon"><i class="{{ c.icon }}"></i></span><span>{{ c.name }}</span><em>{{ c.live_faqs|length }}</em></a>
+                {% endfor %}
+            </nav>
+            <div class="fq-help">
+                <span class="fq-help-icon"><i class="fas fa-headset"></i></span>
+                <strong>Still need help?</strong>
+                <p>Our team usually replies within 1–2 business days.</p>
+                <a href="{% url 'contact:contact' %}" class="fq-help-btn">Ask a question <i class="fas fa-arrow-right"></i></a>
             </div>
+        </aside>
+
+        <div class="fq-main" id="fqResults">
+            {% csrf_token %}
+            <div class="fq-resultbar" id="fqResultbar" hidden aria-live="polite">
+                <span><strong id="fqCount">0</strong> <span id="fqCountText">results</span></span>
+                <button type="button" id="fqReset"><i class="fas fa-rotate-left"></i> Show all questions</button>
+            </div>
+
+            {% for c in categories %}
+            <section class="fq-group" id="topic-{{ c.slug }}" data-group="{{ c.slug }}">
+                <header class="fq-group-head">
+                    <span class="fq-group-icon"><i class="{{ c.icon }}"></i></span>
+                    <div><h2>{{ c.name }}</h2>{% if c.description %}<p>{{ c.description }}</p>{% endif %}</div>
+                </header>
+                {% for f in c.live_faqs %}{% include 'core/_faq_item.html' %}{% endfor %}
+            </section>
             {% endfor %}
+            {% if uncategorised %}
+            <section class="fq-group" id="topic-other" data-group="other">
+                <header class="fq-group-head"><span class="fq-group-icon"><i class="fas fa-circle-question"></i></span><div><h2>More questions</h2></div></header>
+                {% for f in uncategorised %}{% include 'core/_faq_item.html' %}{% endfor %}
+            </section>
+            {% endif %}
+
+            <div class="fq-empty" id="fqEmpty" hidden>
+                <span class="fq-empty-icon"><i class="fas fa-magnifying-glass"></i></span>
+                <h3>No answers for “<span id="fqEmptyQ"></span>”</h3>
+                <p>Try different words, or ask our team directly. We're happy to help.</p>
+                <a href="{% url 'contact:contact' %}" class="btn btn-primary btn-sm">Ask our team <i class="fas fa-arrow-right"></i></a>
+            </div>
         </div>
     </div>
 </section>
-{% include 'includes/cta_section.html' %}
+
+<section class="fq-contact">
+    <div class="container">
+        <div class="fq-contact-head">
+            <h2>Still have questions?</h2>
+            <p>Talk to a real person. No bots, no ticket queues for first conversations.</p>
+        </div>
+        <div class="fq-contact-grid">
+            <a href="tel:{{ site_settings.phone|default:'+917947717070'|cut:' ' }}" class="fq-contact-card">
+                <span class="fq-cc-icon fq-c-green"><i class="fas fa-phone"></i></span>
+                <strong>Call us</strong><span>{{ site_settings.phone|default:'+91 79 4771 7070' }}</span>
+            </a>
+            <a href="mailto:{{ site_settings.email|default:'info@tmsolutech.com' }}" class="fq-contact-card">
+                <span class="fq-cc-icon fq-c-sky"><i class="fas fa-envelope"></i></span>
+                <strong>Email us</strong><span>{{ site_settings.email|default:'info@tmsolutech.com' }}</span>
+            </a>
+            <a href="{% url 'contact:contact' %}" class="fq-contact-card">
+                <span class="fq-cc-icon fq-c-orange"><i class="fas fa-calendar-check"></i></span>
+                <strong>Book a consultation</strong><span>Free, no obligation</span>
+            </a>
+        </div>
+    </div>
+</section>
 {% endblock %}
+
+{% block extra_js %}<script src="{% static_v 'js/faq.js' %}" defer></script>{% endblock %}

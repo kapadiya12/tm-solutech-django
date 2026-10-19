@@ -1,0 +1,39 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/blog-admin.css' %}">{% endblock %}
+{% block dashboard_content %}
+
+<div class="ed-head">
+    <div class="ed-head-text">
+        <a href="{% url 'dashboard:faqcategory_list' %}" class="ed-back"><i class="fas fa-arrow-left"></i> All topics</a>
+        {% if category %}<h2>{{ category.name }}</h2>{% endif %}
+        <p class="ed-url" data-url-preview data-kind="query" data-base="/faqs/#topic-" data-placeholder="your-topic"></p>
+    </div>
+</div>
+
+<form method="post" class="ed bc-form bc-form-single" data-guard novalidate>
+    {% csrf_token %}
+    <div class="bc-form-main">
+        {% if form.errors %}<div class="ed-alert"><i class="fas fa-circle-exclamation"></i> Some fields need your attention. They're marked in red below.</div>{% endif %}
+        <section class="ed-card">
+            <header class="ed-card-head"><span class="ed-card-num">1</span><div><h3>Topic</h3><p>A group of related questions, such as “Pricing” or “Support &amp; AMC”.</p></div></header>
+            {% include 'dashboard/partials/field.html' with field=form.name %}
+            {% include 'dashboard/partials/field.html' with field=form.slug %}
+            {% include 'dashboard/partials/field.html' with field=form.icon %}
+            {% include 'dashboard/partials/field.html' with field=form.description %}
+        </section>
+        <section class="ed-card">
+            <header class="ed-card-head"><span class="ed-card-num">2</span><div><h3>Visibility</h3><p>Order and whether the topic shows on the website.</p></div></header>
+            {% include 'dashboard/partials/field.html' with field=form.display_order %}
+            {% include 'dashboard/partials/field.html' with field=form.is_active %}
+        </section>
+        <div class="ed-savebar">
+            <span class="ed-savebar-hint"><i class="fas fa-circle-info"></i> Fields marked <span class="required">*</span> are required.</span>
+            <div class="ed-savebar-actions">
+                <a href="{% url 'dashboard:faqcategory_list' %}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> {% if category %}Save changes{% else %}Create topic{% endif %}</button>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}

@@ -4,7 +4,7 @@ from django.db.models import Count, Q
 from django.urls import reverse
 from urllib.parse import quote
 from .models import (
-    SiteSettings, Statistic, WhyUsReason, Testimonial, Leadership, FAQ, SEOSettings,
+    SiteSettings, Statistic, WhyUsReason, Testimonial, Leadership, FAQ, FAQCategory, SEOSettings,
     Capability, ClientLogo, HeroTag, HeroStat, HeroSlide,
 )
 from services.models import ServiceCategory, Service, Industry
@@ -77,15 +77,44 @@ def clients_page(request):
     return render(request, 'core/clients.html', context)
 
 def faq_page(request):
-    faqs = FAQ.objects.filter(is_active=True)
-    categories = faqs.values_list('category', flat=True).distinct()
+    from django.db.models import Prefetch
+    live = FAQ.objects.filter(is_active=True)
+    categories = [c for c in FAQCategory.objects.filter(is_active=True).prefetch_related(
+        Prefetch('faqs', queryset=live, to_attr='live_faqs')) if c.live_faqs]
+    uncategorised = list(live.filter(category__isnull=True))
+    faqs = [f for c in categories for f in c.live_faqs] + uncategorised
+    voted = request.session.get('faq_votes', {})
+    for f in faqs:
+        f.vote = voted.get(str(f.pk))
     context = {
-        'faqs': faqs,
         'categories': categories,
+        'uncategorised': uncategorised,
+        'faq_count': len(faqs),
+        'popular': [f for f in faqs if f.is_popular][:6],
+        'faq_schema': faqs,
         'page_title': 'Frequently Asked Questions',
-        'page_subtitle': 'Find answers to common questions about our services',
+        'page_subtitle': 'Answers about our services, pricing, support and security. Can\'t find yours? Our team is a message away.',
     }
     return render(request, 'core/faq.html', context)
+
+
+def faq_helpful(request, pk):
+    """AJAX: 'Was this helpful?' on an FAQ, one vote per session."""
+    from django.db.models import F
+    from django.http import JsonResponse
+    if request.method != 'POST':
+        return JsonResponse({'ok': False}, status=405)
+    faq = get_object_or_404(FAQ, pk=pk, is_active=True)
+    answer = request.POST.get('answer')
+    if answer not in ('yes', 'no'):
+        return JsonResponse({'ok': False}, status=400)
+    votes = request.session.get('faq_votes', {})
+    if str(faq.pk) not in votes:
+        field = 'helpful_yes' if answer == 'yes' else 'helpful_no'
+        FAQ.objects.filter(pk=faq.pk).update(**{field: F(field) + 1})
+        votes[str(faq.pk)] = answer
+        request.session['faq_votes'] = votes
+    return JsonResponse({'ok': True, 'answer': votes[str(faq.pk)]})
 
 
 def search(request):

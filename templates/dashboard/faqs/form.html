@@ -1,24 +1,116 @@
 {% extends 'dashboard/base.html' %}
+{% load static %}
+{% block extra_css %}{{ form.media.css }}<link rel="stylesheet" href="{% static 'css/blog-admin.css' %}">{% endblock %}
 {% block dashboard_content %}
-<div class="flex-between mb-8">
-    <h2>{{ page_title }}</h2>
-    <a href="{% url 'dashboard:faq_list' %}" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Back</a>
+
+<div class="ed-head">
+    <div class="ed-head-text">
+        <a href="{% url 'dashboard:faq_list' %}" class="ed-back"><i class="fas fa-arrow-left"></i> All questions</a>
+        {% if faq %}<h2>Edit question</h2>{% endif %}
+    </div>
+    {% if faq and faq.is_active %}
+    <div class="ed-head-actions">
+        <a href="{% url 'core:faqs' %}#faq-{{ faq.pk }}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-up-right-from-square"></i> View on site</a>
+    </div>
+    {% endif %}
 </div>
-<div class="dashboard-card">
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {% for field in form %}
-        <div class="form-group">
-            <label class="form-label">{{ field.label }} {% if field.field.required %}<span class="required">*</span>{% endif %}</label>
-            {{ field }}
-            {% if field.errors %}<div class="form-error">{{ field.errors.0 }}</div>{% endif %}
-            {% if field.help_text %}<p style="font-size: var(--text-xs); color: var(--gray-500); margin-top: var(--space-1);">{{ field.help_text }}</p>{% endif %}
+
+<form method="post" class="ed bc-form" data-guard novalidate>
+    {% csrf_token %}
+    <div class="bc-form-main">
+        {% if form.errors %}<div class="ed-alert"><i class="fas fa-circle-exclamation"></i> Some fields need your attention. They're marked in red below.</div>{% endif %}
+
+        <section class="ed-card">
+            <header class="ed-card-head"><span class="ed-card-num">1</span><div><h3>Question</h3><p>What a visitor would type into Google or ask on a call.</p></div></header>
+            {% include 'dashboard/partials/field.html' with field=form.question %}
+            {% include 'dashboard/partials/field.html' with field=form.category %}
+            <p class="fqa-form-link"><a href="{% url 'dashboard:faqcategory_list' %}" target="_blank" rel="noopener"><i class="fas fa-folder-tree"></i> Manage topics</a></p>
+        </section>
+
+        <section class="ed-card">
+            <header class="ed-card-head"><span class="ed-card-num">2</span><div><h3>Answer</h3><p>Lead with the direct answer. Bullet points and links to services or articles work well.</p></div></header>
+            {% include 'dashboard/partials/field.html' with field=form.answer %}
+        </section>
+
+        <section class="ed-card">
+            <header class="ed-card-head"><span class="ed-card-num">3</span><div><h3>Visibility</h3><p>Whether it shows on the website and where.</p></div></header>
+            <div class="ed-toggles">
+                {% include 'dashboard/partials/field.html' with field=form.is_active %}
+                {% include 'dashboard/partials/field.html' with field=form.is_popular %}
+            </div>
+            {% include 'dashboard/partials/field.html' with field=form.display_order %}
+        </section>
+
+        <div class="ed-savebar">
+            <span class="ed-savebar-hint"><i class="fas fa-circle-info"></i> Fields marked <span class="required">*</span> are required.</span>
+            <div class="ed-savebar-actions">
+                <a href="{% url 'dashboard:faq_list' %}" class="btn btn-secondary">Cancel</a>
+                {% if faq %}<button type="submit" name="save_continue" class="btn btn-secondary"><i class="fas fa-floppy-disk"></i> Save &amp; keep editing</button>{% endif %}
+                <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> {% if faq %}Save changes{% else %}Add question{% endif %}</button>
+            </div>
         </div>
-        {% endfor %}
-        <div class="flex gap-4">
-            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save</button>
-            <a href="{% url 'dashboard:faq_list' %}" class="btn btn-secondary">Cancel</a>
+    </div>
+
+    <aside class="bc-preview" aria-label="Live preview">
+        <span class="seo-kicker">Live preview</span>
+        <p class="bc-preview-note">How it looks on the FAQs page.</p>
+        <div class="fqa-preview">
+            <div class="fqa-preview-q"><span id="fqpQ">{{ form.question.value|default:"Your question?" }}</span><em id="fqpBadge"{% if not form.is_popular.value %} hidden{% endif %}>Popular</em><i></i></div>
+            <div class="fqa-preview-a" id="fqpA">{% if form.answer.value %}{{ form.answer.value|safe }}{% else %}<p class="is-empty">Your answer appears here.</p>{% endif %}</div>
         </div>
-    </form>
-</div>
+        <p class="bc-preview-state" id="fqpState"></p>
+        {% if faq %}
+        <dl class="bc-meta">
+            <div><dt>Helpful</dt><dd>{% if faq.helpful_percent is not None %}{{ faq.helpful_percent }}%{% else %}—{% endif %}</dd></div>
+            <div><dt>Votes</dt><dd>{{ faq.helpful_total }}</dd></div>
+        </dl>
+        {% endif %}
+    </aside>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+{{ form.media.js }}
+<script>
+(function () {
+    const $ = (id) => document.getElementById(id);
+    const q = $('id_question'), active = $('id_is_active'), popular = $('id_is_popular'), ta = $('id_answer');
+    const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    let lastHtml = null;
+    function getHtml() {
+        const ed = window.editors && window.editors['id_answer'];
+        try { if (ed && ed.getData) return ed.getData(); } catch (e) { /* not ready */ }
+        return ta ? ta.value : '';
+    }
+    function sync() {
+        const text = q.value.trim();
+        $('fqpQ').textContent = text ? (text.endsWith('?') ? text : text + '?') : 'Your question?';
+        $('fqpBadge').hidden = !popular.checked;
+        const html = getHtml();
+        if (html !== lastHtml) {
+            lastHtml = html;
+            const tmp = document.createElement('div'); tmp.innerHTML = html;
+            tmp.querySelectorAll('script,style,iframe').forEach((n) => n.remove());
+            $('fqpA').innerHTML = tmp.textContent.trim() ? tmp.innerHTML : '<p class="is-empty">Your answer appears here.</p>';
+        }
+        $('fqpState').innerHTML = active.checked
+            ? '<i class="fas fa-circle-check"></i> Live on the FAQs page' + (popular.checked ? ', and listed under “Popular” at the top.' : '.')
+            : '<i class="fas fa-eye-slash"></i> Hidden: only visible here.';
+        $('fqpState').classList.toggle('is-off', !active.checked);
+    }
+    [q, active, popular].forEach((el) => { el.addEventListener('input', sync); el.addEventListener('change', sync); });
+    setInterval(sync, 1000);   // CKEditor changes don't bubble as input events
+    sync();
+    // Character counter
+    document.querySelectorAll('[data-count]').forEach((el) => {
+        const label = el.closest('.form-group')?.querySelector('.form-label-row');
+        if (!label) return;
+        const c = document.createElement('span');
+        c.className = 'bf-count';
+        label.appendChild(c);
+        const upd = () => { c.textContent = el.value.length + ' / ' + el.dataset.count; c.classList.toggle('is-over', el.value.length > Number(el.dataset.count)); };
+        el.addEventListener('input', upd); upd();
+    });
+})();
+</script>
 {% endblock %}

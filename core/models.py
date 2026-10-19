@@ -225,27 +225,56 @@ class Leadership(models.Model):
         return f"{self.name} - {self.designation}"
 
 
-class FAQ(models.Model):
-    CATEGORY_CHOICES = [
-        ('general', 'General'),
-        ('services', 'Services'),
-        ('cloud', 'Cloud Solutions'),
-        ('network', 'Network & Security'),
-        ('infrastructure', 'Infrastructure'),
-        ('billing', 'Billing'),
-        ('support', 'Support'),
-    ]
-
-    question = models.CharField(max_length=500)
-    answer = CKEditor5Field('Answer', config_name='default')
-    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='general')
-    is_active = models.BooleanField(default=True)
+class FAQCategory(models.Model):
+    """A group of questions on the FAQs page (e.g. Services, Support & AMC)."""
+    name = models.CharField(max_length=80)
+    slug = models.SlugField(max_length=90, unique=True)
+    icon = models.CharField(max_length=50, default='fas fa-circle-question')
+    description = models.CharField(max_length=200, blank=True)
     display_order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
 
     class Meta:
-        ordering = ['display_order']
+        ordering = ['display_order', 'name']
+        verbose_name = 'FAQ category'
+        verbose_name_plural = 'FAQ categories'
+
+    def __str__(self):
+        return self.name
+
+
+class FAQ(models.Model):
+    question = models.CharField(max_length=500)
+    answer = CKEditor5Field('Answer', config_name='default')
+    category = models.ForeignKey(FAQCategory, on_delete=models.SET_NULL, null=True, blank=True, related_name='faqs')
+    is_active = models.BooleanField(default=True)
+    is_popular = models.BooleanField(default=False)
+    display_order = models.PositiveIntegerField(default=0)
+    helpful_yes = models.PositiveIntegerField(default=0, editable=False)
+    helpful_no = models.PositiveIntegerField(default=0, editable=False)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['display_order', 'pk']
         verbose_name = 'FAQ'
         verbose_name_plural = 'FAQs'
+
+    @property
+    def answer_text(self):
+        """Plain-text answer (tags stripped, entities decoded) for snippets, search and schema."""
+        import re
+        from html import unescape
+        from django.utils.html import strip_tags
+        spaced = re.sub(r'(<(?:p|li|br|/p|/li|ul|ol)[^>]*>)', r' \1', self.answer or '')
+        return ' '.join(unescape(strip_tags(spaced)).split())
+
+    @property
+    def helpful_total(self):
+        return self.helpful_yes + self.helpful_no
+
+    @property
+    def helpful_percent(self):
+        return round(100 * self.helpful_yes / self.helpful_total) if self.helpful_total else None
 
     def __str__(self):
         return self.question

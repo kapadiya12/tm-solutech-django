@@ -1,0 +1,50 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/blog-admin.css' %}"><link rel="stylesheet" href="{% static 'css/inquiries.css' %}">{% endblock %}
+{% block dashboard_content %}
+
+<div class="bl-head">
+    <p>Topics group the questions on the FAQs page and appear in its topics menu. <a href="{% url 'dashboard:faq_list' %}">Back to questions</a></p>
+    <a href="{% url 'dashboard:faqcategory_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> New topic</a>
+</div>
+
+{% if categories %}
+<div class="bc-grid">
+    {% for c in categories %}
+    <article class="bc-card{% if not c.is_active %} is-off{% endif %}">
+        <header class="bc-card-top">
+            <span class="bc-icon"><i class="{{ c.icon }}"></i></span>
+            <div class="bc-title">
+                <h3>{{ c.name }}</h3>
+                <code>/faqs/#topic-{{ c.slug }}</code>
+            </div>
+            {% if not c.is_active %}<span class="bc-status is-off"><i class="fas fa-eye-slash"></i> Hidden</span>
+            {% elif c.live %}<span class="bc-status is-on"><i class="fas fa-circle-check"></i> Visible</span>
+            {% else %}<span class="bc-status is-wait" data-tip="Appears once it has a live question"><i class="fas fa-hourglass-half"></i> No questions</span>{% endif %}
+        </header>
+        <p class="bc-desc{% if not c.description %} is-empty{% endif %}">{{ c.description|default:"No description." }}</p>
+        <dl class="bc-meta">
+            <div><dt>Live</dt><dd>{{ c.live }}</dd></div>
+            <div><dt>All</dt><dd>{{ c.total }}</dd></div>
+            <div><dt>Order</dt><dd>{{ c.display_order }}</dd></div>
+        </dl>
+        <footer class="bc-actions">
+            <a href="{% url 'dashboard:faq_create' %}?category={{ c.pk }}" class="bc-link" data-tip="Add a question to this topic"><i class="fas fa-plus"></i></a>
+            <a href="{% url 'dashboard:faqcategory_edit' c.pk %}" class="btn btn-secondary btn-sm"><i class="fas fa-pen"></i> Edit</a>
+            <form method="post" action="{% url 'dashboard:faqcategory_delete' c.pk %}" data-confirm="{% if c.total %}Its {{ c.total }} question{{ c.total|pluralize }} {{ c.total|pluralize:'is,are' }} kept under “No topic” (not shown on the website until moved).{% else %}This topic has no questions.{% endif %}" data-confirm-name="{{ c.name }}" data-confirm-title="Delete this topic?">
+                {% csrf_token %}<button type="submit" class="bc-del" aria-label="Delete {{ c.name }}" data-tip="Delete"><i class="fas fa-trash-can"></i></button>
+            </form>
+        </footer>
+    </article>
+    {% endfor %}
+    <a href="{% url 'dashboard:faqcategory_create' %}" class="bc-card bc-add"><i class="fas fa-plus"></i><strong>New topic</strong><span>Group related questions</span></a>
+</div>
+{% else %}
+<div class="bc-empty">
+    <span class="bc-icon"><i class="fas fa-folder-plus"></i></span>
+    <h3>No topics yet</h3>
+    <p>Create topics like “Support &amp; AMC” or “Pricing” to group your questions.</p>
+    <a href="{% url 'dashboard:faqcategory_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> New topic</a>
+</div>
+{% endif %}
+{% endblock %}

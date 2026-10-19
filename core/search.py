@@ -145,11 +145,11 @@ def run_search(query, per_group=5):
         pages.append({'title': page.title, 'subtitle': _clean(page.meta_description), 'meta': 'Page', 'url': page.get_absolute_url(), 'icon': 'fas fa-file-lines'})
     add_group('pages', 'Pages', 'fas fa-file-lines', pages)
 
-    faqs = FAQ.objects.filter(_all_terms_q(terms, ['question', 'answer']), is_active=True)
+    faqs = FAQ.objects.filter(_all_terms_q(terms, ['question', 'answer']), is_active=True).select_related('category')
     add_group('faqs', 'FAQs', 'fas fa-circle-question', [{
         'title': f.question,
         'subtitle': _clean(f.answer, 16),
-        'meta': f.get_category_display(),
+        'meta': f.category.name if f.category else 'FAQ',
         'url': f"{reverse('core:faqs')}#faq-{f.pk}",
         'icon': 'fas fa-circle-question',
     } for f in faqs[:20]])
