@@ -20,7 +20,8 @@ VALID = {
     'email': '  Priya.Shah@Acme.COM ',
     'phone_country': 'IN',
     'phone': '98765 43210',
-    'service': '',
+    'service': '__other__',
+    'service_other': 'ERP cloud migration',
     'message': 'We need help migrating our ERP servers to the cloud this quarter.',
     'consent': 'on',
     'website': '',
@@ -66,6 +67,9 @@ class ContactFormTests(TestCase):
         self.assertEqual(ContactInquiry.objects.get().service, 'Hardware Procurement')
 
     # ---- validation ----
+    def test_service_is_required(self):
+        self.assertFieldError('service', service='', service_other='')
+
     def assertFieldError(self, field, **overrides):
         res = self.post(ajax=True, **overrides)
         self.assertEqual(res.status_code, 400, res.content)
@@ -239,7 +243,24 @@ class EmailRuleTests(TestCase):
                 self.assertIn(needle, self.err(email) or '')
 
     def test_dead_domain_rejected_with_suggestion(self):
-        self.assertIn('Did you mean gmail.com', self.err('john@gmal.com', dns=False))
+        self.assertIn('did you mean @gmail.com', self.err('john@gmal.com', dns=False))
+
+    def test_email_formats_and_provider_rules(self):
+        cases = {
+            '.abc@company.com': 'cannot start or end with a dot',
+            'ab@yahoo.com': 'Yahoo usernames',
+            'me@icloud.com': 'iCloud usernames',
+            'a@company.con': 'did you mean @company.com',
+            'x@10.0.0.1': 'IP address',
+            'test@yopmail.com': 'temporary',
+            'bad@-co.com': 'domain part',
+        }
+        for email, needle in cases.items():
+            with self.subTest(email=email):
+                self.assertIn(needle, self.err(email, dns=False) or '')
+        for email in ('Priya <priya@tmsolutech.com>', 'mailto:sales@acme.co.in', 'first.last+news@sub.company.io', 'name@hotmail.co.in'):
+            with self.subTest(email=email):
+                self.assertIsNone(self.err(email, dns=True))
 
     def test_good_emails_pass(self):
         for email in ('john.smith@gmail.com', 'priya@tmsolutech.com', 'sales@acme.co.in'):

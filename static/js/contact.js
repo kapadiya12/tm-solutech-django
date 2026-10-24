@@ -189,7 +189,7 @@
             const has = !!serviceSelect.value;
             const otherText = document.getElementById('id_service_other');
             const label = serviceSelect.value === '__other__' && otherText && otherText.value.trim() ? 'Other: ' + otherText.value.trim() : (opt ? opt.textContent : '');
-            trigger.querySelector('.cf-combo-value').textContent = has ? label : 'Select a service (optional)';
+            trigger.querySelector('.cf-combo-value').textContent = has ? label : 'Select a service';
             trigger.classList.toggle('is-placeholder', !has);
         };
         sync();
@@ -206,7 +206,7 @@
             customOption: (q, matches) => (matches.some((m) => fold(m.label) === fold(q)) ? null
                 : { value: '__custom__', raw: q, label: q, custom: true, search: '' }),
             title: 'Service of interest',
-            searchPlaceholder: 'Search 37 services…',
+            searchPlaceholder: 'Search services…',
             getSelected: () => serviceSelect.value,
             renderItem: (it, q) => it.custom
                 ? '<span class="cf-pop-custom-icon" aria-hidden="true"><i class="fas fa-pen"></i></span><span class="cf-pop-text">Use “' + escapeHtml(it.raw) + '”<small>Not in the list? We’ll note it as your service.</small></span>'
@@ -233,6 +233,7 @@
             if (['ArrowDown', 'ArrowUp', 'Enter', ' '].includes(e.key)) { e.preventDefault(); pop.open(); }
         });
         serviceSelect.addEventListener('change', sync);
+        serviceSelect.addEventListener('change', () => { touched.add('service'); check('service'); });
         if (otherInput) otherInput.addEventListener('input', sync);
         form.addEventListener('reset', () => setTimeout(() => showOther(false)));
         form.addEventListener('reset', () => setTimeout(sync));
@@ -357,6 +358,15 @@
     const squash = (v) => v.replace(/\s+/g, ' ').trim();
     const phoneTouched = () => touched.has('phone');
 
+    // Tidy pasted emails: "Name <a@b.com>", "mailto:a@b.com", trailing dots, full-width @
+    function normaliseEmail(v) {
+        v = (v || '').trim();
+        const m = v.match(/<\s*([^<>\s]+@[^<>\s]+)\s*>/);
+        if (m) v = m[1];
+        v = v.replace(/\uff20/g, '@').replace(/\u200b/g, '').replace(/^["'<>,;\s]+|["'<>,;\s]+$/g, '');
+        if (/^mailto:/i.test(v)) v = v.slice(7);
+        return v.split('?')[0].replace(/\.+$/, '').toLowerCase();
+    }
     const rules = {
         name(v) {
             v = squash(v);
@@ -377,7 +387,7 @@
             return '';
         },
         email(v) {
-            v = v.trim().toLowerCase();
+            v = normaliseEmail(v);
             if (!v) return 'Please enter your work email.';
             if (/\s/.test(v)) return 'Email addresses cannot contain spaces.';
             if ((v.match(/@/g) || []).length !== 1) return 'An email address needs exactly one @, like name@company.com.';
@@ -385,6 +395,12 @@
             if (!local) return 'Add your name before the @.';
             if (!domain) return 'Add the domain after the @, like gmail.com.';
             if (!domain.includes('.')) return 'The domain is incomplete. Did you forget ".com"?';
+            if (local.startsWith('.') || local.endsWith('.')) return 'The part before the @ cannot start or end with a dot.';
+            if (v.includes('..')) return 'An email address cannot contain two dots in a row.';
+            const tld = domain.split('.').pop();
+            const TLD_FIX = { con: 'com', cmo: 'com', ocm: 'com', comm: 'com', coom: 'com', vom: 'com', xom: 'com', nett: 'net', ogr: 'org' };
+            if (TLD_FIX[tld]) return `Check the ending of your email: did you mean @${domain.slice(0, -tld.length)}${TLD_FIX[tld]}?`;
+            if (/^\d+$/.test(tld)) return 'That looks like an IP address. Please use an email domain, like company.com.';
             if (v.length > 254 || local.length > 64 || !EMAIL_RE.test(v)) return 'Please enter a valid email address, like name@company.com.';
             if (domain === 'gmail.com' || domain === 'googlemail.com') {
                 const bare = local.split('+')[0];
@@ -417,6 +433,9 @@
             if (REPEAT_RE.test(v)) return 'Please remove the repeated characters.';
             if ((v.match(URL_RE) || []).length > 3) return 'Please remove some links. Messages with many links are blocked as spam.';
             return '';
+        },
+        service(v) {
+            return v ? '' : 'Please choose the service you need, or pick “Other” and type it.';
         },
         service_other(v) {
             const sel = control('service');
@@ -494,6 +513,7 @@
         return d[a.length][b.length];
     };
     const emailEl = control('email');
+    if (emailEl) emailEl.addEventListener('blur', () => { const n = normaliseEmail(emailEl.value); if (n && n !== emailEl.value) emailEl.value = n; }, true);
     if (emailEl) {
         const tip = document.createElement('button');
         tip.type = 'button';

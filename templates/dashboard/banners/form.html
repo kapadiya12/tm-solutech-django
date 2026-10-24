@@ -1,0 +1,26 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/blog-admin.css' %}">{% endblock %}
+{% block dashboard_content %}
+<div class="ed-head"><div class="ed-head-text"><a href="{% url 'dashboard:banner_list' %}" class="ed-back"><i class="fas fa-arrow-left"></i> All banners</a><h2>{{ label }}</h2></div></div>
+<form method="post" enctype="multipart/form-data" class="ed bc-form" data-guard novalidate>
+    {% csrf_token %}
+    <div class="bc-form-main">
+        {% if form.errors %}<div class="ed-alert"><i class="fas fa-circle-exclamation"></i> Some fields need your attention.</div>{% endif %}
+        <section class="ed-card">
+            <header class="ed-card-head"><span class="ed-card-num">1</span><div><h3>Banner photo</h3><p>Framed on the right of the {{ label }} page banner (desktop and large tablets).</p></div></header>
+            {% include 'dashboard/partials/field.html' with field=form.image %}
+            <div class="ed-grid-2">{% include 'dashboard/partials/field.html' with field=form.badge_1 %}{% include 'dashboard/partials/field.html' with field=form.badge_2 %}</div>
+            {% include 'dashboard/partials/field.html' with field=form.is_active %}
+        </section>
+        <div class="ed-savebar"><span class="ed-savebar-hint"><i class="fas fa-circle-info"></i> Applies immediately.</span>
+            <div class="ed-savebar-actions"><a href="{% url 'dashboard:banner_list' %}" class="btn btn-secondary">Cancel</a><button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> Save banner</button></div></div>
+    </div>
+    <aside class="bc-preview"><span class="seo-kicker">Current photo</span>
+        <div class="cl-preview"><div class="cl-preview-card" style="height:auto;padding:0;overflow:hidden">{% if obj and obj.image %}<img id="bnPrev" src="{{ obj.image.url }}" alt="" style="max-height:none;width:100%;border-radius:12px">{% else %}<img id="bnPrev" alt="" hidden style="width:100%">{% endif %}</div></div>
+    </aside>
+</form>
+{% endblock %}
+{% block extra_js %}<script>
+document.getElementById('id_image')?.addEventListener('change', (e) => { const f = e.target.files[0]; const i = document.getElementById('bnPrev'); if (f && i) { i.src = URL.createObjectURL(f); i.hidden = false; } });
+</script>{% endblock %}

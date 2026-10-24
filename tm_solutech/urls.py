@@ -3,6 +3,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.sitemaps.views import sitemap
+from core.sitemaps import SITEMAPS
 from django.views.generic import RedirectView, TemplateView
 from django.templatetags.static import static as static_url
 
@@ -19,6 +20,8 @@ urlpatterns = [
     path('admin-dashboard/', include('dashboard.urls')),
     path('ckeditor5/', include('django_ckeditor_5.urls')),
     # CMS pages last (catch-all for slugs)
+    path('sitemap.xml', sitemap, {'sitemaps': SITEMAPS}, name='sitemap'),
+    path('', include('core.redirects')),
     path('', include('cms.urls')),
     # Browser icons: browsers (Safari especially) request these directly and cache them per host
     path('favicon.ico', RedirectView.as_view(url=static_url('images/logo/favicon.png'), permanent=False)),

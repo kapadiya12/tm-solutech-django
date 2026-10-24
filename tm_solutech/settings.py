@@ -163,6 +163,7 @@ TEMPLATES = [
 
                 # Custom context processors
                 "core.context_processors.site_settings",
+                "core.context_processors.page_banner",
 
                 "core.context_processors.nav_stats",
                 "core.context_processors.social_links",

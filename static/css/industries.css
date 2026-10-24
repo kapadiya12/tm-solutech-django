@@ -3,8 +3,13 @@
 .ind-card-media { position: relative; height: 210px; margin: 0 -2.25rem 2.4rem; background: #F3F5F8; display: flex; align-items: center; justify-content: center; }
 .ind-card-media img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; padding: 1rem 1.5rem; box-sizing: border-box; transition: transform .6s cubic-bezier(.16,1,.3,1); }
 .ind-card:hover .ind-card-media img { transform: scale(1.04); }
-.ind-card-icon { position: absolute; left: 50%; bottom: -22px; transform: translateX(-50%); width: 46px; height: 46px; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; color: #fff; background: linear-gradient(135deg, #343B4A, #0F1218); box-shadow: 0 12px 24px -12px rgba(10,12,16,.8); }
+.ind-card-icon { position: absolute; left: 50%; bottom: -22px; transform: translateX(-50%); width: 46px; height: 46px; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; color: #fff; background: linear-gradient(135deg, #1E8FD0, #16508E); box-shadow: 0 12px 24px -12px rgba(10,12,16,.8); }
 .ind-intro { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 2.5rem; align-items: center; }
 .ind-intro-media { margin: 0; padding: 1.5rem; border-radius: 22px; background: #F3F5F8; }
 .ind-intro-media img { display: block; width: 100%; height: auto; max-height: 380px; object-fit: contain; }
 @media (max-width: 800px) { .ind-intro { grid-template-columns: 1fr; gap: 1.5rem; } .ind-intro-media { order: -1; } }
+/* Industry page content lists */
+.container-narrow ul { list-style: none; margin: .4rem 0 1.2rem; padding: 0; display: grid; gap: .55rem; }
+.container-narrow li { position: relative; display: block; padding-left: 1.9rem; line-height: 1.6; color: #2E3440; }
+.container-narrow li::before { content: '\f00c'; font-family: 'Font Awesome 6 Free'; font-weight: 900; position: absolute; left: 0; top: .15rem; width: 20px; height: 20px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: .55rem; color: #fff; background: linear-gradient(135deg, #9BC73B, #5C8A1E); }
+.container-narrow h2 { margin-top: 1rem; }

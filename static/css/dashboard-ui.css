@@ -9,7 +9,7 @@
     position: relative; overflow: hidden; pointer-events: auto;
     display: flex; align-items: flex-start; gap: 0.75rem;
     padding: 0.85rem 0.9rem 0.95rem; border-radius: 14px;
-    background: #fff; border: 1px solid rgba(20, 23, 30, .08);
+    background: #fff; border: 1px solid rgba(10, 36, 68, .08);
     box-shadow: 0 20px 40px -18px rgba(10, 12, 16, .45);
     opacity: 0; transform: translateX(24px) scale(.98);
     transition: opacity .3s ease, transform .4s var(--dui-ease);
@@ -21,7 +21,7 @@
 .dui-toast-success .dui-toast-icon { color: #1C7A52; background: rgba(34, 160, 107, .12); }
 .dui-toast-error .dui-toast-icon { color: #C02B30; background: rgba(229, 72, 77, .12); }
 .dui-toast-warning .dui-toast-icon { color: #B45F10; background: rgba(244, 162, 30, .16); }
-.dui-toast-info .dui-toast-icon { color: #2A303C; background: rgba(42, 48, 60, .1); }
+.dui-toast-info .dui-toast-icon { color: #1E75B0; background: rgba(30, 117, 176, .1); }
 .dui-toast-close { width: 26px; height: 26px; border-radius: 8px; border: 0; background: transparent; color: #8A93A8; cursor: pointer; flex-shrink: 0; }
 .dui-toast-close:hover { background: #F1F3F8; color: #1C1F26; }
 .dui-toast-bar { position: absolute; left: 0; bottom: 0; height: 3px; width: 100%; transform-origin: left; }
@@ -124,7 +124,7 @@ html.dui-locked { overflow: hidden; }
 .dui-menu {
     position: fixed; z-index: 3050; display: flex; flex-direction: column; max-height: min(340px, 60vh);
     border-radius: 14px; background: #fff; overflow: hidden;
-    border: 1px solid rgba(20, 23, 30, .08); box-shadow: 0 24px 48px -18px rgba(10, 12, 16, .4);
+    border: 1px solid rgba(10, 36, 68, .08); box-shadow: 0 24px 48px -18px rgba(10, 12, 16, .4);
     opacity: 0; visibility: hidden; transform: translateY(-4px) scale(.98); transform-origin: top center;
     transition: opacity .15s ease, transform .22s var(--dui-ease), visibility 0s linear .22s;
 }
@@ -141,7 +141,7 @@ html.dui-locked { overflow: hidden; }
 .dui-group { padding: 0.55rem 0.6rem 0.25rem; font-size: 0.66rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: #8A93A8; }
 .dui-opt { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; padding: 0.55rem 0.65rem; border-radius: 9px; font-size: 0.87rem; color: #1C1F26; cursor: pointer; }
 .dui-opt.is-active { background: #F1F5FC; }
-.dui-opt.is-selected { font-weight: 700; color: #1F2430; }
+.dui-opt.is-selected { font-weight: 700; color: #173E6E; }
 .dui-opt.is-disabled { opacity: .45; cursor: not-allowed; }
 .dui-opt i { font-size: 0.7rem; color: #0AAEE0; }
 .dui-empty { margin: 0; padding: 1rem; text-align: center; font-size: 0.84rem; color: #8A93A8; }

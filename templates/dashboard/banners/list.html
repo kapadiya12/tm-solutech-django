@@ -1,0 +1,16 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/blog-admin.css' %}"><link rel="stylesheet" href="{% static 'css/inquiries.css' %}">{% endblock %}
+{% block dashboard_content %}
+<div class="bl-head"><p>The photo shown on the right of each page's top banner, with its two floating cards. Pages without their own banner use the fallback.</p></div>
+<div class="bc-grid">
+    {% for key, label, b in rows %}
+    <a href="{% url 'dashboard:banner_edit' key %}" class="bc-card wk-admin-card{% if not b or not b.is_active %} is-off{% endif %}" style="color:inherit">
+        <div class="wk-admin-media">{% if b and b.image %}<img src="{{ b.image.url }}" alt="">{% else %}<span><i class="fas fa-image"></i></span>{% endif %}</div>
+        <header class="bc-card-top"><div class="bc-title"><h3>{{ label }}</h3><code>{% if b %}{{ b.badge_1|default:"—" }}{% if b.badge_2 %} · {{ b.badge_2 }}{% endif %}{% else %}Uses the fallback{% endif %}</code></div>
+            {% if b and b.is_active %}<span class="bc-status is-on"><i class="fas fa-circle-check"></i> On</span>{% elif b %}<span class="bc-status is-off">Off</span>{% else %}<span class="bc-status is-wait">Not set</span>{% endif %}</header>
+        <footer class="bc-actions"><span class="btn btn-secondary btn-sm"><i class="fas fa-pen"></i> Edit</span></footer>
+    </a>
+    {% endfor %}
+</div>
+{% endblock %}

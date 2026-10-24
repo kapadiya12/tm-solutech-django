@@ -263,6 +263,28 @@ class Certification(models.Model):
         return self.name
 
 
+class PageBanner(models.Model):
+    """The photo (and badge text) shown in the top banner of a page."""
+    PAGE_CHOICES = [
+        ('contact', 'Contact'), ('why-us', 'Why Us'), ('about', 'About'), ('leadership', 'Leadership'),
+        ('clients', 'Clients'), ('industries', 'Industries'), ('faqs', 'FAQs'), ('insights', 'Insights'),
+        ('work', 'Our Work'), ('careers', 'Careers'), ('life-at-tm-solutech', 'Life at TM Solutech'),
+        ('default', 'Any other page (fallback)'),
+    ]
+    page = models.CharField(max_length=40, choices=PAGE_CHOICES, unique=True)
+    image = models.ImageField(upload_to='banners/')
+    badge_1 = models.CharField('Floating badge 1', max_length=40, blank=True, default='35+ years of heritage')
+    badge_2 = models.CharField('Floating badge 2', max_length=40, blank=True, default='ISO 9001 · ISO 27000')
+    is_active = models.BooleanField('Show the photo', default=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['page']
+
+    def __str__(self):
+        return self.get_page_display()
+
+
 class FAQCategory(models.Model):
     """A group of questions on the FAQs page (e.g. Services, Support & AMC)."""
     name = models.CharField(max_length=80)

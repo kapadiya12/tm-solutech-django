@@ -1590,3 +1590,19 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 // Refresh: make sure we land at the top once everything has loaded
 window.addEventListener('load', function () { if (!location.hash) window.scrollTo(0, 0); });
+
+
+/* Page banner photo: gentle 3D tilt toward the cursor */
+(function () {
+    const hv = document.querySelector('[data-tilt-hv]');
+    if (!hv || !window.matchMedia('(hover: hover) and (min-width: 1101px)').matches || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const frame = hv.querySelector('.hv-frame');
+    const hero = hv.parentElement;
+    hero.addEventListener('pointermove', (e) => {
+        const r = hv.getBoundingClientRect();
+        const px = (e.clientX - (r.left + r.width / 2)) / window.innerWidth, py = (e.clientY - (r.top + r.height / 2)) / window.innerHeight;
+        frame.style.setProperty('--ry', (-7 + px * 14).toFixed(2) + 'deg');
+        frame.style.setProperty('--rx', (3 - py * 10).toFixed(2) + 'deg');
+    });
+    hero.addEventListener('pointerleave', () => { frame.style.removeProperty('--ry'); frame.style.removeProperty('--rx'); });
+})();

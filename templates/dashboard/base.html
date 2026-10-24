@@ -63,6 +63,9 @@
                     <a href="{% url 'dashboard:industry_list' %}" class="sidebar-link {% if 'industry' in request.resolver_match.url_name %}active{% endif %}">
                         <i class="fas fa-industry"></i> Industries
                     </a>
+                    <a href="{% url 'dashboard:banner_list' %}" class="sidebar-link {% if 'banner' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-panorama"></i> Page Banners
+                    </a>
                     <a href="{% url 'dashboard:page_list' %}" class="sidebar-link {% if request.resolver_match.url_name in 'page_list page_create page_edit page_delete' and page_obj.slug != 'careers' and page_obj.slug != 'life-at-tm-solutech' %}active{% endif %}">
                         <i class="fas fa-file-alt"></i> Pages
                     </a>

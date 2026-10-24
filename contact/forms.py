@@ -7,7 +7,7 @@ from django.core import signing
 from services.models import ServiceCategory
 from .models import ContactInquiry
 from .phone import country_choices, normalise
-from .emailcheck import check_email
+from .emailcheck import check_email, normalise_email
 
 
 
@@ -36,7 +36,7 @@ def issue_form_token():
 
 def service_choices():
     """Services grouped by area for the select (one query + prefetch)."""
-    choices = [('', 'Select a service (optional)')]
+    choices = [('', 'Select a service')]
     categories = (
         ServiceCategory.objects.filter(is_active=True)
         .prefetch_related('services')
@@ -78,7 +78,8 @@ class ContactForm(forms.ModelForm):
     def __init__(self, *args, default_country='IN', **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['service'] = forms.ChoiceField(
-            choices=service_choices(), required=False,
+            choices=service_choices(), required=True,
+            error_messages={'required': 'Please choose the service you need, or pick “Other” and type it.'},
             widget=forms.Select(attrs={'class': 'cf-input', 'aria-describedby': 'err_service'}),
         )
         for name in ('name', 'email', 'message'):
@@ -129,7 +130,7 @@ class ContactForm(forms.ModelForm):
         return company
 
     def clean_email(self):
-        email = self.cleaned_data.get('email', '').strip().lower()
+        email = normalise_email(self.cleaned_data.get('email', ''))
         error, _ = check_email(email)
         if error:
             raise forms.ValidationError(error)

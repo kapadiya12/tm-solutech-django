@@ -129,6 +129,7 @@ def contact_page(request):
         'phone_countries': countries(),
         'service_icons': {c.name: c.icon for c in ServiceCategory.objects.filter(is_active=True).only('name', 'icon')},
         'contact_socials': [s for s in SocialLink.objects.filter(is_active=True, show_on_contact=True)],
+        'team': __import__('core.models', fromlist=['Leadership']).Leadership.objects.filter(is_active=True).exclude(photo='')[:5],
         'message_min': MESSAGE_MIN,
         'message_max': MESSAGE_MAX,
         'page_title': 'Contact Us',

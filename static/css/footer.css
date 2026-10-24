@@ -10,7 +10,7 @@
 /* Flowing spectrum rule along the top edge */
 .sf::before {
     content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; z-index: 3;
-    background: linear-gradient(90deg, #4FCFFF, #0AAEE0, #1F2430, #9BC73B, #FDC943, #E57E27, #4FCFFF);
+    background: linear-gradient(90deg, #4FCFFF, #0AAEE0, #173E6E, #9BC73B, #FDC943, #E57E27, #4FCFFF);
     background-size: 200% 100%;
     animation: sf-flow 8s linear infinite;
 }
@@ -109,7 +109,7 @@
 .sf-btn-primary:hover::before { left: 120%; }
 .sf-btn-primary:hover { transform: translateY(-3px); box-shadow: 0 24px 50px -18px rgba(10, 174, 224, 0.9); color: #ffffff; }
 .sf-btn-icon {
-    width: 40px; height: 40px; border-radius: 50%; background: #ffffff; color: #1F2430;
+    width: 40px; height: 40px; border-radius: 50%; background: #ffffff; color: #173E6E;
     display: inline-flex; align-items: center; justify-content: center;
     transition: transform 0.4s var(--ease-premium);
 }

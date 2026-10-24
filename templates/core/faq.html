@@ -11,7 +11,8 @@
 {% endblock %}
 
 {% block content %}
-<section class="fq-hero">
+<section class="fq-hero{% if page_banner %} has-visual{% endif %}">
+    {% include 'includes/hero_visual.html' %}
     <div class="fq-hero-glow" aria-hidden="true"></div>
     <div class="container">
         <ul class="breadcrumb-list">

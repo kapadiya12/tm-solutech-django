@@ -1434,6 +1434,34 @@ def assistant_chat_view(request, pk):
     return render(request, 'dashboard/assistant/chat_view.html', {'chat': chat, 'page_title': 'Conversation'})
 
 
+# ---- Page banners ----
+@login_required
+@staff_required
+def banner_list(request):
+    from core.models import PageBanner
+    have = {b.page: b for b in PageBanner.objects.all()}
+    rows = [(key, label, have.get(key)) for key, label in PageBanner.PAGE_CHOICES]
+    return render(request, 'dashboard/banners/list.html', {'rows': rows, 'page_title': 'Page Banners'})
+
+
+@login_required
+@staff_required
+def banner_edit(request, page):
+    from core.models import PageBanner
+    from dashboard.forms import PageBannerForm
+    instance = PageBanner.objects.filter(page=page).first()
+    form = PageBannerForm(request.POST or None, request.FILES or None, instance=instance, initial={'page': page})
+    form.fields['page'].disabled = True
+    if request.method == 'POST' and form.is_valid():
+        obj = form.save(commit=False)
+        obj.page = page
+        obj.save()
+        messages.success(request, f'Banner for “{obj}” saved.')
+        return redirect('dashboard:banner_list')
+    return render(request, 'dashboard/banners/form.html', {
+        'form': form, 'obj': instance, 'label': dict(PageBanner.PAGE_CHOICES).get(page, page), 'page_title': 'Edit Page Banner'})
+
+
 # ---- Capability CRUD ----
 @login_required
 @staff_required

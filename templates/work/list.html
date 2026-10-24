@@ -6,7 +6,8 @@
 {% block extra_css %}<link rel="stylesheet" href="{% static_v 'css/insights.css' %}"><link rel="stylesheet" href="{% static_v 'css/work.css' %}">{% endblock %}
 
 {% block content %}
-<section class="ins-hero wk-hero">
+<section class="ins-hero wk-hero{% if page_banner %} has-visual{% endif %}">
+    {% include 'includes/hero_visual.html' %}
     <div class="ins-hero-glow" aria-hidden="true"></div>
     <div class="container">
         <ul class="breadcrumb-list">

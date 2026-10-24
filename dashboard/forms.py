@@ -856,3 +856,16 @@ class TrainedAnswerForm(FormStyleMixin, forms.ModelForm):
             'question': 'Write it the way a visitor would ask. Similar questions get the same answer.',
             'answer': 'The exact, correct answer. Keep it short and factual; links like /contact/ work.',
         }
+
+
+class PageBannerForm(FormStyleMixin, forms.ModelForm):
+    class Meta:
+        from core.models import PageBanner
+        model = PageBanner
+        fields = ['page', 'image', 'badge_1', 'badge_2', 'is_active']
+        help_texts = {
+            'image': 'Landscape photo, at least 1200×900. Shown framed on the right of the page banner.',
+            'badge_1': 'Short text on the floating card (optional).',
+            'badge_2': 'Short text on the second floating card (optional).',
+        }
+        widgets = {'image': forms.FileInput(attrs={'accept': 'image/jpeg,image/png,image/webp'})}

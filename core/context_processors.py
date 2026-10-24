@@ -24,3 +24,27 @@ def social_links(request):
         return {'social_links': list(SocialLink.objects.filter(is_active=True))}
     except Exception:
         return {'social_links': []}
+
+
+BANNER_KEYS = {
+    'contact': 'contact', 'why_us': 'why-us', 'about': 'about', 'leadership': 'leadership', 'clients': 'clients',
+    'industry_list': 'industries', 'industry_detail': 'industries', 'faqs': 'faqs', 'post_list': 'insights',
+    'search': 'default',
+}
+
+
+def page_banner(request):
+    """The banner photo for the current page (Admin → Page Banners)."""
+    match = getattr(request, 'resolver_match', None)
+    if not match or request.path.startswith(('/admin-dashboard/', '/admin/', '/accounts/')):
+        return {}
+    key = BANNER_KEYS.get(match.url_name)
+    if match.app_name == 'work' and match.url_name == 'list':
+        key = 'work'
+    elif match.app_name == 'cms':
+        key = match.kwargs.get('slug') or 'default'
+    if not key:
+        return {}
+    from .models import PageBanner
+    banners = {b.page: b for b in PageBanner.objects.filter(is_active=True, page__in=[key, 'default'])}
+    return {'page_banner': banners.get(key) or banners.get('default')}

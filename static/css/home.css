@@ -13,7 +13,7 @@
     flex-direction: column;
     min-height: clamp(640px, 94vh, 900px);
     padding: calc(var(--nav-height) + 3.5rem) 0 calc(64px + 2.25rem);
-    background: #0B0D12;
+    background: #061A33;
     color: #ffffff;
     overflow: hidden;
 }
@@ -45,7 +45,7 @@
         radial-gradient(45% 55% at 78% 30%, rgba(10, 12, 16, 0.5) 0%, transparent 70%),
         radial-gradient(35% 45% at 92% 80%, rgba(155, 199, 59, 0.35) 0%, transparent 70%),
         radial-gradient(30% 40% at 60% 95%, rgba(244, 162, 30, 0.3) 0%, transparent 70%),
-        linear-gradient(135deg, #12151C 0%, #161A22 50%, #262B36 100%);
+        linear-gradient(135deg, #0A2444 0%, #0D2B50 50%, #262B36 100%);
 }
 .hc-backdrop-design::after {
     content: '';
@@ -101,7 +101,7 @@
 .hc-slide.is-active { visibility: visible; pointer-events: auto; }
 
 /* Per-slide accent (eyebrow dot, highlight gradient, primary button) */
-.hc-accent-blue   { --hc-a1: var(--tm-sky);    --hc-a2: var(--tm-green);       --hc-btn1: #343B4A;  --hc-btn2: #0F1218; }
+.hc-accent-blue   { --hc-a1: var(--tm-sky);    --hc-a2: var(--tm-green);       --hc-btn1: #1E8FD0;  --hc-btn2: #16508E; }
 .hc-accent-green  { --hc-a1: var(--tm-green);  --hc-a2: var(--tm-yellow);      --hc-btn1: var(--tm-green);  --hc-btn2: var(--tm-green-dark); }
 .hc-accent-orange { --hc-a1: var(--tm-yellow); --hc-a2: var(--tm-orange-dark); --hc-btn1: var(--tm-orange); --hc-btn2: var(--tm-orange-dark); }
 
@@ -408,7 +408,7 @@
 /* Brand accent that draws across the top of the text block on hover */
 .lp-body::before {
     content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-    background: linear-gradient(90deg, #0AAEE0, #2A303C, #9BC73B, #F4A21E);
+    background: linear-gradient(90deg, #0AAEE0, #1E75B0, #9BC73B, #F4A21E);
     transform: scaleX(0); transform-origin: left; transition: transform 0.6s var(--ease-premium);
 }
 .lp-card:hover .lp-body::before { transform: scaleX(1); }
@@ -428,7 +428,7 @@
 .lp-seg::before { content: ''; position: absolute; inset: -10px 0; } /* bigger hit area */
 .lp-seg span {
     position: absolute; inset: 0; border-radius: inherit; transform-origin: left; transform: scaleX(0);
-    background: linear-gradient(90deg, #0AAEE0, #2A303C, #9BC73B);
+    background: linear-gradient(90deg, #0AAEE0, #1E75B0, #9BC73B);
 }
 .lp-seg.is-done span { transform: scaleX(1); opacity: 0.35; }
 .lp-seg.is-active span { animation: lp-fill var(--lp-interval, 4s) linear forwards; }

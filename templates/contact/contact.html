@@ -5,7 +5,8 @@
 
 {% block content %}
 {% with phone=site_settings.phone|default:'+91 79 4771 7070' email=site_settings.email|default:'info@tmsolutech.com' address=site_settings.address|default:'805/806 Aditya Building, Near Mithakhali Six Roads, Ellisbridge, Ahmedabad, Gujarat 380006' %}
-<div class="page-hero">
+<div class="page-hero{% if page_banner %} has-visual{% endif %}">
+    {% include 'includes/hero_visual.html' %}
     <div class="hero-orb hero-orb-1"></div>
     <div class="hero-orb hero-orb-2"></div>
     <div class="container">
@@ -82,7 +83,7 @@
                                 {% endif %}
                             {% endfor %}
                         </select>
-                        <label for="id_service" class="cf-label">Service of interest</label>
+                        <label for="id_service" class="cf-label">Service of interest <span class="cf-req" aria-hidden="true">*</span></label>
                         <i class="fas fa-chevron-down cf-select-caret" aria-hidden="true"></i>
                         <p class="cf-error" id="err_service">{{ form.service.errors.0 }}</p>
                     </div>
@@ -144,7 +145,14 @@
                 {% if cp.reply_title or cp.reply_time %}
                 <div class="cf-promise animate-on-scroll">
                     <div class="cf-promise-glow" aria-hidden="true"></div>
-                    <span class="cf-promise-icon" aria-hidden="true"><i class="fas fa-reply"></i></span>
+                    <div class="cf-promise-top">
+                        <span class="cf-promise-icon" aria-hidden="true"><i class="fas fa-reply"></i></span>
+                        {% if team %}
+                        <div class="cf-team" aria-label="Our leadership team">
+                            <span class="cf-team-faces">{% for m in team %}<img src="{{ m.photo.url }}" alt="{{ m.name }}" title="{{ m.name }}">{% endfor %}</span>
+                        </div>
+                        {% endif %}
+                    </div>
                     <h3>{{ cp.reply_title }} {% if cp.reply_time %}<span>{{ cp.reply_time }}</span>{% endif %}</h3>
                     {% if cp.reply_text %}<p>{{ cp.reply_text }}</p>{% endif %}
                     {% if cp.reply_steps %}

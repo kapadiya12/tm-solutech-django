@@ -1,0 +1,13 @@
+{% if page_banner %}
+<span class="hv-bg" aria-hidden="true" style="background-image: url('{{ page_banner.image.url }}')"></span>
+<div class="hv" aria-hidden="true" data-tilt-hv>
+    <div class="hv-frame">
+        <img src="{{ page_banner.image.url }}" alt="" fetchpriority="high">
+        <span class="hv-shine"></span>
+    </div>
+    <span class="hv-ring"></span>
+    {% if page_banner.badge_1 %}<span class="hv-badge hv-badge-a"><i class="fas fa-award"></i> {{ page_banner.badge_1 }}</span>{% endif %}
+    {% if page_banner.badge_2 %}<span class="hv-badge hv-badge-b"><i class="fas fa-shield-halved"></i> {{ page_banner.badge_2 }}</span>{% endif %}
+    <span class="hv-dots"></span>
+</div>
+{% endif %}

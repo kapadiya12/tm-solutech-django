@@ -247,7 +247,7 @@
     const shownKey = 'tmAi.nudgeShown';
     let shownCount = 0;
     try { shownCount = parseInt(sessionStorage.getItem(shownKey) || '0', 10); } catch (e) { /* ignore */ }
-    if (nudge && nudges.length && !state.turns.length && shownCount < 2) {
+    if (nudge && nudges.length && !state.turns.length && shownCount < 3) {
         const pageName = h1 || 'this page';
         let pool = nudges.filter((n) => !n.includes('{page}') || h1);
         const msg = pool[Math.floor(Math.random() * pool.length)].replace('{page}', pageName);
@@ -270,5 +270,58 @@
             open();
             if (chip) send(chip.dataset.q);
         });
+    }
+    // ---- Section-aware tips: as visitors scroll and pause on a section, Tima offers help about it
+    const TOPICS = [
+        [/industr|sector/i, 'Wondering if we work in your industry?', ['Do you work with my industry?', 'How do you help banks and BFSI?']],
+        [/servic|solution|what we/i, 'Exploring our services? I can point you to the right one.', ['Which service fits my business?', 'What does Managed IT include?']],
+        [/leader|team|director/i, 'Want to know who leads TM Solutech?', ['Who leads TM Solutech?', 'How long has the company been around?']],
+        [/client|trusted|partner|brand/i, 'Curious who we work with?', ['Which brands do you work with?', 'Who are your clients?']],
+        [/insight|article|blog|news/i, 'Want the short version of our latest insights?', ['Summarise your latest articles', 'Explain SEBI CSCRF simply']],
+        [/why|different|choose|heritage/i, 'Comparing IT partners? Here is what sets us apart.', ['Why choose TM Solutech?', 'Do you provide 24/7 support?']],
+        [/capabilit|technolog|stack/i, 'Need the full picture of our capabilities?', ['What can you manage end to end?', 'Do you support cloud and on-premise?']],
+        [/process|how we work|deliver/i, 'Questions about how we deliver?', ['How long does a typical project take?', 'What happens after I enquire?']],
+        [/faq|question/i, "Can't find your answer? Just ask me.", ['How is pricing structured?', 'How quickly can you start?']],
+        [/contact|touch|consult/i, 'I can pass your details to the team right now.', ['I want a free consultation', 'Call me back today']],
+    ];
+    const tipKey = 'tmAi.tips';
+    let tipsOff = false;
+    try { tipsOff = sessionStorage.getItem(tipKey) === 'off'; } catch (e) { /* ignore */ }
+    if (nudge && !tipsOff && 'IntersectionObserver' in window) {
+        const seen = new Set();
+        let lastTip = Date.now(), tipCount = 0, dwell = null;
+        const showTip = (msg, qs) => {
+            if (!panel.hidden || busy || tipCount >= 4 || Date.now() - lastTip < 20000) return false;
+            nudge.querySelector('.tm-ai-nudge-text').textContent = msg;
+            const box = nudge.querySelector('.tm-ai-nudge-chips');
+            box.innerHTML = '';
+            qs.forEach((q) => { const b = document.createElement('button'); b.type = 'button'; b.dataset.q = q; b.textContent = q; box.appendChild(b); });
+            nudge.classList.remove('is-leaving');
+            nudge.hidden = false;
+            root.classList.add('is-waving'); setTimeout(() => root.classList.remove('is-waving'), 1900);
+            lastTip = Date.now(); tipCount++;
+            return true;
+            clearTimeout(nudge._hide);
+            nudge._hide = setTimeout(() => { nudge.classList.add('is-leaving'); setTimeout(() => { nudge.hidden = true; nudge.classList.remove('is-leaving'); }, 400); }, 12000);
+        };
+        const heads = Array.from(document.querySelectorAll('main h2, section h2')).filter((h) => !h.closest('.tm-ai'));
+        const io = new IntersectionObserver((entries) => {
+            entries.forEach((en) => {
+                if (!en.isIntersecting) return;
+                const text = en.target.textContent.trim();
+                const topic = TOPICS.find(([re]) => re.test(text) || re.test(en.target.closest('section')?.className || ''));
+                if (!topic || seen.has(topic[1])) return;
+                clearTimeout(dwell);
+                dwell = setTimeout(() => {          // only if the visitor actually pauses here
+                    const r = en.target.getBoundingClientRect();
+                    if (r.top < 0 || r.top > window.innerHeight * 0.8) return;
+                    if (showTip(topic[1], topic[2])) seen.add(topic[1]);
+                }, 2500);
+            });
+        }, { rootMargin: '-15% 0px -35% 0px' });
+        heads.forEach((h) => io.observe(h));
+        nudge.querySelector('.tm-ai-nudge-x').addEventListener('click', () => { try { sessionStorage.setItem(tipKey, 'off'); } catch (e) { /* ignore */ } tipCount = 99; });
+        // the welcome pop-up counts as the first tip
+        lastTip = Date.now() - 20000 + (parseInt(root.dataset.nudgeDelay, 10) || 8) * 1000 + 15000;
     }
 })();
