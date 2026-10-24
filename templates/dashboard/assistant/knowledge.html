@@ -1,0 +1,8 @@
+{% extends 'dashboard/base.html' %}
+{% block dashboard_content %}
+<div class="ed-head"><div class="ed-head-text">
+    <a href="{% url 'dashboard:assistant_settings' %}" class="ed-back"><i class="fas fa-arrow-left"></i> Assistant settings</a>
+    <p class="ed-url">Everything the assistant reads before answering ({{ words }} words). It is rebuilt from the website automatically every few minutes.</p>
+</div></div>
+<pre class="aa-knowledge">{{ text }}</pre>
+{% endblock %}

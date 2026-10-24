@@ -212,6 +212,7 @@ def service_create(request):
             last = Service.objects.filter(category=service.category).order_by('-display_order').values_list('display_order', flat=True).first()
             service.display_order = (last or 0) + 1
             service.save()
+            form.save_m2m()
             messages.success(request, f'"{service.title}" created. Its page is live at {service.get_absolute_url()}')
             return _after_save(request, service, 'dashboard:service_list', 'dashboard:service_edit')
         messages.error(request, 'Please fix the highlighted fields.')
@@ -234,6 +235,7 @@ def service_edit(request, pk):
                 last = Service.objects.filter(category_id=service.category_id).exclude(pk=service.pk).order_by('-display_order').values_list('display_order', flat=True).first()
                 service.display_order = (last or 0) + 1
             service.save()
+            form.save_m2m()
             messages.success(request, f'"{service.title}" saved.')
             return _after_save(request, service, 'dashboard:service_list', 'dashboard:service_edit')
         messages.error(request, 'Please fix the highlighted fields.')
@@ -275,6 +277,7 @@ def category_create(request):
             last = ServiceCategory.objects.order_by('-display_order').values_list('display_order', flat=True).first()
             category.display_order = (last or 0) + 1
             category.save()
+            form.save_m2m()
             messages.success(request, f'Category "{category.name}" created. Now add services to it.')
             return _after_save(request, category, 'dashboard:category_list', 'dashboard:category_edit')
         messages.error(request, 'Please fix the highlighted fields.')
@@ -1188,6 +1191,247 @@ def work_delete(request, pk):
         case.delete()
         messages.success(request, f'“{title}” deleted.')
     return redirect('dashboard:work_list')
+
+
+# ---- Partners, certifications, service page settings ----
+def _simple_save(request, form_class, template, list_url, noun, instance=None, extra=None):
+    form = form_class(request.POST or None, request.FILES or None, instance=instance)
+    if request.method == 'POST' and form.is_valid():
+        obj = form.save()
+        messages.success(request, f'{noun} “{obj}” {"updated" if instance else "added"}.')
+        return redirect(list_url)
+    ctx = {'form': form, 'obj': instance, 'page_title': f'{"Edit" if instance else "Add"} {noun.lower()}'}
+    ctx.update(extra or {})
+    return render(request, template, ctx)
+
+
+@login_required
+@staff_required
+def partner_list(request):
+    from core.models import Partner
+    partners = Partner.objects.annotate(n_services=Count('services', distinct=True), n_areas=Count('service_categories', distinct=True))
+    return render(request, 'dashboard/partners/list.html', {
+        'partners': partners, 'live': sum(1 for p in partners if p.is_active), 'page_title': 'Technology Partners'})
+
+
+@login_required
+@staff_required
+def partner_create(request):
+    from dashboard.forms import PartnerForm
+    return _simple_save(request, PartnerForm, 'dashboard/partners/form.html', 'dashboard:partner_list', 'Partner')
+
+
+@login_required
+@staff_required
+def partner_edit(request, pk):
+    from core.models import Partner
+    from dashboard.forms import PartnerForm
+    return _simple_save(request, PartnerForm, 'dashboard/partners/form.html', 'dashboard:partner_list', 'Partner',
+                        get_object_or_404(Partner, pk=pk))
+
+
+@login_required
+@staff_required
+def partner_delete(request, pk):
+    from core.models import Partner
+    obj = get_object_or_404(Partner, pk=pk)
+    if request.method == 'POST':
+        name = obj.name
+        obj.delete()
+        messages.success(request, f'Partner “{name}” deleted.')
+    return redirect('dashboard:partner_list')
+
+
+@login_required
+@staff_required
+def certification_list(request):
+    from core.models import Certification
+    return render(request, 'dashboard/certifications/list.html', {
+        'certs': Certification.objects.all(), 'page_title': 'Certifications'})
+
+
+@login_required
+@staff_required
+def certification_create(request):
+    from dashboard.forms import CertificationForm
+    return _simple_save(request, CertificationForm, 'dashboard/certifications/form.html', 'dashboard:certification_list', 'Certification')
+
+
+@login_required
+@staff_required
+def certification_edit(request, pk):
+    from core.models import Certification
+    from dashboard.forms import CertificationForm
+    return _simple_save(request, CertificationForm, 'dashboard/certifications/form.html', 'dashboard:certification_list',
+                        'Certification', get_object_or_404(Certification, pk=pk))
+
+
+@login_required
+@staff_required
+def certification_delete(request, pk):
+    from core.models import Certification
+    obj = get_object_or_404(Certification, pk=pk)
+    if request.method == 'POST':
+        name = obj.name
+        obj.delete()
+        messages.success(request, f'Certification “{name}” deleted.')
+    return redirect('dashboard:certification_list')
+
+
+@login_required
+@staff_required
+def service_page_settings(request):
+    from services.models import ServicePageSettings
+    from dashboard.forms import ServicePageSettingsForm
+    obj = ServicePageSettings.load()
+    form = ServicePageSettingsForm(request.POST or None, instance=obj)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        messages.success(request, 'Service page layout saved.')
+        return redirect('dashboard:service_page_settings')
+    sample = Service.objects.filter(is_active=True).select_related('category').first()
+    return render(request, 'dashboard/services/page_settings.html', {
+        'form': form, 'sample': sample, 'page_title': 'Service Page Layout'})
+
+
+# ---- AI assistant ----
+@login_required
+@staff_required
+def assistant_settings(request):
+    from assistant.models import AssistantSettings, Conversation, TrainedAnswer
+    from dashboard.forms import AssistantSettingsForm
+    cfg = AssistantSettings.get()
+    form = AssistantSettingsForm(request.POST or None, instance=cfg)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        messages.success(request, 'AI assistant settings saved.')
+        return redirect('dashboard:assistant_settings')
+    today = timezone.localdate()
+    return render(request, 'dashboard/assistant/settings.html', {
+        'form': form, 'cfg': cfg,
+        'stats': {
+            'chats': Conversation.objects.count(),
+            'today': Conversation.objects.filter(created_at__date=today).count(),
+            'leads': Conversation.objects.filter(lead__isnull=False).count(),
+            'unread': Conversation.objects.filter(is_read=False).count(),
+            'trained': TrainedAnswer.objects.filter(is_active=True).count(),
+        },
+        'key_source': 'admin' if cfg.gemini_key else ('server' if cfg.key else ''),
+        'page_title': 'AI Assistant',
+    })
+
+
+@login_required
+@staff_required
+def assistant_knowledge(request):
+    from assistant.knowledge import CACHE_KEY, build_system
+    from assistant.models import AssistantSettings
+    from django.core.cache import cache
+    cache.delete(CACHE_KEY)   # always show the latest
+    text = build_system(AssistantSettings.get())
+    return render(request, 'dashboard/assistant/knowledge.html', {
+        'text': text, 'words': len(text.split()), 'page_title': 'What the assistant knows'})
+
+
+@login_required
+@staff_required
+def assistant_test(request):
+    """POST JSON {message, history}: try the assistant from the dashboard without saving a conversation."""
+    from assistant.ai import AIError, generate
+    from assistant.knowledge import build_system, split_suggestions
+    from assistant.models import AssistantSettings
+    if request.method != 'POST':
+        return JsonResponse({'ok': False}, status=405)
+    cfg = AssistantSettings.get()
+    try:
+        data = json.loads(request.body)
+    except ValueError:
+        return JsonResponse({'ok': False}, status=400)
+    history = [h for h in data.get('history', []) if h.get('role') in ('user', 'model')][-12:]
+    history.append({'role': 'user', 'text': str(data.get('message', ''))[:1200]})
+    if not cfg.key:
+        return JsonResponse({'ok': False, 'reply': 'No Gemini API key is set.'})
+    try:
+        raw, model = generate(cfg, build_system(cfg), history)
+    except AIError as e:
+        return JsonResponse({'ok': False, 'reply': f'The AI could not be reached ({e}).'})
+    reply, suggestions, _lead = split_suggestions(raw)
+    return JsonResponse({'ok': True, 'reply': reply, 'suggestions': suggestions, 'model': model})
+
+
+@login_required
+@staff_required
+def assistant_answers(request):
+    from assistant.models import TrainedAnswer
+    return render(request, 'dashboard/assistant/answers.html', {
+        'answers': TrainedAnswer.objects.all(), 'page_title': 'Trained Answers'})
+
+
+def _answer_save(request, instance=None):
+    from dashboard.forms import TrainedAnswerForm
+    form = TrainedAnswerForm(request.POST or None, instance=instance)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        from assistant.knowledge import CACHE_KEY
+        from django.core.cache import cache
+        cache.delete(CACHE_KEY)
+        messages.success(request, 'Answer saved. The assistant uses it from the next message.')
+        return redirect('dashboard:assistant_answers')
+    return render(request, 'dashboard/assistant/answer_form.html', {
+        'form': form, 'obj': instance, 'page_title': 'Edit answer' if instance else 'Teach an answer'})
+
+
+@login_required
+@staff_required
+def assistant_answer_create(request):
+    return _answer_save(request)
+
+
+@login_required
+@staff_required
+def assistant_answer_edit(request, pk):
+    from assistant.models import TrainedAnswer
+    return _answer_save(request, get_object_or_404(TrainedAnswer, pk=pk))
+
+
+@login_required
+@staff_required
+def assistant_answer_delete(request, pk):
+    from assistant.models import TrainedAnswer
+    obj = get_object_or_404(TrainedAnswer, pk=pk)
+    if request.method == 'POST':
+        obj.delete()
+        messages.success(request, 'Answer deleted.')
+    return redirect('dashboard:assistant_answers')
+
+
+@login_required
+@staff_required
+def assistant_chats(request):
+    from assistant.models import Conversation
+    chats = Conversation.objects.select_related('lead')
+    f = request.GET.get('filter', '')
+    if f == 'leads':
+        chats = chats.filter(lead__isnull=False)
+    elif f == 'unread':
+        chats = chats.filter(is_read=False)
+    return render(request, 'dashboard/assistant/chats.html', {
+        'chats': chats[:200], 'filter': f, 'page_title': 'Assistant Chats'})
+
+
+@login_required
+@staff_required
+def assistant_chat_view(request, pk):
+    from assistant.models import Conversation
+    chat = get_object_or_404(Conversation.objects.select_related('lead'), pk=pk)
+    if request.method == 'POST' and request.POST.get('action') == 'delete':
+        chat.delete()
+        messages.success(request, 'Conversation deleted.')
+        return redirect('dashboard:assistant_chats')
+    if not chat.is_read:
+        chat.is_read = True
+        chat.save(update_fields=['is_read'])
+    return render(request, 'dashboard/assistant/chat_view.html', {'chat': chat, 'page_title': 'Conversation'})
 
 
 # ---- Capability CRUD ----

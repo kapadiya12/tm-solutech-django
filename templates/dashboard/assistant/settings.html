@@ -1,0 +1,102 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/blog-admin.css' %}"><link rel="stylesheet" href="{% static 'css/assistant.css' %}">{% endblock %}
+{% block dashboard_content %}
+<div class="bl-head">
+    <p>{{ cfg.name }} answers visitors using everything on the website (services, FAQs, industries, team, articles), plus your trained answers. Edit the site and {{ cfg.name }} learns it automatically.</p>
+    <div class="flex gap-2">
+        <a href="{% url 'dashboard:assistant_knowledge' %}" class="btn btn-secondary btn-sm"><i class="fas fa-brain"></i> What {{ cfg.name }} knows</a>
+        <a href="{% url 'dashboard:assistant_answers' %}" class="btn btn-primary btn-sm"><i class="fas fa-graduation-cap"></i> Teach an answer</a>
+    </div>
+</div>
+<div class="bl-stats">
+    <div class="bl-stat {% if cfg.ready and cfg.enabled %}bl-c-green{% else %}bl-c-orange{% endif %}"><span class="bl-ic"><i class="fas fa-power-off"></i></span><span><strong>{% if not cfg.enabled %}Off{% elif cfg.ready %}Live{% else %}No key{% endif %}</strong>{% if key_source == 'server' %}Key from server{% elif key_source %}Key set here{% else %}Add a Gemini key{% endif %}</span></div>
+    <a href="{% url 'dashboard:assistant_chats' %}" class="bl-stat"><span class="bl-ic"><i class="fas fa-comments"></i></span><span><strong>{{ stats.chats }}</strong>Chats ({{ stats.today }} today)</span></a>
+    <a href="{% url 'dashboard:assistant_chats' %}?filter=unread" class="bl-stat bl-c-blue"><span class="bl-ic"><i class="fas fa-envelope-open"></i></span><span><strong>{{ stats.unread }}</strong>Unread chats</span></a>
+    <a href="{% url 'dashboard:assistant_chats' %}?filter=leads" class="bl-stat bl-c-green"><span class="bl-ic"><i class="fas fa-user-check"></i></span><span><strong>{{ stats.leads }}</strong>Leads collected</span></a>
+    <a href="{% url 'dashboard:assistant_answers' %}" class="bl-stat bl-c-dark"><span class="bl-ic"><i class="fas fa-graduation-cap"></i></span><span><strong>{{ stats.trained }}</strong>Trained answers</span></a>
+</div>
+
+<form method="post" class="ed ed-seo" data-guard novalidate>
+    {% csrf_token %}
+    {% if form.errors %}<div class="ed-alert"><i class="fas fa-circle-exclamation"></i> Some fields need your attention.</div>{% endif %}
+    <nav class="ed-nav" data-section-nav>
+        <span class="ed-nav-title">Sections</span>
+        <a href="#s-basic"><span class="ed-nav-dot"></span> Identity</a>
+        <a href="#s-talk"><span class="ed-nav-dot"></span> Conversation</a>
+        <a href="#s-pop"><span class="ed-nav-dot"></span> Pop-ups</a>
+        <a href="#s-know"><span class="ed-nav-dot"></span> Knowledge</a>
+        <a href="#s-ai"><span class="ed-nav-dot"></span> AI &amp; limits</a>
+    </nav>
+    <div class="ed-main">
+        <section class="ed-card" id="s-basic" data-section>
+            <header class="ed-card-head"><span class="ed-card-num">1</span><div><h3>Identity</h3><p>Name, launcher and where it sits.</p></div></header>
+            <div class="ed-toggles">{% include 'dashboard/partials/field.html' with field=form.enabled %}{% include 'dashboard/partials/field.html' with field=form.show_on_phones %}</div>
+            <div class="ed-grid-2">{% include 'dashboard/partials/field.html' with field=form.name %}{% include 'dashboard/partials/field.html' with field=form.launcher_label %}</div>
+            <div class="ed-grid-2">{% include 'dashboard/partials/field.html' with field=form.tagline %}{% include 'dashboard/partials/field.html' with field=form.position %}</div>
+        </section>
+        <section class="ed-card" id="s-talk" data-section>
+            <header class="ed-card-head"><span class="ed-card-num">2</span><div><h3>Conversation</h3><p>What visitors see when they open the chat.</p></div></header>
+            {% include 'dashboard/partials/field.html' with field=form.greeting %}
+            {% include 'dashboard/partials/field.html' with field=form.quick_replies %}
+            <div class="ed-toggles">{% include 'dashboard/partials/field.html' with field=form.page_suggestions %}{% include 'dashboard/partials/field.html' with field=form.show_suggestions %}</div>
+            <div class="ed-toggles">{% include 'dashboard/partials/field.html' with field=form.collect_leads %}</div>
+            {% include 'dashboard/partials/field.html' with field=form.placeholder %}
+            {% include 'dashboard/partials/field.html' with field=form.footer_note %}
+        </section>
+        <section class="ed-card" id="s-pop" data-section>
+            <header class="ed-card-head"><span class="ed-card-num">3</span><div><h3>Pop-ups</h3><p>The speech bubble that greets visitors (max twice per visit).</p></div></header>
+            <div class="ed-toggles">{% include 'dashboard/partials/field.html' with field=form.show_nudge %}</div>
+            {% include 'dashboard/partials/field.html' with field=form.nudge_text %}
+            {% include 'dashboard/partials/field.html' with field=form.nudge_delay %}
+        </section>
+        <section class="ed-card" id="s-know" data-section>
+            <header class="ed-card-head"><span class="ed-card-num">4</span><div><h3>Knowledge &amp; personality</h3><p>The website is learned automatically. Add anything extra here, or <a href="{% url 'dashboard:assistant_answers' %}">teach exact answers</a>.</p></div></header>
+            {% include 'dashboard/partials/field.html' with field=form.personality %}
+            {% include 'dashboard/partials/field.html' with field=form.extra_knowledge %}
+        </section>
+        <section class="ed-card" id="s-ai" data-section>
+            <header class="ed-card-head"><span class="ed-card-num">5</span><div><h3>AI &amp; limits</h3><p>Google Gemini settings and safety caps.</p></div></header>
+            {% include 'dashboard/partials/field.html' with field=form.gemini_key %}
+            <div class="ed-grid-2">{% include 'dashboard/partials/field.html' with field=form.model %}{% include 'dashboard/partials/field.html' with field=form.backup_model %}</div>
+            <div class="ed-grid-2">{% include 'dashboard/partials/field.html' with field=form.temperature %}{% include 'dashboard/partials/field.html' with field=form.history_turns %}</div>
+            <div class="ed-grid-2">{% include 'dashboard/partials/field.html' with field=form.max_messages %}{% include 'dashboard/partials/field.html' with field=form.daily_limit %}</div>
+            {% include 'dashboard/partials/field.html' with field=form.busy_message %}
+            {% include 'dashboard/partials/field.html' with field=form.limit_message %}
+        </section>
+        <div class="ed-savebar"><span class="ed-savebar-hint"><i class="fas fa-circle-info"></i> Changes apply to the website immediately.</span>
+            <div class="ed-savebar-actions"><button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> Save settings</button></div></div>
+    </div>
+
+    <aside class="seo-panel aa-test" aria-label="Test the assistant">
+        <div class="aa-test-head"><span class="aa-test-avatar">{% include 'assistant/character.html' with uid='a' %}</span><div><strong>Test {{ cfg.name }}</strong><small>Try questions before visitors do. Not saved.</small></div></div>
+        <div class="aa-test-log" id="aaLog" data-lenis-prevent><div class="aa-m aa-bot">{{ cfg.greeting }}</div></div>
+        <div class="aa-test-form"><input type="text" id="aaIn" placeholder="Ask something…" maxlength="500"><button type="button" id="aaSend" class="btn btn-primary btn-sm"><i class="fas fa-arrow-up"></i></button></div>
+    </aside>
+</form>
+{% endblock %}
+{% block extra_js %}<script>
+(function () {
+    const log = document.getElementById('aaLog'), inp = document.getElementById('aaIn'), btn = document.getElementById('aaSend');
+    const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const hist = [];
+    const esc = (s) => s.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+    const fmt = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\[([^\]]+)\]\((\/[^)]*)\)/g, '<a href="$2" target="_blank">$1</a>').replace(/\n/g, '<br>');
+    function add(cls, html) { const d = document.createElement('div'); d.className = 'aa-m ' + cls; d.innerHTML = html; log.appendChild(d); log.scrollTop = log.scrollHeight; return d; }
+    async function ask(q) {
+        q = q.trim(); if (!q) return;
+        add('aa-user', esc(q)); inp.value = ''; btn.disabled = true;
+        const t = add('aa-bot', '<i class="fas fa-ellipsis fa-fade"></i>');
+        try {
+            const r = await fetch('{% url "dashboard:assistant_test" %}', { method: 'POST', headers: { 'X-CSRFToken': csrf, 'Content-Type': 'application/json' }, body: JSON.stringify({ message: q, history: hist }) });
+            const d = await r.json();
+            t.innerHTML = fmt(d.reply || 'No reply') + (d.model ? `<small class="aa-model">${d.model}</small>` : '');
+            if (d.suggestions && d.suggestions.length) { const s = add('aa-sugs', ''); d.suggestions.forEach((x) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = x; b.onclick = () => ask(x); s.appendChild(b); }); }
+            hist.push({ role: 'user', text: q }, { role: 'model', text: d.reply || '' });
+        } catch (e) { t.textContent = 'Could not reach the server.'; }
+        btn.disabled = false; inp.focus();
+    }
+    btn.addEventListener('click', () => ask(inp.value));
+    inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); ask(inp.value); } });
+})();
+</script>{% endblock %}

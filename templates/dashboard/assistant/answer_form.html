@@ -1,0 +1,20 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/blog-admin.css' %}">{% endblock %}
+{% block dashboard_content %}
+<div class="ed-head"><div class="ed-head-text"><a href="{% url 'dashboard:assistant_answers' %}" class="ed-back"><i class="fas fa-arrow-left"></i> Trained answers</a></div></div>
+<form method="post" class="ed bc-form bc-form-single" data-guard novalidate>
+    {% csrf_token %}
+    <div class="bc-form-main">
+        {% if form.errors %}<div class="ed-alert"><i class="fas fa-circle-exclamation"></i> Some fields need your attention.</div>{% endif %}
+        <section class="ed-card">
+            <header class="ed-card-head"><span class="ed-card-num">1</span><div><h3>Teach an answer</h3><p>Used before anything else when visitors ask this or something similar.</p></div></header>
+            {% include 'dashboard/partials/field.html' with field=form.question %}
+            {% include 'dashboard/partials/field.html' with field=form.answer %}
+            {% include 'dashboard/partials/field.html' with field=form.is_active %}
+        </section>
+        <div class="ed-savebar"><span class="ed-savebar-hint"><i class="fas fa-circle-info"></i> Used from the next message.</span>
+            <div class="ed-savebar-actions"><a href="{% url 'dashboard:assistant_answers' %}" class="btn btn-secondary">Cancel</a><button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> Save answer</button></div></div>
+    </div>
+</form>
+{% endblock %}

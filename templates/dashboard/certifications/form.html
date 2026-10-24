@@ -1,0 +1,30 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/blog-admin.css' %}">{% endblock %}
+{% block dashboard_content %}
+<div class="ed-head"><div class="ed-head-text">
+    <a href="{% url 'dashboard:certification_list' %}" class="ed-back"><i class="fas fa-arrow-left"></i> All certifications</a>
+    {% if obj %}<h2>{{ obj.name }}</h2>{% endif %}
+</div></div>
+<form method="post" enctype="multipart/form-data" class="ed bc-form bc-form-single" data-guard novalidate>
+    {% csrf_token %}
+    <div class="bc-form-main">
+        {% if form.errors %}<div class="ed-alert"><i class="fas fa-circle-exclamation"></i> Some fields need your attention.</div>{% endif %}
+        <section class="ed-card">
+            <header class="ed-card-head"><span class="ed-card-num">1</span><div><h3>Certification</h3><p>Shown as a badge on service pages.</p></div></header>
+            <div class="ed-grid-2">
+                {% include 'dashboard/partials/field.html' with field=form.name %}
+                {% include 'dashboard/partials/field.html' with field=form.title %}
+            </div>
+            {% include 'dashboard/partials/field.html' with field=form.description %}
+            {% include 'dashboard/partials/field.html' with field=form.icon %}
+            {% include 'dashboard/partials/field.html' with field=form.logo %}
+            {% include 'dashboard/partials/field.html' with field=form.display_order %}
+            {% include 'dashboard/partials/field.html' with field=form.is_active %}
+        </section>
+        <div class="ed-savebar"><span class="ed-savebar-hint"><i class="fas fa-circle-info"></i> Fields marked <span class="required">*</span> are required.</span>
+            <div class="ed-savebar-actions"><a href="{% url 'dashboard:certification_list' %}" class="btn btn-secondary">Cancel</a><button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> {% if obj %}Save changes{% else %}Add certification{% endif %}</button></div>
+        </div>
+    </div>
+</form>
+{% endblock %}

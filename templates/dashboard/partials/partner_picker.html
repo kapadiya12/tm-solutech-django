@@ -1,0 +1,21 @@
+{# Logo checkboxes for a partners ManyToMany field #}
+<div class="form-group pp-group">
+    <div class="form-label-row"><label class="form-label">{{ field.label }}</label><span class="pp-count" data-pp-count></span></div>
+    <div class="pp-grid" data-partner-picker>
+        {% for opt in field %}
+        <label class="pp-item">
+            {{ opt.tag }}
+            <span class="pp-card">
+                <span class="pp-check"><i class="fas fa-check"></i></span>
+                {% with p=opt.data.value.instance %}
+                {% if p.logo %}<img src="{{ p.logo.url }}" alt="">{% endif %}
+                <small>{{ opt.choice_label }}</small>
+                {% endwith %}
+            </span>
+        </label>
+        {% empty %}
+        <p class="form-help">No partners yet. <a href="{% url 'dashboard:partner_create' %}">Add a partner</a>.</p>
+        {% endfor %}
+    </div>
+    {% if field.help_text %}<p class="form-help">{{ field.help_text }} <a href="{% url 'dashboard:partner_list' %}" target="_blank" rel="noopener">Manage partners</a></p>{% endif %}
+</div>

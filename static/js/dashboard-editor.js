@@ -509,3 +509,10 @@
         document.querySelector('.form-group.has-error input, .form-group.has-error textarea, .form-group.has-error select')?.focus();
     });
 })();
+
+/* Partner picker: live "N selected" count */
+document.querySelectorAll('[data-partner-picker]').forEach((grid) => {
+    const out = grid.closest('.pp-group')?.querySelector('[data-pp-count]');
+    const sync = () => { if (out) { const n = grid.querySelectorAll('input:checked').length; out.textContent = n ? n + ' selected' : 'None selected'; } };
+    grid.addEventListener('change', sync); sync();
+});

@@ -1,0 +1,95 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/blog-admin.css' %}">{% endblock %}
+{% block dashboard_content %}
+
+<div class="ed-head">
+    <div class="ed-head-text">
+        <p class="ed-url">Headings, call-to-action and sections shared by every service page. Each service's own content is edited in <a href="{% url 'dashboard:service_list' %}">Services</a>.</p>
+    </div>
+    {% if sample %}<div class="ed-head-actions"><a href="{{ sample.get_absolute_url }}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-up-right-from-square"></i> Preview a service page</a></div>{% endif %}
+</div>
+
+<form method="post" class="ed" data-guard novalidate>
+    {% csrf_token %}
+    {% if form.errors %}<div class="ed-alert"><i class="fas fa-circle-exclamation"></i> Some fields need your attention.</div>{% endif %}
+
+    <nav class="ed-nav" data-section-nav aria-label="Form sections">
+        <span class="ed-nav-title">Sections</span>
+        <a href="#sec-show"><span class="ed-nav-dot"></span> Show / hide</a>
+        <a href="#sec-features"><span class="ed-nav-dot"></span> Features</a>
+        <a href="#sec-benefits"><span class="ed-nav-dot"></span> Benefits</a>
+        <a href="#sec-process"><span class="ed-nav-dot"></span> Process</a>
+        <a href="#sec-partners"><span class="ed-nav-dot"></span> Partners &amp; industries</a>
+        <a href="#sec-faq"><span class="ed-nav-dot"></span> FAQ &amp; related</a>
+        <a href="#sec-home"><span class="ed-nav-dot"></span> Company sections</a>
+        <a href="#sec-cta"><span class="ed-nav-dot"></span> Call to action</a>
+    </nav>
+
+    <div class="ed-main">
+        <section class="ed-card" id="sec-show" data-section>
+            <header class="ed-card-head"><span class="ed-card-num">1</span><div><h3>Show / hide sections</h3><p>Turn shared sections on or off across all service and service-area pages.</p></div></header>
+            <div class="ed-toggles">
+                {% include 'dashboard/partials/field.html' with field=form.show_stats %}
+                {% include 'dashboard/partials/field.html' with field=form.show_partners %}
+                {% include 'dashboard/partials/field.html' with field=form.show_industries %}
+                {% include 'dashboard/partials/field.html' with field=form.show_certifications %}
+                {% include 'dashboard/partials/field.html' with field=form.show_clients %}
+                {% include 'dashboard/partials/field.html' with field=form.show_why_us %}
+                {% include 'dashboard/partials/field.html' with field=form.show_capabilities %}
+                {% include 'dashboard/partials/field.html' with field=form.show_testimonials %}
+            </div>
+            <p class="form-help">The stats come from <a href="{% url 'dashboard:statistic_list' %}">Trust Bar Stats</a>, logos from <a href="{% url 'dashboard:partner_list' %}">Partners</a>, industries from <a href="{% url 'dashboard:industry_list' %}">Industries</a> badges from <a href="{% url 'dashboard:certification_list' %}">Certifications</a>, client logos from <a href="{% url 'dashboard:clientlogo_list' %}">Clients</a>, reasons from <a href="{% url 'dashboard:whyus_list' %}">Why Us</a>, and capabilities from <a href="{% url 'dashboard:capability_list' %}">Capabilities</a>.</p>
+        </section>
+
+        <section class="ed-card" id="sec-features" data-section>
+            <header class="ed-card-head"><span class="ed-card-num">2</span><div><h3>Key features heading</h3><p>Above each service's feature cards.</p></div></header>
+            <div class="ed-grid-2">{% include 'dashboard/partials/field.html' with field=form.features_badge %}{% include 'dashboard/partials/field.html' with field=form.features_title %}</div>
+            {% include 'dashboard/partials/field.html' with field=form.features_text %}
+        </section>
+        <section class="ed-card" id="sec-benefits" data-section>
+            <header class="ed-card-head"><span class="ed-card-num">3</span><div><h3>Benefits heading</h3><p>Beside the list of business benefits.</p></div></header>
+            <div class="ed-grid-2">{% include 'dashboard/partials/field.html' with field=form.benefits_badge %}{% include 'dashboard/partials/field.html' with field=form.benefits_title %}</div>
+            {% include 'dashboard/partials/field.html' with field=form.benefits_text %}
+        </section>
+        <section class="ed-card" id="sec-process" data-section>
+            <header class="ed-card-head"><span class="ed-card-num">4</span><div><h3>Process heading</h3><p>Above the animated delivery timeline.</p></div></header>
+            <div class="ed-grid-2">{% include 'dashboard/partials/field.html' with field=form.process_badge %}{% include 'dashboard/partials/field.html' with field=form.process_title %}</div>
+            {% include 'dashboard/partials/field.html' with field=form.process_text %}
+        </section>
+        <section class="ed-card" id="sec-partners" data-section>
+            <header class="ed-card-head"><span class="ed-card-num">5</span><div><h3>Partners &amp; industries headings</h3><p>Above the logo marquee and the industries carousel.</p></div></header>
+            <div class="ed-grid-2">{% include 'dashboard/partials/field.html' with field=form.partners_badge %}{% include 'dashboard/partials/field.html' with field=form.partners_title %}</div>
+            {% include 'dashboard/partials/field.html' with field=form.partners_text %}
+            <div class="ed-grid-2">{% include 'dashboard/partials/field.html' with field=form.industries_badge %}{% include 'dashboard/partials/field.html' with field=form.industries_title %}</div>
+            {% include 'dashboard/partials/field.html' with field=form.industries_text %}
+        </section>
+        <section class="ed-card" id="sec-faq" data-section>
+            <header class="ed-card-head"><span class="ed-card-num">6</span><div><h3>FAQ &amp; related services headings</h3></div></header>
+            <div class="ed-grid-2">{% include 'dashboard/partials/field.html' with field=form.faq_badge %}{% include 'dashboard/partials/field.html' with field=form.faq_title %}</div>
+            <div class="ed-grid-2">{% include 'dashboard/partials/field.html' with field=form.related_badge %}{% include 'dashboard/partials/field.html' with field=form.related_title %}</div>
+        </section>
+        <section class="ed-card" id="sec-home" data-section>
+            <header class="ed-card-head"><span class="ed-card-num">7</span><div><h3>Company sections</h3><p>Client logos, Why TM Solutech, capabilities and testimonials (shared with the homepage).</p></div></header>
+            {% include 'dashboard/partials/field.html' with field=form.clients_title %}
+            <div class="ed-grid-2">{% include 'dashboard/partials/field.html' with field=form.why_badge %}{% include 'dashboard/partials/field.html' with field=form.why_title %}</div>
+            {% include 'dashboard/partials/field.html' with field=form.why_text %}
+            <div class="ed-grid-2">{% include 'dashboard/partials/field.html' with field=form.capabilities_badge %}{% include 'dashboard/partials/field.html' with field=form.capabilities_title %}</div>
+            {% include 'dashboard/partials/field.html' with field=form.capabilities_text %}
+            <div class="ed-grid-2">{% include 'dashboard/partials/field.html' with field=form.testimonials_badge %}{% include 'dashboard/partials/field.html' with field=form.testimonials_title %}</div>
+        </section>
+
+        <section class="ed-card" id="sec-cta" data-section>
+            <header class="ed-card-head"><span class="ed-card-num">8</span><div><h3>Call to action</h3><p>The dark banner at the bottom of every service page; the button text is also used in the hero.</p></div></header>
+            {% include 'dashboard/partials/field.html' with field=form.cta_title %}
+            {% include 'dashboard/partials/field.html' with field=form.cta_text %}
+            {% include 'dashboard/partials/field.html' with field=form.cta_button %}
+        </section>
+
+        <div class="ed-savebar">
+            <span class="ed-savebar-hint"><i class="fas fa-circle-info"></i> Changes apply to all service pages.</span>
+            <div class="ed-savebar-actions"><button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> Save layout</button></div>
+        </div>
+    </div>
+</form>
+{% endblock %}

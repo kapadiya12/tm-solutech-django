@@ -1,0 +1,13 @@
+{# Image card for a service, used in grids and carousels #}
+<a href="{{ s.get_absolute_url }}" class="sv-card"{% if slide %} data-slide{% endif %} data-spotlight>
+    <span class="sv-card-media">
+        <span class="sv-card-img">{% if s.image %}<img src="{{ s.image.url }}" alt="" loading="lazy">{% endif %}</span>
+        <span class="sv-card-icon"><i class="{{ s.icon }}"></i></span>
+        {% if show_area %}<span class="sv-card-area">{{ s.category.name }}</span>{% endif %}
+    </span>
+    <span class="sv-card-body">
+        <strong>{{ s.title }}</strong>
+        <small>{{ s.short_description|truncatewords:20 }}</small>
+        <em>Learn more <i class="fas fa-arrow-right"></i></em>
+    </span>
+</a>

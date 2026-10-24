@@ -1,0 +1,32 @@
+{% if sp.show_why_us and why_us_reasons %}
+<section class="sv-section sv-why">
+    <div class="container sv-why-grid">
+        <div class="sv-why-side" data-reveal>
+            <span class="sv-badge"><i class="fas fa-award"></i> {{ sp.why_badge }}</span>
+            <h2>{{ sp.why_title }}</h2>
+            {% if sp.why_text %}<p>{{ sp.why_text }}</p>{% endif %}
+            <div class="sv-why-heritage">
+                <strong>35+</strong>
+                <span>Years of heritage<br><small>Since 1985 through TM Systems</small></span>
+            </div>
+            <ul class="sv-why-values">
+                <li><i class="fas fa-check"></i> Customer-centric approach</li>
+                <li><i class="fas fa-check"></i> Cost-effective solutions</li>
+                <li><i class="fas fa-check"></i> Time-efficient delivery</li>
+                <li><i class="fas fa-check"></i> Quality without compromise</li>
+            </ul>
+            <a href="{% url 'core:why_us' %}" class="sv-btn sv-btn-dark">Why TM Solutech <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="sv-why-cards">
+            {% for r in why_us_reasons %}
+            <article class="sv-why-card" data-reveal data-spotlight style="--i: {{ forloop.counter0 }}">
+                <span class="sv-why-num">{{ forloop.counter|stringformat:"02d" }}</span>
+                <span class="sv-why-icon"><i class="{{ r.icon }}"></i></span>
+                <h3>{{ r.title }}</h3>
+                <p>{{ r.description }}</p>
+            </article>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}

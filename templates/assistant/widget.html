@@ -1,0 +1,57 @@
+{% load static asset_tags %}
+{% with cfg=assistant_cfg %}
+<link rel="stylesheet" href="{% static_v 'css/assistant.css' %}">
+<div class="tm-ai tm-ai-{{ cfg.position }}{% if not cfg.show_on_phones %} tm-ai-nophone{% endif %}" id="tmAi"
+     data-endpoint="{% url 'assistant:chat' %}" data-name="{{ cfg.name }}"
+     data-nudge-delay="{{ cfg.nudge_delay }}" data-page-chips="{{ cfg.page_suggestions|yesno:'1,0' }}">
+    {% if cfg.show_nudge %}<script type="application/json" id="tmAiNudges">[{% for line in cfg.nudge_text.splitlines %}{% if line.strip %}"{{ line.strip|escapejs }}",{% endif %}{% endfor %}""]</script>{% endif %}
+    <script type="application/json" id="tmAiQuick">[{% for q in cfg.quick_reply_list %}"{{ q|escapejs }}"{% if not forloop.last %},{% endif %}{% endfor %}]</script>
+    {% csrf_token %}
+    <div class="tm-ai-dock">
+        <div class="tm-ai-nudge" id="tmAiNudge" hidden>
+            <button type="button" class="tm-ai-nudge-x" aria-label="Dismiss"><i class="fas fa-xmark"></i></button>
+            <div class="tm-ai-nudge-top"><span class="tm-ai-nudge-avatar">{% include 'assistant/character.html' with uid='n' %}</span><span><strong>{{ cfg.name }}</strong><small><span class="tm-ai-live"></span> Online now</small></span></div>
+            <p class="tm-ai-nudge-text"></p>
+            <div class="tm-ai-nudge-chips"></div>
+        </div>
+        <button type="button" class="tm-ai-launcher" id="tmAiLauncher" aria-expanded="false" aria-controls="tmAiPanel" aria-label="{{ cfg.launcher_label }}">
+            <span class="tm-ai-halo" aria-hidden="true"></span>
+            <span class="tm-ai-avatar">{% include 'assistant/character.html' with uid='l' %}</span>
+            <span class="tm-ai-label"><span class="tm-ai-live"></span>{{ cfg.launcher_label }}</span>
+        </button>
+    </div>
+
+    <section class="tm-ai-panel" id="tmAiPanel" role="dialog" aria-label="{{ cfg.name }} – AI assistant" hidden>
+        <header class="tm-ai-head">
+            <span class="tm-ai-head-avatar">{% include 'assistant/character.html' with uid='h' %}</span>
+            <div class="tm-ai-head-text">
+                <strong>{{ cfg.name }}</strong>
+                <small><span class="tm-ai-live"></span> {{ cfg.tagline }}</small>
+            </div>
+            <button type="button" class="tm-ai-icon-btn" id="tmAiReset" aria-label="New conversation" title="New conversation"><i class="fas fa-rotate-right"></i></button>
+            <button type="button" class="tm-ai-icon-btn" id="tmAiClose" aria-label="Close"><i class="fas fa-xmark"></i></button>
+        </header>
+        <div class="tm-ai-body" id="tmAiBody" data-lenis-prevent aria-live="polite">
+            <div class="tm-ai-msg tm-ai-bot tm-ai-greet"><div class="tm-ai-bubble">{{ cfg.greeting|linebreaksbr }}</div></div>
+            <div class="tm-ai-start" id="tmAiStart">
+                <div class="tm-ai-chips tm-ai-page-chips" id="tmAiPageChips" hidden></div>
+                {% if cfg.quick_reply_list %}
+                <span class="tm-ai-start-title">Popular questions</span>
+                <div class="tm-ai-topics">
+                    {% for q in cfg.quick_reply_list %}<button type="button" class="tm-ai-topic tm-ai-chip" data-q="{{ q }}"><i class="fas fa-arrow-right"></i><span>{{ q }}</span></button>{% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        <form class="tm-ai-form" id="tmAiForm" autocomplete="off">
+            <textarea id="tmAiInput" rows="1" maxlength="1200" placeholder="{{ cfg.placeholder }}" aria-label="Message {{ cfg.name }}"></textarea>
+            <button type="submit" class="tm-ai-send" aria-label="Send"><i class="fas fa-arrow-up"></i></button>
+        </form>
+        <footer class="tm-ai-foot">
+            {% if cfg.footer_note %}<span>{{ cfg.footer_note }}</span>{% endif %}
+            <a href="{% url 'contact:contact' %}">Talk to our team</a>
+        </footer>
+    </section>
+</div>
+<script src="{% static_v 'js/assistant.js' %}" defer></script>
+{% endwith %}

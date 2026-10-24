@@ -1,0 +1,35 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/blog-admin.css' %}"><link rel="stylesheet" href="{% static 'css/inquiries.css' %}">{% endblock %}
+{% block dashboard_content %}
+<div class="bl-head">
+    <p>Technology brands shown in the logo strips on the Services pages. Pick which ones appear on each service area in <a href="{% url 'dashboard:category_list' %}">Service Categories</a>.</p>
+    <div class="flex gap-2">
+        <a href="{% url 'services:service_list' %}#partners" target="_blank" rel="noopener" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-up-right-from-square"></i> View on site</a>
+        <a href="{% url 'dashboard:partner_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> New partner</a>
+    </div>
+</div>
+<div class="bl-stats bc-stats">
+    <div class="bl-stat"><span class="bl-ic"><i class="fas fa-handshake"></i></span><span><strong>{{ partners|length }}</strong>Partners</span></div>
+    <div class="bl-stat bl-c-green"><span class="bl-ic"><i class="fas fa-eye"></i></span><span><strong>{{ live }}</strong>On website</span></div>
+    <a href="{% url 'dashboard:certification_list' %}" class="bl-stat bl-c-orange"><span class="bl-ic"><i class="fas fa-certificate"></i></span><span><strong>Certifications</strong>Manage ISO badges</span></a>
+</div>
+<div class="cl-grid">
+    {% for p in partners %}
+    <article class="cl-card{% if not p.is_active %} is-off{% endif %}">
+        <div class="cl-logo">{% if p.logo %}<img src="{{ p.logo.url }}" alt="{{ p.name }}" loading="lazy" style="height:44px;width:auto">{% else %}<strong>{{ p.name }}</strong>{% endif %}</div>
+        <div class="cl-body">
+            <strong>{{ p.name }}</strong>
+            <small>{{ p.get_category_display }} · {% if p.n_areas %}{{ p.n_areas }} area{{ p.n_areas|pluralize }}{% else %}not assigned{% endif %}{% if p.n_services %} · {{ p.n_services }} service{{ p.n_services|pluralize }}{% endif %}</small>
+        </div>
+        <div class="cl-actions">
+            <a href="{% url 'dashboard:partner_edit' p.pk %}" class="fqa-icon-btn" data-tip="Edit"><i class="fas fa-pen"></i></a>
+            <form method="post" action="{% url 'dashboard:partner_delete' p.pk %}" data-confirm="The logo is removed from all service pages." data-confirm-name="{{ p.name }}" data-confirm-title="Delete this partner?">
+                {% csrf_token %}<button type="submit" class="bc-del" aria-label="Delete {{ p.name }}" data-tip="Delete"><i class="fas fa-trash-can"></i></button>
+            </form>
+        </div>
+    </article>
+    {% endfor %}
+    <a href="{% url 'dashboard:partner_create' %}" class="cl-card cl-add"><i class="fas fa-plus"></i><strong>New partner</strong></a>
+</div>
+{% endblock %}

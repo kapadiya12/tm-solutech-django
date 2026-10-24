@@ -225,6 +225,44 @@ class Leadership(models.Model):
         return f"{self.name} - {self.designation}"
 
 
+class Partner(models.Model):
+    """Technology partners / OEM brands (Microsoft, Cisco, Dell…)."""
+    CATEGORY_CHOICES = [
+        ('software', 'Software & Cloud'),
+        ('security', 'Security'),
+        ('hardware', 'Hardware & Devices'),
+        ('networking', 'Networking & Surveillance'),
+    ]
+    name = models.CharField(max_length=80)
+    logo = models.FileField(upload_to='partners/', blank=True, help_text='SVG or PNG. Transparent background works best.')
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='software')
+    website = models.URLField(blank=True)
+    display_order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['display_order', 'name']
+
+    def __str__(self):
+        return self.name
+
+
+class Certification(models.Model):
+    name = models.CharField(max_length=80, help_text='e.g. ISO 9001')
+    title = models.CharField(max_length=120, blank=True, help_text='e.g. Quality Management System')
+    description = models.CharField(max_length=240, blank=True)
+    icon = models.CharField(max_length=50, default='fas fa-certificate')
+    logo = models.FileField(upload_to='certifications/', blank=True)
+    display_order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['display_order', 'name']
+
+    def __str__(self):
+        return self.name
+
+
 class FAQCategory(models.Model):
     """A group of questions on the FAQs page (e.g. Services, Support & AMC)."""
     name = models.CharField(max_length=80)

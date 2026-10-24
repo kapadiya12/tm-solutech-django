@@ -1,0 +1,44 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/blog-admin.css' %}"><link rel="stylesheet" href="{% static 'css/inquiries.css' %}">{% endblock %}
+{% block dashboard_content %}
+<div class="bv-top"><a href="{% url 'dashboard:assistant_chats' %}" class="ed-back"><i class="fas fa-arrow-left"></i> All chats</a></div>
+<div class="bv-grid">
+    <div class="bv-main">
+        <section class="bv-card">
+            <header class="bv-card-head"><h3><i class="fas fa-comments"></i> {{ chat.title|default:"Conversation" }}</h3><span>{{ chat.created_at|date:"M d, Y · H:i" }}</span></header>
+            <div class="aa-transcript">
+                {% for t in chat.transcript %}
+                <div class="aa-m {% if t.role == 'user' %}aa-user{% else %}aa-bot{% endif %}">{{ t.text|linebreaksbr }}</div>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+    <aside class="bv-side">
+        <section class="bv-card">
+            <header class="bv-card-head"><h3><i class="fas fa-circle-info"></i> Details</h3></header>
+            <dl class="fqv-dl">
+                <div><dt>Started on</dt><dd>{{ chat.page|default:"/" }}</dd></div>
+                <div><dt>Messages</dt><dd>{{ chat.visitor_messages }}</dd></div>
+                <div><dt>AI model</dt><dd>{{ chat.model|default:"—" }}</dd></div>
+                <div><dt>Last activity</dt><dd>{{ chat.updated_at|date:"M d, H:i" }}</dd></div>
+            </dl>
+        </section>
+        {% if chat.lead %}
+        <section class="bv-card">
+            <header class="bv-card-head"><h3><i class="fas fa-user-check"></i> Lead</h3><a href="{% url 'dashboard:inquiry_detail' chat.lead.pk %}">Open <i class="fas fa-arrow-right"></i></a></header>
+            <dl class="fqv-dl">
+                <div><dt>Name</dt><dd>{{ chat.lead.name }}</dd></div>
+                {% if chat.lead.email %}<div><dt>Email</dt><dd>{{ chat.lead.email }}</dd></div>{% endif %}
+                {% if chat.lead.phone %}<div><dt>Phone</dt><dd>{{ chat.lead.phone }}</dd></div>{% endif %}
+                {% if chat.lead.company %}<div><dt>Company</dt><dd>{{ chat.lead.company }}</dd></div>{% endif %}
+            </dl>
+        </section>
+        {% endif %}
+        <section class="iqd-danger">
+            <div class="iqd-danger-head"><span class="iqd-danger-icon"><i class="fas fa-triangle-exclamation"></i></span><div><h3>Delete conversation</h3><p>Removes this transcript permanently.</p></div></div>
+            <form method="post" data-confirm="The transcript is deleted permanently." data-confirm-title="Delete this conversation?">{% csrf_token %}<input type="hidden" name="action" value="delete"><button type="submit" class="iqd-danger-btn"><i class="fas fa-trash-can"></i> Delete</button></form>
+        </section>
+    </aside>
+</div>
+{% endblock %}

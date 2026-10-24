@@ -1,0 +1,34 @@
+{# Tima: an origami prism spirit built from the folded facets of the TM Solutech logo. #}
+<svg class="tima" viewBox="0 0 120 132" aria-hidden="true" focusable="false">
+    <defs>
+        <linearGradient id="timaVisor{{ uid }}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2A303C"/><stop offset="1" stop-color="#07080B"/></linearGradient>
+        <radialGradient id="timaEye{{ uid }}" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#C9F2FF"/><stop offset=".55" stop-color="#4FCFFF"/><stop offset="1" stop-color="#1E8FC0"/></radialGradient>
+    </defs>
+    <ellipse class="tima-shadow" cx="60" cy="126" rx="26" ry="4.5" fill="#0B0D12" opacity=".25"/>
+    <g class="tima-body">
+        {# side wings (folded paper) #}
+        <polygon class="tima-wing tima-wing-l" points="22,56 4,46 12,74" fill="#9BC73B"/>
+        <polygon class="tima-wing tima-wing-r" points="98,56 116,46 108,74" fill="#F4A21E"/>
+        {# head: folded prism facets #}
+        <polygon points="60,14 24,44 60,56" fill="#4FCFFF"/>
+        <polygon points="60,14 96,44 60,56" fill="#2FA9DD"/>
+        <polygon points="24,44 16,80 60,56" fill="#9BC73B"/>
+        <polygon points="96,44 104,80 60,56" fill="#F4A21E"/>
+        <polygon points="16,80 60,116 60,56" fill="#7FA82E"/>
+        <polygon points="104,80 60,116 60,56" fill="#FDC943"/>
+        <polyline points="60,14 60,116" stroke="#fff" stroke-opacity=".18" stroke-width="1"/>
+        {# visor #}
+        <rect x="27" y="50" width="66" height="34" rx="17" fill="url(#timaVisor{{ uid }})" stroke="#fff" stroke-opacity=".28" stroke-width="1.5"/>
+        <rect x="33" y="54" width="22" height="4" rx="2" fill="#fff" opacity=".12"/>
+        <g class="tima-look"><g class="tima-eyes">
+            <ellipse cx="47" cy="66" rx="6" ry="7" fill="url(#timaEye{{ uid }})"/>
+            <ellipse cx="73" cy="66" rx="6" ry="7" fill="url(#timaEye{{ uid }})"/>
+            <circle cx="49.5" cy="63" r="1.9" fill="#fff"/><circle cx="75.5" cy="63" r="1.9" fill="#fff"/>
+        </g></g>
+        <path class="tima-smile" d="M53 75 Q60 80 67 75" stroke="#9BC73B" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+        <circle cx="37" cy="76" r="3" fill="#F4A21E" opacity=".35"/><circle cx="83" cy="76" r="3" fill="#F4A21E" opacity=".35"/>
+        {# antenna spark #}
+        <line x1="60" y1="14" x2="60" y2="6" stroke="#FDC943" stroke-width="2"/>
+        <polygon class="tima-spark" points="60,0 63,5 60,10 57,5" fill="#FDC943"/>
+    </g>
+</svg>

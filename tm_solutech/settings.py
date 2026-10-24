@@ -100,6 +100,7 @@ INSTALLED_APPS = [
     "services.apps.ServicesConfig",
     "insights.apps.InsightsConfig",
     "work.apps.WorkConfig",
+    "assistant.apps.AssistantConfig",
     "contact.apps.ContactConfig",
     "dashboard.apps.DashboardConfig",
     "cms.apps.CmsConfig",
@@ -168,6 +169,7 @@ TEMPLATES = [
                 "dashboard.context_processors.dashboard_counts",
 
                 "services.context_processors.service_categories",
+                "assistant.context_processors.assistant",
             ],
         },
     },

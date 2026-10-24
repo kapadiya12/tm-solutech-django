@@ -789,3 +789,19 @@
 
 /* Phones: hover tooltips near the right edge must not widen the page */
 @media (max-width: 760px) { .dashboard-main, .dashboard-content { overflow-x: clip; } }
+
+/* ---- Partner picker (service + category forms) ---- */
+.pp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: .55rem; }
+.pp-item { position: relative; cursor: pointer; }
+.pp-item input { position: absolute; opacity: 0; pointer-events: none; }
+.pp-card { position: relative; height: 84px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .35rem; padding: .5rem; border-radius: 12px; background: #fff; border: 1.5px solid var(--gray-200); transition: border-color .2s, box-shadow .2s, background .2s; }
+.pp-card img { height: 26px; width: auto; max-width: 90px; object-fit: contain; filter: grayscale(1); opacity: .55; transition: filter .2s, opacity .2s; }
+.pp-card small { font-size: .7rem; font-weight: 600; color: var(--gray-500); }
+.pp-check { position: absolute; top: 6px; right: 6px; width: 18px; height: 18px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: .55rem; color: #fff; background: var(--gray-200); transition: background .2s; }
+.pp-item:hover .pp-card { border-color: var(--gray-300); }
+.pp-item input:checked + .pp-card { border-color: #1F2430; background: #FAFBFC; box-shadow: 0 0 0 3px rgba(31,36,48,.07); }
+.pp-item input:checked + .pp-card img { filter: none; opacity: 1; }
+.pp-item input:checked + .pp-card small { color: var(--gray-900); }
+.pp-item input:checked + .pp-card .pp-check { background: #22A06B; }
+.pp-item input:focus-visible + .pp-card { outline: 3px solid rgba(79,207,255,.5); outline-offset: 2px; }
+.pp-count { font-size: .74rem; color: var(--gray-500); }

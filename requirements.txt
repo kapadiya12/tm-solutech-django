@@ -10,3 +10,4 @@ django-cloudinary-storage
 cloudinary
 phonenumbers==9.0.41
 dnspython==2.7.0
+requests==2.32.3

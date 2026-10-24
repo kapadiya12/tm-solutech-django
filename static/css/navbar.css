@@ -2494,14 +2494,16 @@ html.search-locked body { overflow: hidden; }
         color: inherit;
         opacity: 0;
         visibility: hidden;
-        transform: translateX(14px);
-        transition: opacity 0.35s ease, transform 0.45s var(--ease-premium), visibility 0s linear 0.45s;
+        transform: translateX(-10px);
+        /* leaving: quick fade so it never overlaps the incoming slide */
+        transition: opacity 0.16s ease, transform 0.2s ease, visibility 0s linear 0.2s;
     }
     .ms-spot-slide.is-active {
         opacity: 1;
         visibility: inherit;
         transform: none;
-        transition: opacity 0.4s ease 0.05s, transform 0.5s var(--ease-premium) 0.05s, visibility 0s;
+        /* entering: waits for the old slide to clear */
+        transition: opacity 0.35s ease 0.18s, transform 0.5s var(--ease-premium) 0.18s, visibility 0s;
     }
     .ms-spot-icon {
         flex-shrink: 0;

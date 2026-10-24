@@ -1,0 +1,14 @@
+{% if sp.show_stats and company_stats %}
+<section class="sv-stats" aria-label="TM Solutech in numbers">
+    <div class="container">
+        <div class="sv-stats-grid">
+            {% for stat in company_stats %}
+            <div class="sv-stat" data-reveal style="--i: {{ forloop.counter0 }}">
+                <strong>{% if stat.value.isdigit %}<span data-counter="{{ stat.value }}">0</span>{% else %}{{ stat.value }}{% endif %}{{ stat.suffix }}</strong>
+                <span>{{ stat.label }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}

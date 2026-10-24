@@ -1,0 +1,32 @@
+{% if sp.show_testimonials and testimonials %}
+<section class="sv-section sv-testimonials">
+    <div class="container">
+        <div class="sv-carousel" data-carousel>
+            <header class="sv-head sv-head-row" data-reveal>
+                <div>
+                    <span class="sv-badge"><i class="fas fa-quote-left"></i> {{ sp.testimonials_badge }}</span>
+                    <h2>{{ sp.testimonials_title }}</h2>
+                </div>
+                <div class="sv-arrows">
+                    <button type="button" class="sv-arrow" data-prev aria-label="Previous"><i class="fas fa-arrow-left"></i></button>
+                    <button type="button" class="sv-arrow" data-next aria-label="Next"><i class="fas fa-arrow-right"></i></button>
+                </div>
+            </header>
+            <div class="sv-track sv-track-2" data-track data-lenis-prevent>
+                {% for t in testimonials %}
+                <figure class="sv-quote" data-slide>
+                    <span class="sv-quote-mark" aria-hidden="true"><i class="fas fa-quote-left"></i></span>
+                    <span class="sv-stars" aria-label="{{ t.rating }} out of 5">{% for i in "12345" %}<i class="fas fa-star{% if forloop.counter > t.rating %} is-off{% endif %}"></i>{% endfor %}</span>
+                    <blockquote>{{ t.content }}</blockquote>
+                    <figcaption>
+                        <span class="sv-quote-avatar">{% if t.photo %}<img src="{{ t.photo.url }}" alt="">{% else %}{{ t.name|slice:":1" }}{% endif %}</span>
+                        <span><strong>{{ t.name }}</strong><small>{{ t.designation }}{% if t.company %}, {{ t.company }}{% endif %}</small></span>
+                    </figcaption>
+                </figure>
+                {% endfor %}
+            </div>
+            <div class="sv-progress"><span data-progress></span></div>
+        </div>
+    </div>
+</section>
+{% endif %}

@@ -1,63 +1,80 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static asset_tags %}
+
+{% block title %}Services | TM Solutech{% endblock %}
+{% block meta_description %}{{ page_subtitle }}{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static_v 'css/services.css' %}">{% endblock %}
 
 {% block content %}
-<div class="page-hero">
-    <div class="hero-orb hero-orb-1"></div>
-    <div class="hero-orb hero-orb-2"></div>
-    <div class="hero-orb hero-orb-3"></div>
+<section class="sv-hero sv-hero-list">
+    <div class="sv-hero-bg" aria-hidden="true"><span class="sv-orb sv-orb-1"></span><span class="sv-orb sv-orb-2"></span><span class="sv-orb sv-orb-3"></span><span class="sv-grid-bg"></span></div>
     <div class="container">
-        <ul class="breadcrumb-list">
-            <li><a href="{% url 'core:home' %}"><i class="fas fa-home"></i> Home</a></li>
-            <li><span class="separator"><i class="fas fa-chevron-right"></i></span> Services</li>
-        </ul>
-        <h1 class="page-title">{{ page_title }}</h1>
-        <p class="page-subtitle">{{ page_subtitle }}</p>
-    </div>
-</div>
-
-{% if categories %}
-{# Sticky jump bar: one tap to any service area #}
-<nav class="svc-jumpbar" aria-label="Service areas">
-    <div class="container">
-        <div class="svc-jumpbar-track" data-lenis-prevent>
-            {% for category in categories %}
-            <a href="#{{ category.slug }}" class="svc-jump accent-{% cycle 'blue' 'green' 'orange' %}" data-svc-jump>
-                <i class="{{ category.icon }}" aria-hidden="true"></i>
-                <span>{{ category.name }}</span>
-                <span class="svc-jump-count">{{ category.page_services|length }}</span>
+        <div class="sv-hero-text sv-hero-text-wide">
+            <ul class="breadcrumb-list">
+                <li><a href="{% url 'core:home' %}"><i class="fas fa-home"></i> Home</a></li>
+                <li><span class="separator"><i class="fas fa-chevron-right"></i></span> Services</li>
+            </ul>
+            <span class="sv-eyebrow sv-in" style="--d: 0"><i class="fas fa-layer-group"></i> {{ categories|length }} service areas · {{ service_total }} solutions</span>
+            <h1 class="sv-in" style="--d: 1">IT that <span class="sv-grad">runs your business</span>, end to end</h1>
+            <p class="sv-lead sv-in" style="--d: 2">{{ page_subtitle }}</p>
+            <div class="sv-hero-actions sv-in" style="--d: 3">
+                <a href="#areas" class="sv-btn sv-btn-light" data-scroll>Explore service areas <i class="fas fa-arrow-down"></i></a>
+                <a href="{% url 'contact:contact' %}" class="sv-btn sv-btn-ghost">{{ sp.cta_button }} <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+        {# Numbered service-area cards #}
+        <div class="sv-area-index" id="areas">
+            {% for c in categories %}
+            <a href="#{{ c.slug }}" class="sv-index-card sv-in" style="--d: {{ forloop.counter|add:3 }}" data-scroll>
+                <span class="sv-index-num">{{ forloop.counter|stringformat:"02d" }}</span>
+                <span class="sv-index-icon"><i class="{{ c.icon }}"></i></span>
+                <strong>{{ c.name }}</strong>
+                <small>{{ c.page_services|length }} solution{{ c.page_services|length|pluralize }}</small>
+                <i class="fas fa-arrow-down sv-index-go" aria-hidden="true"></i>
             </a>
             {% endfor %}
         </div>
     </div>
-</nav>
-{% endif %}
+</section>
 
-{% for category in categories %}
-<section id="{{ category.slug }}" class="section svc-area {% if forloop.counter|divisibleby:2 %}section-gray{% endif %} services-section" data-svc-area>
-    {% if forloop.counter|divisibleby:2 %}<div class="section-glow services-glow"></div>{% endif %}
+{% include 'services/partials/clients.html' %}
+{% include 'services/partials/capabilities.html' %}
+
+{% for c in categories %}
+<section class="sv-section sv-area{% if forloop.counter|divisibleby:2 %} sv-area-alt{% endif %}" id="{{ c.slug }}">
     <div class="container">
-        <div class="section-header animate-on-scroll">
-            <span class="section-badge"><i class="{{ category.icon }}"></i> {{ category.page_services|length }} Service{{ category.page_services|length|pluralize }}</span>
-            <h2>{{ category.name }}</h2>
-            <p>{{ category.short_description|default:category.description|truncatewords:24 }}</p>
-        </div>
-        <div class="grid grid-3">
-            {% for service in category.page_services %}
-            <div class="service-card animate-on-scroll animate-delay-{% cycle 1 2 3 %}">
-                <div class="service-card-icon"><i class="{{ service.icon }}"></i></div>
-                <h3>{{ service.title }}</h3>
-                <p>{{ service.short_description|truncatewords:22 }}</p>
-                <a href="{{ service.get_absolute_url }}" class="service-card-link">Learn More <i class="fas fa-arrow-right"></i></a>
+        <div class="sv-area-banner" data-reveal>
+            <div class="sv-area-banner-media">{% if c.image %}<img src="{{ c.image.url }}" alt="" loading="lazy">{% endif %}<span class="sv-area-banner-num">{{ forloop.counter|stringformat:"02d" }}</span></div>
+            <div class="sv-area-banner-text">
+                <span class="sv-badge"><i class="{{ c.icon }}"></i> {{ c.page_services|length }} solution{{ c.page_services|length|pluralize }}</span>
+                <h2>{{ c.name }}</h2>
+                <p>{{ c.short_description }}</p>
+                {% if c.partners.all %}<ul class="sv-mini-logos">{% for p in c.partners.all|slice:":5" %}<li title="{{ p.name }}">{% if p.logo %}<img src="{{ p.logo.url }}" alt="{{ p.name }}" loading="lazy">{% else %}{{ p.name }}{% endif %}</li>{% endfor %}</ul>{% endif %}
+                <a href="{{ c.get_absolute_url }}" class="sv-btn sv-btn-dark">Explore {{ c.name }} <i class="fas fa-arrow-right"></i></a>
             </div>
-            {% endfor %}
         </div>
-        <div class="text-center" style="margin-top: var(--space-8);">
-            <a href="{{ category.get_absolute_url }}" class="btn btn-secondary">Explore {{ category.name }} <i class="fas fa-arrow-right"></i></a>
+        <div class="sv-carousel" data-carousel>
+            <div class="sv-track" data-track data-lenis-prevent>
+                {% for s in c.page_services %}{% include 'services/partials/service_card.html' with s=s slide=True %}{% endfor %}
+            </div>
+            <div class="sv-carousel-foot">
+                <div class="sv-progress"><span data-progress></span></div>
+                <div class="sv-arrows">
+                    <button type="button" class="sv-arrow" data-prev aria-label="Previous"><i class="fas fa-arrow-left"></i></button>
+                    <button type="button" class="sv-arrow" data-next aria-label="Next"><i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
         </div>
     </div>
 </section>
 {% endfor %}
 
-{% include 'includes/cta_section.html' %}
+{% include 'services/partials/stats.html' %}
+{% include 'services/partials/why_us.html' %}
+{% include 'services/partials/partners.html' %}
+{% include 'services/partials/industries.html' %}
+{% include 'services/partials/testimonials.html' %}
+{% include 'services/partials/cta.html' %}
 {% endblock %}
+
+{% block extra_js %}<script src="{% static_v 'js/services.js' %}" defer></script>{% endblock %}

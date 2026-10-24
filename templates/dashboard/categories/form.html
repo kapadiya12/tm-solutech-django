@@ -16,7 +16,7 @@
     </div>
 </div>
 
-<form method="post" class="ed" data-guard data-validate novalidate>
+<form method="post" enctype="multipart/form-data" class="ed" data-guard data-validate novalidate>
     {% csrf_token %}
     {% if form.errors %}<div class="ed-alert"><i class="fas fa-circle-exclamation"></i> Some fields need your attention. They're marked in red below.</div>{% endif %}
 
@@ -38,8 +38,12 @@
         </section>
 
         <section class="ed-card" id="sec-page" data-section>
-            <header class="ed-card-head"><span class="ed-card-num">2</span><div><h3>Category page</h3><p>The introduction at the top of the category page, above its list of services.</p></div><span class="ed-card-state"></span></header>
+            <header class="ed-card-head"><span class="ed-card-num">2</span><div><h3>Category page</h3><p>The hero image, introduction, partner logos and Google listing of the category page.</p></div><span class="ed-card-state"></span></header>
             {% include 'dashboard/partials/field.html' with field=form.description %}
+            {% include 'dashboard/partials/field.html' with field=form.image %}
+            {% include 'dashboard/partials/partner_picker.html' with field=form.partners %}
+            {% include 'dashboard/partials/field.html' with field=form.meta_title %}
+            {% include 'dashboard/partials/field.html' with field=form.meta_description %}
         </section>
 
         <section class="ed-card" id="sec-visibility" data-section>

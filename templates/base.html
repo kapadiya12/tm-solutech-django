@@ -74,6 +74,8 @@
 
     <a href="#" class="back-to-top" aria-label="Back to top"><i class="fas fa-chevron-up"></i></a>
 
+    {% if assistant_cfg %}{% include 'assistant/widget.html' %}{% endif %}
+
     <div class="cookie-notice">
         <div class="container">
             <p>We use cookies to enhance your experience. By continuing to visit this site, you agree to our use of cookies.</p>

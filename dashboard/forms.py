@@ -1,10 +1,10 @@
 from django import forms
 from core.models import (
     SiteSettings, WhyUsReason, Testimonial, Leadership, FAQ, FAQCategory, Statistic, Gallery, SEOSettings,
-    Capability, ClientLogo, HeroTag, HeroStat, HeroSlide, SocialLink,
+    Capability, ClientLogo, HeroTag, HeroStat, HeroSlide, SocialLink, Partner, Certification,
 )
 from contact.models import ContactPageSettings
-from services.models import ServiceCategory, Service, Industry
+from services.models import ServiceCategory, Service, Industry, ServicePageSettings
 from insights.models import BlogPost, BlogCategory
 from work.models import CaseStudy
 from cms.models import Page
@@ -146,8 +146,13 @@ class ServiceCategoryForm(_ContentFormMixin, FormStyleMixin, forms.ModelForm):
 
     class Meta:
         model = ServiceCategory
-        fields = ['name', 'slug', 'icon', 'short_description', 'description', 'show_in_nav', 'is_active']
+        fields = ['name', 'slug', 'icon', 'short_description', 'description', 'image', 'partners',
+                  'meta_title', 'meta_description', 'show_in_nav', 'is_active']
         labels = {
+            'image': 'Hero image',
+            'partners': 'Technology partners',
+            'meta_title': 'Google title',
+            'meta_description': 'Google description',
             'name': 'Category name',
             'slug': 'Page address',
             'short_description': 'Short summary',
@@ -159,6 +164,8 @@ class ServiceCategoryForm(_ContentFormMixin, FormStyleMixin, forms.ModelForm):
             'name': 'Shown in the navbar menu, on the homepage and as the page title. E.g. "Cloud Solutions".',
             'short_description': 'Shown under the category in the navbar menu, on homepage cards and in search.',
             'description': 'The introduction paragraph at the top of the category page.',
+            'image': 'Background of the category page hero and its banner on the Services page. Landscape, at least 1600×1000.',
+            'partners': 'Brands shown on this category page and used by its services unless a service picks its own.',
             'show_in_nav': 'Show this category as a column in the website\'s Services menu.',
             'is_active': 'When off, this category and all its services are hidden from the website.',
         }
@@ -167,10 +174,17 @@ class ServiceCategoryForm(_ContentFormMixin, FormStyleMixin, forms.ModelForm):
             'short_description': forms.Textarea(attrs={'rows': 3}),
             'description': forms.Textarea(attrs={'rows': 6}),
             'slug': forms.TextInput(attrs={'data-slug-from': 'id_name'}),
+            'image': forms.FileInput(attrs={'accept': 'image/jpeg,image/png,image/webp', 'data-image-input': '1'}),
+            'partners': forms.CheckboxSelectMultiple,
+            'meta_title': forms.TextInput(attrs={'maxlength': 70, 'data-count': '60'}),
+            'meta_description': forms.Textarea(attrs={'rows': 2, 'maxlength': 200, 'data-count': '158'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['partners'].queryset = Partner.objects.filter(is_active=True)
+        if self.instance.pk and self.instance.image:
+            self.fields['image'].widget.attrs['data-current'] = self.instance.image.url
         self.fields['slug'].required = False
         self.fields['slug'].help_text = 'Created automatically from the name.'
         self._apply_rules()
@@ -189,13 +203,14 @@ class ServiceForm(_ContentFormMixin, FormStyleMixin, forms.ModelForm):
     benefit_items = ItemsField(keys=['title', 'text'], min_items=2, noun='benefit', label='Benefits')
     process_items = ItemsField(keys=['title', 'text'], min_items=3, noun='step', label='Process steps')
     faq_items = ItemsField(keys=['question', 'answer'], min_items=2, max_items=20, noun='question', label='FAQs')
+    hero_stats = ItemsField(keys=['value', 'label'], min_items=0, max_items=4, noun='number', label='Hero numbers')
 
     class Meta:
         model = Service
         fields = [
             'category', 'title', 'slug', 'icon', 'short_description', 'image', 'description',
-            'feature_items', 'benefit_items', 'process_items', 'faq_items',
-            'show_in_nav', 'nav_badge', 'is_active',
+            'feature_items', 'benefit_items', 'process_items', 'faq_items', 'hero_stats', 'partners',
+            'meta_title', 'meta_description', 'show_in_nav', 'nav_badge', 'is_active',
         ]
         labels = {
             'title': 'Service name',
@@ -203,7 +218,10 @@ class ServiceForm(_ContentFormMixin, FormStyleMixin, forms.ModelForm):
             'category': 'Service area',
             'short_description': 'Short summary',
             'description': 'Overview',
-            'image': 'Overview image',
+            'image': 'Hero image',
+            'partners': 'Technology partners',
+            'meta_title': 'Google title',
+            'meta_description': 'Google description',
             'show_in_nav': 'Show in navbar',
             'nav_badge': 'Navbar badge',
             'is_active': 'Published',
@@ -213,7 +231,10 @@ class ServiceForm(_ContentFormMixin, FormStyleMixin, forms.ModelForm):
             'category': 'Decides the page address and which navbar column the service appears in.',
             'short_description': 'Shown under the page title, in the navbar menu, on cards and in search.',
             'description': 'The main introduction on the service page. Use headings, lists and bold text.',
-            'image': 'Shown beside the overview. JPG or PNG, landscape, at least 1200×800.',
+            'image': 'The large photo in the page hero, also used on cards and carousels. Landscape, at least 1400×900.',
+            'partners': 'Brands shown in the partner logo strip on this page. Leave empty to use the service area\'s partners.',
+            'meta_title': 'Title in Google results. Defaults to the service name.',
+            'meta_description': 'Description in Google results. Defaults to the short summary.',
             'show_in_nav': 'List this service in the website\'s Services menu.',
             'nav_badge': 'Optional highlight next to the name in the navbar menu.',
             'is_active': 'When off, the page is hidden from the website, the navbar and search.',
@@ -223,10 +244,14 @@ class ServiceForm(_ContentFormMixin, FormStyleMixin, forms.ModelForm):
             'short_description': forms.Textarea(attrs={'rows': 3}),
             'slug': forms.TextInput(attrs={'data-slug-from': 'id_title'}),
             'image': forms.FileInput(attrs={'accept': 'image/jpeg,image/png,image/webp', 'data-image-input': '1'}),
+            'partners': forms.CheckboxSelectMultiple,
+            'meta_title': forms.TextInput(attrs={'maxlength': 70, 'data-count': '60'}),
+            'meta_description': forms.Textarea(attrs={'rows': 2, 'maxlength': 200, 'data-count': '158'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['partners'].queryset = Partner.objects.filter(is_active=True)
         self.fields['slug'].required = False
         self.fields['slug'].help_text = 'Created automatically from the name.'
         self.fields['category'].empty_label = 'Choose a service area…'
@@ -728,3 +753,106 @@ class CaseStudyForm(FormStyleMixin, forms.ModelForm):
         if data.get('testimonial_quote') and not data.get('testimonial_author'):
             self.add_error('testimonial_author', 'Say who the quote is from.')
         return data
+
+
+class PartnerForm(FormStyleMixin, forms.ModelForm):
+    class Meta:
+        model = Partner
+        fields = ['name', 'logo', 'category', 'website', 'display_order', 'is_active']
+        labels = {'name': 'Brand name', 'display_order': 'Display order', 'is_active': 'Show on website'}
+        help_texts = {
+            'logo': 'SVG or PNG with a transparent background. Shown in the logo strips on service pages.',
+            'category': 'Used to group partners.',
+            'website': 'Optional.',
+            'display_order': 'Lower numbers show first.',
+            'is_active': 'When off, the logo is hidden everywhere.',
+        }
+        widgets = {'logo': forms.FileInput(attrs={'accept': 'image/svg+xml,image/png,image/webp,image/jpeg'})}
+
+    def clean_logo(self):
+        logo = self.cleaned_data.get('logo')
+        if logo and hasattr(logo, 'name') and not logo.name.lower().endswith(('.svg', '.png', '.webp', '.jpg', '.jpeg')):
+            raise forms.ValidationError('Please upload an SVG, PNG, WebP or JPG file.')
+        if logo and getattr(logo, 'size', 0) > 2 * 1024 * 1024:
+            raise forms.ValidationError('Logo is larger than 2 MB.')
+        return logo
+
+
+class CertificationForm(FormStyleMixin, forms.ModelForm):
+    class Meta:
+        model = Certification
+        fields = ['name', 'title', 'description', 'icon', 'logo', 'display_order', 'is_active']
+        labels = {'name': 'Certification', 'title': 'Full name', 'logo': 'Badge image', 'display_order': 'Display order', 'is_active': 'Show on website'}
+        help_texts = {
+            'name': 'Short name, e.g. ISO 9001.',
+            'title': 'e.g. Quality Management System.',
+            'description': 'One line about what it means for clients.',
+            'logo': 'Optional certificate badge. If empty, the icon is shown.',
+            'is_active': 'When off, it is hidden from service pages.',
+        }
+        widgets = {'icon': IconInput(), 'description': forms.Textarea(attrs={'rows': 2, 'maxlength': 240})}
+
+
+class ServicePageSettingsForm(FormStyleMixin, forms.ModelForm):
+    class Meta:
+        model = ServicePageSettings
+        exclude = ['updated_at']
+        widgets = {f: forms.TextInput(attrs={'maxlength': 240}) for f in (
+            'features_text', 'benefits_text', 'process_text', 'partners_text', 'industries_text', 'cta_text', 'why_text', 'capabilities_text')}
+
+for _name in ServicePageSettingsForm.base_fields:
+    _f = ServicePageSettingsForm.base_fields[_name]
+    if _name.endswith('_badge'):
+        _f.label = 'Badge'
+    elif _name.endswith('_title'):
+        _f.label = 'Heading'
+    elif _name.endswith('_text'):
+        _f.label = 'Intro line'
+ServicePageSettingsForm.base_fields['cta_title'].label = 'Heading'
+ServicePageSettingsForm.base_fields['clients_title'].label = 'Client logos heading'
+ServicePageSettingsForm.base_fields['cta_button'].label = 'Button text'
+
+
+class AssistantSettingsForm(FormStyleMixin, forms.ModelForm):
+    class Meta:
+        from assistant.models import AssistantSettings
+        model = AssistantSettings
+        exclude = ['updated_at']
+        widgets = {
+            'greeting': forms.Textarea(attrs={'rows': 3}),
+            'quick_replies': forms.Textarea(attrs={'rows': 4}),
+            'personality': forms.Textarea(attrs={'rows': 3}),
+            'extra_knowledge': forms.Textarea(attrs={'rows': 8, 'placeholder': 'e.g. Office hours are Mon–Sat, 10am–7pm.\nWe do not offer website design services.'}),
+            'gemini_key': forms.PasswordInput(render_value=False, attrs={'autocomplete': 'new-password', 'placeholder': 'Leave empty to keep the current key'}),
+            'temperature': forms.NumberInput(attrs={'step': '0.05', 'min': '0', 'max': '1'}),
+        }
+        help_texts = {
+            'quick_replies': 'One per line (up to 6), shown as buttons when the chat opens.',
+            'personality': 'How the assistant sounds. Facts come from the website automatically.',
+            'max_messages': 'After this many messages in one chat, visitors are pointed to the team.',
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._old_key = self.instance.gemini_key
+
+    def clean_gemini_key(self):
+        return (self.cleaned_data.get('gemini_key') or '').strip() or self._old_key
+
+    def clean_temperature(self):
+        t = self.cleaned_data.get('temperature')
+        if t is not None and not (0 <= t <= 1):
+            raise forms.ValidationError('Use a value between 0 and 1.')
+        return t
+
+
+class TrainedAnswerForm(FormStyleMixin, forms.ModelForm):
+    class Meta:
+        from assistant.models import TrainedAnswer
+        model = TrainedAnswer
+        fields = ['question', 'answer', 'is_active']
+        widgets = {'answer': forms.Textarea(attrs={'rows': 5})}
+        help_texts = {
+            'question': 'Write it the way a visitor would ask. Similar questions get the same answer.',
+            'answer': 'The exact, correct answer. Keep it short and factual; links like /contact/ work.',
+        }

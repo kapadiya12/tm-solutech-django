@@ -1,40 +1,109 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static asset_tags %}
+
+{% block title %}{{ category.meta_title|default:category.name }} | TM Solutech{% endblock %}
+{% block meta_description %}{{ category.meta_description|default:category.short_description }}{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static_v 'css/services.css' %}">{% endblock %}
 
 {% block content %}
-<div class="page-hero">
-    <div class="hero-orb hero-orb-1"></div>
-    <div class="hero-orb hero-orb-2"></div>
-    <div class="container">
-        <ul class="breadcrumb-list">
-            <li><a href="{% url 'core:home' %}"><i class="fas fa-home"></i> Home</a></li>
-            <li><span class="separator"><i class="fas fa-chevron-right"></i></span> <a href="{% url 'services:service_list' %}">Services</a></li>
-            <li><span class="separator"><i class="fas fa-chevron-right"></i></span> {{ category.name }}</li>
-        </ul>
-        <div class="service-hero-badge"><i class="{{ category.icon }}"></i></div>
-        <h1 class="page-title">{{ page_title }}</h1>
-        <p class="page-subtitle">{{ page_subtitle }}</p>
-    </div>
-</div>
-
-<section class="section">
-    <div class="container">
-        {% if category.description %}
-        <div class="container-narrow typography-pro" style="margin-bottom: var(--space-12); text-align: center;">
-            <div class="animate-on-scroll">{{ category.description|safe }}</div>
-        </div>
-        {% endif %}
-        <div class="grid grid-3">
-            {% for service in services %}
-            <div class="service-card animate-on-scroll animate-delay-{% cycle 1 2 3 %}">
-                <div class="service-card-icon"><i class="{{ service.icon }}"></i></div>
-                <h3>{{ service.title }}</h3>
-                <p>{{ service.short_description|truncatewords:25 }}</p>
-                <a href="{{ service.get_absolute_url }}" class="service-card-link">Learn More <i class="fas fa-arrow-right"></i></a>
+<section class="sv-hero sv-hero-cat">
+    <div class="sv-hero-bg" aria-hidden="true"><span class="sv-orb sv-orb-1"></span><span class="sv-orb sv-orb-2"></span><span class="sv-orb sv-orb-3"></span><span class="sv-grid-bg"></span></div>
+    <div class="container sv-hero-inner">
+        <div class="sv-hero-text">
+            <ul class="breadcrumb-list">
+                <li><a href="{% url 'core:home' %}"><i class="fas fa-home"></i> Home</a></li>
+                <li><span class="separator"><i class="fas fa-chevron-right"></i></span> <a href="{% url 'services:service_list' %}">Services</a></li>
+                <li><span class="separator"><i class="fas fa-chevron-right"></i></span> {{ category.name }}</li>
+            </ul>
+            <span class="sv-eyebrow sv-in" style="--d: 0"><i class="{{ category.icon }}"></i> Service area · {{ services|length }} solution{{ services|length|pluralize }}</span>
+            <h1 class="sv-in" style="--d: 1">{{ category.name }}</h1>
+            <p class="sv-lead sv-in" style="--d: 2">{{ category.short_description }}</p>
+            <ul class="sv-chips sv-in" style="--d: 3">
+                {% for sv in services|slice:":3" %}<li><i class="fas fa-check"></i> {{ sv.title }}</li>{% endfor %}
+            </ul>
+            <div class="sv-hero-actions sv-in" style="--d: 4">
+                <a href="#solutions" class="sv-btn sv-btn-light" data-scroll>View solutions <i class="fas fa-arrow-down"></i></a>
+                <a href="{% url 'contact:contact' %}" class="sv-btn sv-btn-ghost">{{ sp.cta_button }} <i class="fas fa-arrow-right"></i></a>
             </div>
-            {% endfor %}
+        </div>
+        <div class="sv-hero-visual sv-in" style="--d: 2" data-tilt>
+            <div class="sv-hero-frame">
+                {% if category.image %}<img src="{{ category.image.url }}" alt="{{ category.name }}" fetchpriority="high">{% endif %}
+                <span class="sv-hero-shine" aria-hidden="true"></span>
+            </div>
+            <div class="sv-float sv-float-a"><span class="sv-float-icon"><i class="{{ category.icon }}"></i></span><span><small>Service area</small><strong>{{ services|length }} solutions</strong></span></div>
+            {% if certifications %}<div class="sv-float sv-float-b"><span class="sv-float-icon sv-float-green"><i class="fas fa-shield-halved"></i></span><span><small>Certified</small><strong>{% for c in certifications %}{{ c.name }}{% if not forloop.last %} · {% endif %}{% endfor %}</strong></span></div>{% endif %}
+            {% if partners %}
+            <div class="sv-float sv-float-c sv-float-logos"><small>Platforms</small><span>{% for p in partners|slice:":4" %}{% if p.logo %}<img src="{{ p.logo.url }}" alt="{{ p.name }}" title="{{ p.name }}">{% endif %}{% endfor %}</span></div>
+            {% endif %}
         </div>
     </div>
 </section>
-{% include 'includes/cta_section.html' %}
+
+{% if category.description %}
+<section class="sv-section sv-intro">
+    <div class="container sv-intro-grid" data-reveal>
+        <span class="sv-badge"><i class="fas fa-circle-info"></i> Overview</span>
+        <p class="sv-intro-text">{{ category.description }}</p>
+    </div>
+</section>
+{% endif %}
+
+<section class="sv-section sv-solutions" id="solutions">
+    <div class="container">
+        <header class="sv-head sv-head-center" data-reveal>
+            <span class="sv-badge"><i class="{{ category.icon }}"></i> Solutions</span>
+            <h2>What we deliver in {{ category.name }}</h2>
+        </header>
+        <div class="sv-card-grid">
+            {% for s in services %}<div data-reveal style="--i: {{ forloop.counter0 }}">{% include 'services/partials/service_card.html' with s=s %}</div>{% endfor %}
+        </div>
+    </div>
+</section>
+
+{% include 'services/partials/clients.html' %}
+{% include 'services/partials/stats.html' %}
+{% include 'services/partials/partners.html' %}
+{% include 'services/partials/why_us.html' %}
+{% include 'services/partials/industries.html' %}
+
+{% include 'services/partials/testimonials.html' %}
+
+{% if other_categories %}
+<section class="sv-section sv-areas">
+    <div class="container">
+        <div class="sv-carousel" data-carousel>
+            <header class="sv-head sv-head-row" data-reveal>
+                <div>
+                    <span class="sv-badge"><i class="fas fa-compass"></i> More service areas</span>
+                    <h2>Explore other solutions</h2>
+                </div>
+                <div class="sv-arrows">
+                    <button type="button" class="sv-arrow" data-prev aria-label="Previous"><i class="fas fa-arrow-left"></i></button>
+                    <button type="button" class="sv-arrow" data-next aria-label="Next"><i class="fas fa-arrow-right"></i></button>
+                </div>
+            </header>
+            <div class="sv-track" data-track data-lenis-prevent>
+                {% for c in other_categories %}
+                <a href="{{ c.get_absolute_url }}" class="sv-ind-card sv-area-card2" data-slide>
+                    <span class="sv-ind-media">{% if c.image %}<img src="{{ c.image.url }}" alt="" loading="lazy">{% endif %}<span class="sv-area-count">{{ c.page_services|length }} solutions</span></span>
+                    <span class="sv-ind-body">
+                        <span class="sv-ind-icon"><i class="{{ c.icon }}"></i></span>
+                        <strong>{{ c.name }}</strong>
+                        <small>{{ c.short_description|truncatewords:18 }}</small>
+                        <ul class="sv-area-list">{% for s in c.page_services|slice:":3" %}<li><i class="fas fa-check"></i> {{ s.title }}</li>{% endfor %}</ul>
+                        <em>Explore {{ c.name }} <i class="fas fa-arrow-right"></i></em>
+                    </span>
+                </a>
+                {% endfor %}
+            </div>
+            <div class="sv-progress"><span data-progress></span></div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{% include 'services/partials/cta.html' %}
 {% endblock %}
+
+{% block extra_js %}<script src="{% static_v 'js/services.js' %}" defer></script>{% endblock %}

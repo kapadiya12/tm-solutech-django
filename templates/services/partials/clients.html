@@ -1,0 +1,14 @@
+{% if sp.show_clients and client_logos %}
+<section class="sv-clients" aria-label="{{ sp.clients_title }}">
+    <div class="container"><p class="sv-clients-title" data-reveal>{{ sp.clients_title }}</p></div>
+    <div class="sv-marquee sv-marquee-slow">
+        <div class="sv-marquee-track">
+            {% for group in "ab" %}
+            <ul class="sv-marquee-group"{% if forloop.last %} aria-hidden="true"{% endif %}>
+                {% for c in client_logos %}<li class="sv-client" title="{{ c.name }}"><img src="{{ c.logo.url }}" alt="{% if forloop.parentloop.first %}{{ c.name }}{% endif %}" loading="lazy"></li>{% endfor %}
+            </ul>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}

@@ -1,0 +1,26 @@
+{# Technology partners: infinite logo marquee (two rows in opposite directions when there are many) #}
+{% if sp.show_partners and partners %}
+<section class="sv-section sv-partners" id="partners">
+    <div class="container">
+        <header class="sv-head sv-head-center" data-reveal>
+            <span class="sv-badge"><i class="fas fa-handshake"></i> {{ sp.partners_badge }}</span>
+            <h2>{{ sp.partners_title }}</h2>
+            {% if sp.partners_text %}<p>{{ sp.partners_text }}</p>{% endif %}
+        </header>
+    </div>
+    <div class="sv-marquee" data-reveal>
+        <div class="sv-marquee-track">
+            {% for group in "ab" %}
+            <ul class="sv-marquee-group"{% if forloop.last %} aria-hidden="true"{% endif %}>
+                {% for p in partners %}
+                <li class="sv-logo" title="{{ p.name }}">
+                    {% if p.logo %}<img src="{{ p.logo.url }}" alt="{% if forloop.parentloop.first %}{{ p.name }}{% endif %}" loading="lazy">{% else %}<strong>{{ p.name }}</strong>{% endif %}
+                    <span>{{ p.name }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}

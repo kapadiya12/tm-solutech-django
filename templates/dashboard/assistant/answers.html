@@ -1,0 +1,25 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/blog-admin.css' %}"><link rel="stylesheet" href="{% static 'css/inquiries.css' %}">{% endblock %}
+{% block dashboard_content %}
+<div class="bl-head">
+    <p>Exact answers you teach the assistant. They take priority over everything else, and similar questions get the same answer.</p>
+    <a href="{% url 'dashboard:assistant_answer_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Teach an answer</a>
+</div>
+{% if answers %}
+<div class="fqa-group"><ul class="fqa-list">
+    {% for a in answers %}
+    <li class="fqa-row{% if not a.is_active %} is-off{% endif %}" style="grid-template-columns:minmax(0,1fr) auto auto">
+        <a href="{% url 'dashboard:assistant_answer_edit' a.pk %}" class="fqa-main"><strong>{{ a.question }}</strong><small>{{ a.answer|truncatechars:150 }}</small></a>
+        <span class="bc-status {% if a.is_active %}is-on{% else %}is-off{% endif %}">{% if a.is_active %}In use{% else %}Off{% endif %}</span>
+        <div class="fqa-actions">
+            <a href="{% url 'dashboard:assistant_answer_edit' a.pk %}" class="fqa-icon-btn" data-tip="Edit"><i class="fas fa-pen"></i></a>
+            <form method="post" action="{% url 'dashboard:assistant_answer_delete' a.pk %}" data-confirm="The assistant will stop using this answer." data-confirm-name="{{ a.question|truncatechars:60 }}" data-confirm-title="Delete this answer?">{% csrf_token %}<button type="submit" class="bc-del" data-tip="Delete"><i class="fas fa-trash-can"></i></button></form>
+        </div>
+    </li>
+    {% endfor %}
+</ul></div>
+{% else %}
+<div class="bc-empty"><span class="bc-icon"><i class="fas fa-graduation-cap"></i></span><h3>No trained answers yet</h3><p>The assistant already knows the whole website. Teach it exact answers for anything specific, e.g. office hours or a policy.</p><a href="{% url 'dashboard:assistant_answer_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Teach an answer</a></div>
+{% endif %}
+{% endblock %}

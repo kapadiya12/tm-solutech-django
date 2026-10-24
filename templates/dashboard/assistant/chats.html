@@ -1,0 +1,25 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/blog-admin.css' %}"><link rel="stylesheet" href="{% static 'css/inquiries.css' %}">{% endblock %}
+{% block dashboard_content %}
+<div class="bl-head"><p>Every conversation visitors had with the assistant. Chats that shared contact details become <a href="{% url 'dashboard:inquiry_list' %}">Inquiries</a> automatically.</p></div>
+<div class="iq-tabs" style="margin-bottom:1rem">
+    <a href="?" class="{% if not filter %}is-active{% endif %}">All</a>
+    <a href="?filter=unread" class="{% if filter == 'unread' %}is-active{% endif %}">Unread</a>
+    <a href="?filter=leads" class="{% if filter == 'leads' %}is-active{% endif %}">Leads</a>
+</div>
+{% if chats %}
+<div class="fqa-group"><ul class="fqa-list">
+    {% for c in chats %}
+    <li class="fqa-row" style="grid-template-columns:auto minmax(0,1fr) auto auto">
+        <span class="bc-icon" style="width:36px;height:36px;font-size:.8rem"><i class="fas fa-comments"></i></span>
+        <a href="{% url 'dashboard:assistant_chat_view' c.pk %}" class="fqa-main"><strong>{% if not c.is_read %}● {% endif %}{{ c.title|default:"Conversation" }}</strong><small>{{ c.visitor_messages }} message{{ c.visitor_messages|pluralize }} · started on {{ c.page|default:"/" }} · {{ c.updated_at|timesince }} ago</small></a>
+        {% if c.lead %}<span class="bc-status is-on"><i class="fas fa-user-check"></i> Lead</span>{% else %}<span></span>{% endif %}
+        <a href="{% url 'dashboard:assistant_chat_view' c.pk %}" class="fqa-icon-btn" data-tip="Read"><i class="fas fa-eye"></i></a>
+    </li>
+    {% endfor %}
+</ul></div>
+{% else %}
+<div class="bc-empty"><span class="bc-icon"><i class="fas fa-comments"></i></span><h3>No conversations yet</h3><p>When visitors chat with the assistant, their conversations appear here.</p></div>
+{% endif %}
+{% endblock %}

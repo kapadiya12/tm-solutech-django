@@ -32,6 +32,7 @@
         <a href="#sec-benefits"><span class="ed-nav-dot"></span> Benefits</a>
         <a href="#sec-process"><span class="ed-nav-dot"></span> Process</a>
         <a href="#sec-faqs"><span class="ed-nav-dot"></span> FAQs</a>
+        <a href="#sec-extras"><span class="ed-nav-dot"></span> Partners &amp; SEO</a>
         <a href="#sec-visibility"><span class="ed-nav-dot"></span> Visibility</a>
     </nav>
 
@@ -74,8 +75,16 @@
             {% include 'dashboard/partials/repeater.html' with field=form.faq_items title='Questions' noun='question' add_label='Add question' icon='fas fa-circle-question' min=2 max=20 schema='[{"key":"question","label":"Question","placeholder":"e.g. How long does setup take?","max":300},{"key":"answer","label":"Answer","type":"textarea","rows":3,"placeholder":"A clear, helpful answer"}]' %}
         </section>
 
+        <section class="ed-card" id="sec-extras" data-section>
+            <header class="ed-card-head"><span class="ed-card-num">7</span><div><h3>Partners, hero numbers &amp; SEO</h3><p>Optional extras for the service page.</p></div><span class="ed-card-state"></span></header>
+            {% include 'dashboard/partials/partner_picker.html' with field=form.partners %}
+            {% include 'dashboard/partials/repeater.html' with field=form.hero_stats title='Hero numbers' noun='number' add_label='Add number' icon='fas fa-chart-simple' min='0' max=4 schema='[{"key":"value","label":"Number","placeholder":"e.g. 99.9%","max":20},{"key":"label","label":"Label","placeholder":"e.g. Uptime","max":40}]' %}
+            {% include 'dashboard/partials/field.html' with field=form.meta_title %}
+            {% include 'dashboard/partials/field.html' with field=form.meta_description %}
+        </section>
+
         <section class="ed-card" id="sec-visibility" data-section>
-            <header class="ed-card-head"><span class="ed-card-num">7</span><div><h3>Visibility</h3><p>Where the service appears. Menu order is set by dragging in <a href="{% url 'dashboard:navbar_services' %}">Services Menu</a>.</p></div><span class="ed-card-state"></span></header>
+            <header class="ed-card-head"><span class="ed-card-num">8</span><div><h3>Visibility</h3><p>Where the service appears. Menu order is set by dragging in <a href="{% url 'dashboard:navbar_services' %}">Services Menu</a>.</p></div><span class="ed-card-state"></span></header>
             <div class="ed-toggles">
                 {% include 'dashboard/partials/field.html' with field=form.is_active %}
                 {% include 'dashboard/partials/field.html' with field=form.show_in_nav %}

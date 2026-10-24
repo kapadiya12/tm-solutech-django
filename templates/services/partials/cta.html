@@ -1,0 +1,20 @@
+<section class="sv-cta">
+    <div class="container">
+        <div class="sv-cta-card" data-reveal>
+            <div class="sv-cta-glow" aria-hidden="true"></div>
+            <div class="sv-cta-text">
+                <h2>{{ sp.cta_title }}</h2>
+                {% if sp.cta_text %}<p>{{ sp.cta_text }}</p>{% endif %}
+                {% if sp.show_certifications and certifications %}
+                <ul class="sv-certs">
+                    {% for c in certifications %}<li title="{{ c.title }}"><i class="{{ c.icon }}"></i> {{ c.name }}{% if c.title %} <small>{{ c.title }}</small>{% endif %}</li>{% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+            <div class="sv-cta-actions">
+                <a href="{% url 'contact:contact' %}" class="sv-btn sv-btn-light">{{ sp.cta_button }} <i class="fas fa-arrow-right"></i></a>
+                {% if site_settings.phone %}<a href="tel:{{ site_settings.phone|cut:' ' }}" class="sv-btn sv-btn-ghost"><i class="fas fa-phone"></i> {{ site_settings.phone }}</a>{% endif %}
+            </div>
+        </div>
+    </div>
+</section>

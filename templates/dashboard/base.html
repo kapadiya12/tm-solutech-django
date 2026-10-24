@@ -53,6 +53,9 @@
                     <a href="{% url 'dashboard:service_list' %}" class="sidebar-link {% if request.resolver_match.url_name in 'service_list service_create service_edit' %}active{% endif %}">
                         <i class="fas fa-cogs"></i> Services
                     </a>
+                    <a href="{% url 'dashboard:service_page_settings' %}" class="sidebar-link {% if request.resolver_match.url_name == 'service_page_settings' %}active{% endif %}">
+                        <i class="fas fa-table-columns"></i> Service Page Layout
+                    </a>
                 </div>
 
                 <div class="sidebar-section">
@@ -95,6 +98,12 @@
                     <a href="{% url 'dashboard:clientlogo_list' %}" class="sidebar-link {% if 'clientlogo' in request.resolver_match.url_name %}active{% endif %}">
                         <i class="fas fa-building"></i> Clients
                     </a>
+                    <a href="{% url 'dashboard:partner_list' %}" class="sidebar-link {% if 'partner' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-handshake"></i> Partners
+                    </a>
+                    <a href="{% url 'dashboard:certification_list' %}" class="sidebar-link {% if 'certification' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-certificate"></i> Certifications
+                    </a>
                     <a href="{% url 'dashboard:faq_list' %}" class="sidebar-link {% if 'faq' in request.resolver_match.url_name %}active{% endif %}">
                         <i class="fas fa-question-circle"></i> FAQs
                     </a>
@@ -128,6 +137,19 @@
                 </div>
 
                 <div class="sidebar-section">
+                    <div class="sidebar-section-title">AI Assistant</div>
+                    <a href="{% url 'dashboard:assistant_settings' %}" class="sidebar-link {% if request.resolver_match.url_name in 'assistant_settings assistant_knowledge' %}active{% endif %}">
+                        <i class="fas fa-robot"></i> Assistant Settings
+                    </a>
+                    <a href="{% url 'dashboard:assistant_answers' %}" class="sidebar-link {% if 'assistant_answer' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-graduation-cap"></i> Trained Answers
+                    </a>
+                    <a href="{% url 'dashboard:assistant_chats' %}" class="sidebar-link {% if 'assistant_chat' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-comments"></i> Chats
+                    </a>
+                </div>
+
+                <div class="sidebar-section">
                     <div class="sidebar-section-title">Communication</div>
                     <a href="{% url 'dashboard:inquiry_list' %}" class="sidebar-link {% if 'inquiry' in request.resolver_match.url_name %}active{% endif %}">
                         <i class="fas fa-envelope"></i> Inquiries
@@ -143,7 +165,7 @@
 
                 <div class="sidebar-section">
                     <div class="sidebar-section-title">Settings</div>
-                    <a href="{% url 'dashboard:site_settings' %}" class="sidebar-link {% if 'settings' in request.resolver_match.url_name %}active{% endif %}">
+                    <a href="{% url 'dashboard:site_settings' %}" class="sidebar-link {% if request.resolver_match.url_name == 'site_settings' %}active{% endif %}">
                         <i class="fas fa-sliders-h"></i> Site Settings
                     </a>
                     <a href="{% url 'admin:index' %}" class="sidebar-link" target="_blank">
